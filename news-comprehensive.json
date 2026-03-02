@@ -1,0 +1,117 @@
+[
+  {
+    "name": "CNR-1 中国之声",
+    "url": "https://lhttp.qtfm.cn/live/15318317/64k.mp3"
+  },
+  {
+    "name": "CCTV13新闻频道",
+    "url": "https://piccpndali.v.myalicdn.com/audio/cctv13_2.m3u8",
+    "tag": "伴音"
+  },
+  {
+    "name": "凤凰卫视资讯台",
+    "url": "http://playtv-live.ifeng.com/live/06OLEEWQKN4_audio.m3u8",
+    "tag": "伴音"
+  },
+  {
+    "name": "凤凰卫视中文台",
+    "url": "http://playtv-live.ifeng.com/live/06OLEGEGM4G_audio.m3u8",
+    "tag": "伴音"
+  },
+  {
+    "name": "国际新闻",
+    "url": "https://lhttp-hw.qtfm.cn/live/20500172/64k.mp3"
+  },
+  {
+    "name": "CRI环球资讯广播",
+    "url": "https://sk.cri.cn/905.m3u8"
+  },
+  {
+    "name": "CRI南海之声广播",
+    "url": "https://sk.cri.cn/nhzs.m3u8"
+  },
+  {
+    "name": "CRI 轻松调频CRI EZFM",
+    "url": "https://sk.cri.cn/915.m3u8"
+  },
+  {
+    "name": "CRI华语环球广播",
+    "url": "https://sk.cri.cn/hyhq.m3u8"
+  },
+  {
+    "name": "CRI世界华声 华语环球方言广播",
+    "url": "https://sk.cri.cn/hxfh.m3u8"
+  },
+  {
+    "name": "CAPITAL 958 城市频道",
+    "url": "https://19183.live.streamtheworld.com/CAPITAL958FM_PREM.aac"
+  },
+  {
+    "name": "香港电台第一台FM92.6 RTHK1",
+    "url": "https://rthkradio1-live.akamaized.net/hls/live/2035313/radio1/index_64_a.m3u8"
+  },
+  {
+    "name": "香港电台第二台FM94.8 RTHK2",
+    "url": "https://rthkradio2-live.akamaized.net/hls/live/2040078/radio2/index_64_a.m3u8"
+  },
+  {
+    "name": "香港电台第五台AM783 RTHK5",
+    "url": "https://rthkradio5-live.akamaized.net/hls/live/2040081/radio5/index_64_a.m3u8"
+  },
+  {
+    "name": "香港电台第六台RTHK6普通话频道",
+    "url": "https://rthkradiopth-live.akamaized.net/hls/live/2040082/radiopth/index_64_a.m3u8"
+  },
+  {
+    "name": "北京新闻广播",
+    "url": "https://lhttp-hw.qtfm.cn/live/339/64k.mp3"
+  },
+  {
+    "name": "北京文艺广播",
+    "url": "https://lhttp-hw.qtfm.cn/live/333/64k.mp3"
+  },
+  {
+    "name": "上海新闻广播",
+    "url": "https://lhttp-hw.qtfm.cn/live/270/64k.mp3"
+  },
+  {
+    "name": "第一财经广播",
+    "url": "https://lhttp-hw.qtfm.cn/live/276/64k.mp3"
+  },
+  {
+    "name": "浙江之声",
+    "url": "https://lhttp-hw.qtfm.cn/live/4518/64k.mp3"
+  },
+  {
+    "name": "杭州之声",
+    "url": "https://lhttp-hw.qtfm.cn/live/1134/64k.mp3"
+  },
+  {
+    "name": "中广新闻网",
+    "url": "http://stream.rcs.revma.com/78fm9wyy2tzuv"
+  },
+  {
+    "name": "江西交通广播",
+    "url": "https://lhttp-hw.qtfm.cn/live/1811/64k.mp3"
+  },
+  {
+    "name": "江西财经广播",
+    "url": "https://lhttp-hw.qtfm.cn/live/5021665/64k.mp3"
+  },
+  {
+    "name": "江西音乐广播",
+    "url": "https://lhttp-hw.qtfm.cn/live/1802/64k.mp3"
+  },
+  {
+    "name": "江西新闻广播",
+    "url": "https://lhttp-hw.qtfm.cn/live/1809/64k.mp3"
+  },
+  {
+    "name": "江西旅游广播",
+    "url": "https://lhttp-hw.qtfm.cn/live/20133/64k.mp3"
+  },
+  {
+    "name": "江西潮台969",
+    "url": "https://lhttp-hw.qtfm.cn/live/20500092/64k.mp3"
+  }
+]

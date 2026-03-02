@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HellYell - 电台 - 让美好发声</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: #0a0a0a;
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        /* 左侧导航 */
+        .sidebar {
+            width: 160px;
+            background: #1a1a1a;
+            border-right: 1px solid #2a2a2a;
+            padding: 20px 0;
+            overflow-y: auto;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .logo {
+            padding: 0 15px 20px;
+            border-bottom: 1px solid #2a2a2a;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background: #1a1a1a;
+            z-index: 5;
+        }
+        
+        .logo h1 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+        
+        .nav-section {
+            padding: 0 15px;
+            margin-bottom: 25px;
+        }
+        
+        .nav-section h3 {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .nav-list {
+            list-style: none;
+        }
+        
+        .nav-item {
+            display: block;
+            padding: 10px 12px;
+            color: #ccc;
+            text-decoration: none;
+            font-size: 16px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .nav-item:hover {
+            background: #2a2a2a;
+            color: #fff;
+        }
+        
+        .nav-item.active {
+            background: #d32f2f;
+            color: #fff;
+        }
+        
+        /* 右侧内容区域 */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #0f0f0f;
+            padding-bottom: 100px; /* 为底部播放器留出空间 */
+        }
+        
+        .content-section {
+            margin-bottom: 35px;
+        }
+        
+        .content-section h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 18px;
+            color: #fff;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #2a2a2a;
+        }
+        
+        /* 电台列表 */
+        .station-list {
+            display: grid;
+            gap: 10px;
+        }
+        
+        .station-item {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 15px 18px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .station-item:hover {
+            background: #2a2a2a;
+            border-color: #d32f2f;
+        }
+        
+        .station-item.active {
+            background: #d32f2f;
+            border-color: #d32f2f;
+        }
+        
+        .station-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .station-name {
+            font-size: 16px;
+            color: #fff;
+            flex: 1;
+        }
+        
+        .live-badge {
+            background: #d32f2f;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+        
+        /* 节目列表 */
+        .program-list {
+            display: grid;
+            gap: 10px;
+        }
+        
+        .program-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 18px;
+            background: #1a1a1a;
+            border-radius: 6px;
+            border: 1px solid #2a2a2a;
+        }
+        
+        .program-time {
+            font-size: 14px;
+            color: #d32f2f;
+            font-weight: 500;
+            min-width: 70px;
+        }
+        
+        .program-name {
+            font-size: 16px;
+            color: #fff;
+        }
+        
+        /* 底部播放器 */
+        .player {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 90px;
+            background: #1a1a1a;
+            border-top: 1px solid #2a2a2a;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 20px;
+            z-index: 100;
+        }
+        
+        .player-info {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .current-station {
+            font-size: 16px;
+            font-weight: 500;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .current-song {
+            font-size: 14px;
+            color: #ccc;
+            margin-top: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .player-time {
+            font-size: 14px;
+            color: #666;
+            margin-top: 6px;
+        }
+        
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .play-btn {
+            background: #d32f2f;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            font-size: 20px;
+            position: relative;
+        }
+        
+        .play-btn:hover {
+            background: #b71c1c;
+        }
+        
+        /* 自定义播放/暂停图标 */
+        .play-btn::before {
+            content: "▶";
+            position: absolute;
+        }
+        
+        .play-btn.paused::before {
+            content: "■";
+            letter-spacing: -3px;
+            font-weight: bold;
+        }
+        
+        .progress-container {
+            flex: 1;
+            max-width: 400px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #2a2a2a;
+            border-radius: 3px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .progress {
+            width: 30%;
+            height: 100%;
+            background: #d32f2f;
+            border-radius: 3px;
+            transition: width 0.1s ease;
+        }
+        
+        /* 滚动条样式 */
+        .sidebar::-webkit-scrollbar,
+        .main-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar::-webkit-scrollbar-track,
+        .main-content::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb,
+        .main-content::-webkit-scrollbar-thumb {
+            background: #d32f2f;
+            border-radius: 3px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb:hover,
+        .main-content::-webkit-scrollbar-thumb:hover {
+            background: #b71c1c;
+        }
+        
+        /* 手机端适配 */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 140px;
+                padding: 15px 0;
+            }
+            
+            .logo {
+                padding: 0 12px 15px;
+            }
+            
+            .logo h1 {
+                font-size: 18px;
+            }
+            
+            .nav-section {
+                padding: 0 12px;
+                margin-bottom: 20px;
+            }
+            
+            .nav-section h3 {
+                font-size: 15px;
+            }
+            
+            .nav-item {
+                padding: 8px 10px;
+                font-size: 15px;
+            }
+            
+            .main-content {
+                padding: 15px;
+                padding-bottom: 100px;
+            }
+            
+            .content-section h2 {
+                font-size: 18px;
+            }
+            
+            .station-item {
+                padding: 12px 15px;
+            }
+            
+            .station-name {
+                font-size: 15px;
+            }
+            
+            .live-badge {
+                font-size: 12px;
+                padding: 3px 8px;
+            }
+            
+            .player {
+                padding: 0 15px;
+                gap: 15px;
+                height: 85px;
+            }
+            
+            .current-station {
+                font-size: 15px;
+            }
+            
+            .current-song {
+                font-size: 13px;
+            }
+            
+            .player-time {
+                font-size: 13px;
+            }
+            
+            .play-btn {
+                width: 55px;
+                height: 55px;
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .sidebar {
+                width: 130px;
+            }
+            
+            .logo h1 {
+                font-size: 17px;
+            }
+            
+            .nav-section h3 {
+                font-size: 14px;
+            }
+            
+            .nav-item {
+                font-size: 14px;
+                padding: 7px 9px;
+            }
+            
+            .station-name {
+                font-size: 14px;
+            }
+            
+            .live-badge {
+                font-size: 11px;
+                padding: 2px 7px;
+            }
+            
+            .player {
+                height: 80px;
+                padding: 0 12px;
+            }
+            
+            .play-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 16px;
+            }
+            
+            .current-station {
+                font-size: 14px;
+            }
+            
+            .current-song {
+                font-size: 12px;
+            }
+        }
+/* 强制修复方案 - 覆盖所有可能的问题 */
+@media (max-width: 480px) {
+    * {
+        max-width: 100vw !important;
+        box-sizing: border-box !important;
+    }
+    
+    .container {
+        display: flex !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+    }
+    
+    .sidebar {
+        width: 120px !important;
+        flex: 0 0 120px !important;
+        min-width: 120px !important;
+        max-width: 120px !important;
+    }
+    
+    .main-content {
+        flex: 1 !important;
+        width: calc(100vw - 120px) !important;
+        min-width: 0 !important;
+        padding: 12px !important;
+        padding-bottom: 100px !important;
+        overflow-x: hidden !important;
+    }
+    
+    .content-section,
+    .station-list,
+    .station-item {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-right: 0 !important;
+        padding-right: 0 !important;
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 左侧导航 -->
+        <div class="sidebar">
+            <div class="logo">
+                <h1>HellYell电台</h1>
+            </div>
+            
+            <div class="nav-section">
+                <ul class="nav-list">
+                    <li><a class="nav-item active" data-target="foreign-music">国际音乐台</a></li>
+                    <li><a class="nav-item" data-target="chinese-music">中文音乐台</a></li>
+                    <li><a class="nav-item" data-target="news-comprehensive">新闻综合台</a></li>
+                    <li><a class="nav-item" data-target="huaijiu-musiclist">怀旧の音乐</a></li>
+                    <li><a class="nav-item" data-target="qiche-musiclist">汽车の音乐</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 右侧内容区域 -->
+        <div class="main-content">
+            <!-- 外文音乐台 -->
+            <div class="content-section" id="foreign-music">
+                <h2>国际音乐台</h2>
+                <div class="station-list" id="foreign-music-list">
+                    <!-- 内容将通过JavaScript动态加载 -->
+                </div>
+            </div>
+            <!-- 中文音乐台 -->
+            <div class="content-section" id="chinese-music">
+                <h2>中文音乐台</h2>
+                <div class="station-list" id="chinese-music-list">
+                    <!-- 内容将通过JavaScript动态加载 -->
+                </div>
+            </div>
+            <!-- 新闻综合台 -->
+            <div class="content-section" id="news-comprehensive">
+                <h2>新闻综合台</h2>
+                <div class="station-list" id="news-comprehensive-list">
+                    <!-- 内容将通过JavaScript动态加载 -->
+                </div>
+            </div>
+            <!-- 怀旧の音乐 -->
+            <div class="content-section" id="huaijiu-musiclist">
+                <h2>怀旧の音乐</h2>
+                <div class="station-list" id="huaijiu-musiclist-list">
+                    <!-- 内容将通过JavaScript动态加载 -->
+                </div>
+            </div>
+            <!-- 汽车の音乐 -->
+            <div class="content-section" id="qiche-musiclist">
+                <h2>汽车の音乐</h2>
+                <div class="station-list" id="qiche-musiclist-list">
+                    <!-- 内容将通过JavaScript动态加载 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部播放器 -->
+    <div class="player">
+        <div class="player-info">
+            <div class="current-station">未选择电台</div>
+            <div class="current-song">请选择电台开始播放</div>
+            <div class="player-time">00:00</div>
+        </div>
+        <div class="player-controls">
+            <button class="play-btn"></button>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 电台数据加载器
+        class StationDataLoader {
+            constructor() {
+                this.stationLists = {};
+            }
+            
+            async loadStationData(sectionId, dataFile) {
+                try {
+                    const response = await fetch(dataFile);
+                    const data = await response.json();
+                    this.stationLists[sectionId] = data;
+                    this.renderStationList(sectionId, data);
+                } catch (error) {
+                    console.error(`加载 ${sectionId} 数据失败:`, error);
+                }
+            }
+            
+            renderStationList(sectionId, stations) {
+                const container = document.getElementById(`${sectionId}-list`);
+                if (!container) return;
+                
+                container.innerHTML = stations.map(station => `
+                    <div class="station-item" data-url="${station.url}">
+                        <div class="station-info">
+                            <span class="station-name">${station.name}</span>
+                            ${station.recommended ? '<span class="live-badge">推荐</span>' : ''}
+                            ${station.tag ? `<span class="live-badge">${station.tag}</span>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            async loadAllData() {
+                await Promise.all([
+                    this.loadStationData('foreign-music', 'foreign-music.json'),
+                    this.loadStationData('chinese-music', 'chinese-music.json'),
+                    this.loadStationData('news-comprehensive', 'news-comprehensive.json'),
+                    this.loadStationData('huaijiu-musiclist', 'huaijiu-musiclist.json'),
+                    this.loadStationData('qiche-musiclist', 'qiche-musiclist.json')
+                ]);
+            }
+        }
+
+        class RadioPlayer {
+            constructor() {
+                this.audio = new Audio();
+                this.isPlaying = false;
+                this.currentStation = null;
+                this.volume = 0.5;
+                this.dataLoader = new StationDataLoader();
+                this.loadTimeout = null;
+                
+                this.init();
+            }
+            
+            async init() {
+                await this.dataLoader.loadAllData();
+                this.setupEventListeners();
+                this.setupNavigation();
+                this.setupVolume();
+            }
+            
+            setupEventListeners() {
+                // 电台点击事件 - 使用事件委托
+                document.addEventListener('click', (e) => {
+                    const stationItem = e.target.closest('.station-item');
+                    if (stationItem) {
+                        // 检查是否在播放列表分类中（怀旧音乐或汽车音乐）
+                        const isHuaijiuSection = stationItem.closest('#huaijiu-musiclist');
+                        const isQicheSection = stationItem.closest('#qiche-musiclist');
+                        
+                        if (isHuaijiuSection || isQicheSection) {
+                            this.selectPlaylistStation(stationItem);
+                        } else {
+                            this.selectStation(stationItem);
+                        }
+                    }
+                });
+                
+                // 播放按钮
+                document.querySelector('.play-btn').addEventListener('click', () => {
+                    this.togglePlay();
+                });
+                
+                // 音频事件
+                this.audio.addEventListener('loadstart', () => {
+                    this.updateStatus('正在加载...');
+                });
+                
+                this.audio.addEventListener('canplay', () => {
+                    this.updateStatus('可以播放');
+                });
+                
+                this.audio.addEventListener('playing', () => {
+                    this.updateStatus('播放中');
+                    this.updatePlayButton(true);
+                });
+                
+                this.audio.addEventListener('pause', () => {
+                    this.updatePlayButton(false);
+                });
+                
+                this.audio.addEventListener('error', () => {
+                    this.updateStatus('播放失败');
+                    this.updatePlayButton(false);
+                });
+                
+                this.audio.addEventListener('timeupdate', () => {
+                    this.updateTime();
+                });
+            }
+            
+            setupNavigation() {
+                // 分类导航点击事件
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        
+                        // 更新活跃状态
+                        document.querySelectorAll('.nav-item').forEach(nav => {
+                            nav.classList.remove('active');
+                        });
+                        item.classList.add('active');
+                        
+                        // 滚动到对应分类
+                        const targetId = item.getAttribute('data-target');
+                        const targetSection = document.getElementById(targetId);
+                        if (targetSection) {
+                            targetSection.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    });
+                });
+            }
+            
+            setupVolume() {
+                this.audio.volume = this.volume;
+            }
+            
+            selectStation(stationElement) {
+                // 移除之前选中的样式
+                document.querySelectorAll('.station-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                // 添加当前选中样式
+                stationElement.classList.add('active');
+                
+                const stationName = stationElement.querySelector('.station-name').textContent;
+                const stationUrl = stationElement.dataset.url;
+                
+                this.currentStation = {
+                    name: stationName,
+                    url: stationUrl,
+                    element: stationElement
+                };
+                
+                document.querySelector('.current-station').textContent = stationName;
+                document.querySelector('.current-song').textContent = '正在加载...';
+                this.updateStatus('已选择电台');
+                
+                // 自动播放
+                this.play();
+            }
+            
+            togglePlay() {
+                if (!this.currentStation) {
+                    alert('请先选择一个电台');
+                    return;
+                }
+                
+                if (this.isPlaying) {
+                    this.pause();
+                } else {
+                    this.play();
+                }
+            }
+            
+            play() {
+                if (!this.currentStation) return;
+                
+                // 清除可能存在的超时定时器
+                if (this.loadTimeout) {
+                    clearTimeout(this.loadTimeout);
+                    this.loadTimeout = null;
+                }
+                
+                this.audio.src = this.currentStation.url;
+                
+                // 设置加载超时检测（仅限播放列表模式）
+                if (this.currentStation.isPlaylist) {
+                    this.loadTimeout = setTimeout(() => {
+                        if (!this.isPlaying) {
+                            console.log('歌曲加载超时，自动播放下一首');
+                            this.playNextInPlaylist();
+                        }
+                    }, 8000); // 8秒超时
+                }
+                
+                this.audio.play()
+                    .then(() => {
+                        // 清除超时定时器
+                        if (this.loadTimeout) {
+                            clearTimeout(this.loadTimeout);
+                            this.loadTimeout = null;
+                        }
+                        
+                        this.isPlaying = true;
+                        this.updatePlayButton(true);
+                        this.updateStatus('播放中');
+                        // 获取当前播放歌曲信息
+                        setTimeout(() => {
+                            if (this.currentStation.isPlaylist) {
+                                document.querySelector('.current-song').textContent = `正在播放: ${this.currentStation.name}`;
+                            } else {
+                                const songs = ['经典老歌', '流行金曲', '轻音乐', '爵士乐', '新闻播报'];
+                                const randomSong = songs[Math.floor(Math.random() * songs.length)];
+                                document.querySelector('.current-song').textContent = `正在播放: ${randomSong}`;
+                            }
+                        }, 1000);
+                    })
+                    .catch(error => {
+                        // 清除超时定时器
+                        if (this.loadTimeout) {
+                            clearTimeout(this.loadTimeout);
+                            this.loadTimeout = null;
+                        }
+                        
+                        console.error('播放失败:', error);
+                        this.updateStatus('播放失败，请检查网络');
+                        
+                        // 播放失败时，如果是播放列表模式，也尝试下一首
+                        if (this.currentStation.isPlaylist) {
+                            setTimeout(() => {
+                                this.playNextInPlaylist();
+                            }, 1000);
+                        }
+                    });
+            }
+            
+            pause() {
+                // 清除超时定时器
+                if (this.loadTimeout) {
+                    clearTimeout(this.loadTimeout);
+                    this.loadTimeout = null;
+                }
+                
+                this.audio.pause();
+                this.isPlaying = false;
+                this.updatePlayButton(false);
+                this.updateStatus('已暂停');
+                document.querySelector('.current-song').textContent = '播放已暂停';
+            }
+            
+            updatePlayButton(playing) {
+                const playBtn = document.querySelector('.play-btn');
+                if (playing) {
+                    playBtn.classList.add('paused');
+                } else {
+                    playBtn.classList.remove('paused');
+                }
+            }
+            
+            updateStatus(status) {
+                // 可以在这里添加状态显示逻辑
+                console.log('状态:', status);
+            }
+            
+            updateTime() {
+                const timeElement = document.querySelector('.player-time');
+                const currentTime = this.formatTime(this.audio.currentTime);
+                const duration = this.formatTime(this.audio.duration || 0);
+                timeElement.textContent = `${currentTime} / ${duration}`;
+                
+                // 更新进度条
+                if (this.audio.duration) {
+                    const progress = (this.audio.currentTime / this.audio.duration) * 100;
+                    document.querySelector('.progress').style.width = `${progress}%`;
+                }
+            }
+            
+            formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+            
+            // 处理播放列表模式
+            selectPlaylistStation(stationElement) {
+                // 移除之前选中的样式
+                document.querySelectorAll('.station-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                // 添加当前选中样式
+                stationElement.classList.add('active');
+                
+                const stationName = stationElement.querySelector('.station-name').textContent;
+                const stationUrl = stationElement.dataset.url;
+                
+                this.currentStation = {
+                    name: stationName,
+                    url: stationUrl,
+                    element: stationElement,
+                    isPlaylist: true // 标记为播放列表模式
+                };
+                
+                document.querySelector('.current-station').textContent = stationName;
+                document.querySelector('.current-song').textContent = '正在加载...';
+                this.updateStatus('已选择歌曲');
+                
+                // 获取当前分类中的所有歌曲
+                this.setupPlaylist();
+                
+                // 自动播放
+                this.play();
+            }
+
+            // 设置播放列表
+            setupPlaylist() {
+                // 确定当前所在的播放列表分类
+                const currentSection = this.currentStation.element.closest('.content-section');
+                const allSongs = currentSection.querySelectorAll('.station-item');
+                
+                this.playlist = Array.from(allSongs).map(item => ({
+                    name: item.querySelector('.station-name').textContent,
+                    url: item.dataset.url,
+                    element: item
+                }));
+                
+                // 找到当前选中歌曲在播放列表中的位置
+                this.currentPlaylistIndex = this.playlist.findIndex(item => 
+                    item.element === this.currentStation.element
+                );
+                
+                // 监听歌曲结束事件，自动播放下一首
+                this.audio.addEventListener('ended', () => {
+                    this.playNextInPlaylist();
+                });
+            }
+
+            // 播放下一首歌曲
+            playNextInPlaylist() {
+                
+                if (this.loadTimeout) {
+                    clearTimeout(this.loadTimeout);
+                    this.loadTimeout = null;
+                }
+                
+                if (!this.playlist || this.currentPlaylistIndex === undefined) return;
+                
+                // 移动到下一首
+                this.currentPlaylistIndex++;
+                
+                // 如果已经是最后一首，就停止播放
+                if (this.currentPlaylistIndex >= this.playlist.length) {
+                    this.updateStatus('播放列表结束');
+                    document.querySelector('.current-song').textContent = '播放列表结束';
+                    return;
+                }
+                
+                // 获取下一首歌曲
+                const nextSong = this.playlist[this.currentPlaylistIndex];
+                
+                // 更新选中状态
+                document.querySelectorAll('.station-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                nextSong.element.classList.add('active');
+                
+                // 设置当前歌曲
+                this.currentStation = {
+                    name: nextSong.name,
+                    url: nextSong.url,
+                    element: nextSong.element,
+                    isPlaylist: true
+                };
+                
+                document.querySelector('.current-station').textContent = nextSong.name;
+                document.querySelector('.current-song').textContent = '正在播放下一首...';
+                
+                // 播放下一首
+                this.play();
+            }
+        }
+
+        // 初始化播放器
+        document.addEventListener('DOMContentLoaded', () => {
+            new RadioPlayer();
+        });
+    </script>
+</body>
+</html>
