@@ -190,13 +190,13 @@
     "url": "https://audio.mixcloud.stream/secure/hls/,1/e/2/3/81b2-c058-4dd6-bf18-55a088705c8d,1/e/2/3/81b2-c058-4dd6-bf18-55a088705c8d-192K,.m4a.urlset/index.m3u8"
   },
   {
-    "name": "BBC World Service",
-    "url": "https://stream.live.vc.bbcmedia.co.uk/bbc_world_service"
-  },
-  {
     "name": "BBC RADIO 1 🚀",
     "url": "https://as-hls-ww.live.cf.md.bbci.co.uk/pool_01505109/live/ww/bbc_radio_one/bbc_radio_one.isml/bbc_radio_one-audio%3d96000.norewind.m3u8"
   },
+  {
+    "name": "BBC RADIO 1",
+    "url": "https://a.files.bbci.co.uk/ms6/live/3441A116-B12E-4D2F-ACA8-C1984642FA4B/audio/simulcast/dash/uk/pc_hd_abr_v2/cfs/bbc_radio_one.mpd"
+  },  
   {
     "name": "BBC RADIO 2",
     "url": "https://as-hls-ww-live.akamaized.net/pool_74208725/live/ww/bbc_radio_two/bbc_radio_two.isml/bbc_radio_two-audio%3d96000.norewind.m3u8"
