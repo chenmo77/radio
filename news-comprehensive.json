@@ -20,19 +20,12 @@
   },
   {
     "name": "BBC World Service",
-    "url": "https://a.files.bbci.co.uk/ms6/live/3441A116-B12E-4D2F-ACA8-C1984642FA4B/audio/simulcast/dash/uk/pc_hd_abr_v2/aks/bbc_world_service.mpd"
-  },
-  {
-    "name": "BBC World Service 备",
     "url": "https://stream.live.vc.bbcmedia.co.uk/bbc_world_service"
   },
   {
-    "name": "BBC Live News",
-    "url": "https://a.files.bbci.co.uk/ms6/live/3441A116-B12E-4D2F-ACA8-C1984642FA4B/audio/simulcast/dash/uk/pc_hd_abr_v2/aks/bbc_sounds_news.mpd"
-  },
-  {
     "name": "Bloomberg Radio",
-    "url": "https://15693.live.streamtheworld.com/WBBRAMAAC48/HLS/playlist.m3u8"
+    "url": "https://15693.live.streamtheworld.com/WBBRAMAAC48/HLS/playlist.m3u8",
+    "tag": "推荐"
   },
   {
     "name": "国际新闻",
