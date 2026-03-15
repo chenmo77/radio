@@ -9,8 +9,52 @@
     "url": "https://my.streamingmedia.it/listen/discofunk/play"
   },
   {
+    "name": "BBC RADIO 1 🚀",
+    "url": "https://as-hls-ww.live.cf.md.bbci.co.uk/pool_01505109/live/ww/bbc_radio_one/bbc_radio_one.isml/bbc_radio_one-audio%3d96000.norewind.m3u8",
+    "recommended": true
+  },
+  {
+    "name": "BBC RADIO 2",
+    "url": "https://as-hls-ww-live.akamaized.net/pool_74208725/live/ww/bbc_radio_two/bbc_radio_two.isml/bbc_radio_two-audio%3d96000.norewind.m3u8"
+  },
+  {
+    "name": "BBC RADIO 3 🚀",
+    "url": "https://as-hls-ww-live.akamaized.net/pool_23461179/live/ww/bbc_radio_three/bbc_radio_three.isml/bbc_radio_three-audio%3d96000.norewind.m3u8"
+  },
+  {
+    "name": "BBC RADIO 4 🚀",
+    "url": "https://as-hls-ww.live.cf.md.bbci.co.uk/pool_55057080/live/ww/bbc_radio_fourfm/bbc_radio_fourfm.isml/bbc_radio_fourfm-audio%3d96000.m3u8"
+  },
+  {
+    "name": "BBC RADIO 5 🚀",
+    "url": "https://as-hls-ww-live.akamaized.net/pool_89021708/live/ww/bbc_radio_five_live/bbc_radio_five_live.isml/bbc_radio_five_live-audio%3d96000.norewind.m3u8"
+  },
+  {
+    "name": "BBC RADIO 6 Music🚀",
+    "url": "https://as-hls-ww.live.cf.md.bbci.co.uk/pool_81827798/live/ww/bbc_6music/bbc_6music.isml/bbc_6music-audio%3d96000.norewind.m3u8",
+    "recommended": true
+  },
+  {
     "name": "Mountain Chill® KRKQ - 95.5 FM",
-    "url": "https://mountain-chill.radiocult.fm/stream"
+    "url": "https://mountain-chill.radiocult.fm/stream",
+    "recommended": true
+  },
+  {
+    "name": "100% ACID JAZZ",
+    "url": "https://mpc1.mediacp.eu:8356/stream/1/"
+  },
+  {
+    "name": "NATURE RADIO SLEEP",
+    "url": "https://az1.mediacp.eu/listen/natureradiosleep/stream/1/",
+    "recommended": true
+  },
+  {
+    "name": "NonStopOldies",
+    "url": "https://ais-sa2.cdnstream1.com/2383_128.mp3"
+  },
+  {
+    "name": "A MISSISSIPPI BLUES",
+    "url": "https://cast1.torontocast.com:4450/stream/1/"
   },
   {
     "name": "TOP 100 CLUB CHARTS",
@@ -192,35 +236,6 @@
   {
     "name": "DB Radio",
     "url": "https://audio.mixcloud.stream/secure/hls/,1/e/2/3/81b2-c058-4dd6-bf18-55a088705c8d,1/e/2/3/81b2-c058-4dd6-bf18-55a088705c8d-192K,.m4a.urlset/index.m3u8"
-  },
-  {
-    "name": "BBC RADIO 1 🚀",
-    "url": "https://as-hls-ww.live.cf.md.bbci.co.uk/pool_01505109/live/ww/bbc_radio_one/bbc_radio_one.isml/bbc_radio_one-audio%3d96000.norewind.m3u8"
-  },
-  {
-    "name": "BBC RADIO 1",
-    "url": "https://a.files.bbci.co.uk/ms6/live/3441A116-B12E-4D2F-ACA8-C1984642FA4B/audio/simulcast/dash/uk/pc_hd_abr_v2/cfs/bbc_radio_one.mpd"
-  },  
-  {
-    "name": "BBC RADIO 2",
-    "url": "https://as-hls-ww-live.akamaized.net/pool_74208725/live/ww/bbc_radio_two/bbc_radio_two.isml/bbc_radio_two-audio%3d96000.norewind.m3u8"
-  },
-  {
-    "name": "BBC RADIO 3 🚀",
-    "url": "https://as-hls-ww-live.akamaized.net/pool_23461179/live/ww/bbc_radio_three/bbc_radio_three.isml/bbc_radio_three-audio%3d96000.norewind.m3u8"
-  },
-  {
-    "name": "BBC RADIO 4 🚀",
-    "url": "https://as-hls-ww.live.cf.md.bbci.co.uk/pool_55057080/live/ww/bbc_radio_fourfm/bbc_radio_fourfm.isml/bbc_radio_fourfm-audio%3d96000.m3u8"
-  },
-  {
-    "name": "BBC RADIO 5 🚀",
-    "url": "https://as-hls-ww-live.akamaized.net/pool_89021708/live/ww/bbc_radio_five_live/bbc_radio_five_live.isml/bbc_radio_five_live-audio%3d96000.norewind.m3u8"
-  },
-  {
-    "name": "BBC RADIO 6 🚀",
-    "url": "https://as-hls-ww.live.cf.md.bbci.co.uk/pool_81827798/live/ww/bbc_6music/bbc_6music.isml/bbc_6music-audio%3d96000.norewind.m3u8",
-    "recommended": true
   },
   {
     "name": "Radio France",
