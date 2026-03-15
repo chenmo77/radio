@@ -40,6 +40,14 @@
     "recommended": true
   },
   {
+    "name": "Rinse FM",
+    "url": "https://admin.stream.rinse.fm/proxy/rinse_uk/stream"
+  },
+  {
+    "name": "Deepvibes Radio",
+    "url": "http://88.208.218.19:9106/;stream/1"
+  },
+  {
     "name": "100% ACID JAZZ",
     "url": "https://mpc1.mediacp.eu:8356/stream/1/"
   },
