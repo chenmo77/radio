@@ -40,6 +40,10 @@
     "recommended": true
   },
   {
+    "name": "KISS FM",
+    "url": "https://topradio.stream41.radiohost.de/kissfm_mp3-192"
+  },
+  {
     "name": "Rinse FM",
     "url": "https://admin.stream.rinse.fm/proxy/rinse_uk/stream"
   },
