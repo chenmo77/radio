@@ -248,7 +248,7 @@
             background: #0f0f0f;
             padding: 8px;
             min-height: 0;
-            scroll-behavior: smooth; /* 添加平滑滚动 */
+            scroll-behavior: smooth;
         }
         
         .song-list-item {
@@ -288,6 +288,7 @@
             width: 100%;
             position: relative;
             bottom: 0;
+            margin-top: auto; /* 确保在flex容器中靠底 */
         }
         
         .player-info {
@@ -578,12 +579,13 @@
             
             .player {
                 height: 80px;
-                padding: 0 12px;
+                padding: 0 10px;
+                gap: 10px;
             }
             
             .play-btn {
-                width: 50px;
-                height: 50px;
+                width: 48px;
+                height: 48px;
                 font-size: 16px;
             }
             
@@ -593,6 +595,46 @@
             
             .current-song {
                 font-size: 12px;
+                margin-top: 4px;
+            }
+            
+            .player-time {
+                font-size: 12px;
+                margin-top: 4px;
+            }
+            
+            .progress-container {
+                max-width: 100px;
+            }
+        }
+        
+        /* 确保在非常小的屏幕上也能显示完整 */
+        @media (max-width: 360px) {
+            .player {
+                padding: 0 8px;
+                gap: 8px;
+            }
+            
+            .play-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 14px;
+            }
+            
+            .current-station {
+                font-size: 13px;
+            }
+            
+            .current-song {
+                font-size: 11px;
+            }
+            
+            .player-time {
+                font-size: 11px;
+            }
+            
+            .progress-container {
+                max-width: 70px;
             }
         }
     </style>
@@ -763,6 +805,7 @@
                 this.dataLoader = new StationDataLoader();
                 this.loadTimeout = null;
                 this.playMode = 'random'; // 'random', 'sequential', 'single', 'list'
+                this.isLoading = false; // 添加加载状态标记
                 
                 this.init();
             }
@@ -794,36 +837,42 @@
                 
                 // 音频事件
                 this.audio.addEventListener('loadstart', () => {
+                    this.isLoading = true;
                     this.updateStatus('正在加载...');
                 });
                 
                 this.audio.addEventListener('canplay', () => {
+                    this.isLoading = false;
                     this.updateStatus('可以播放');
                 });
                 
                 this.audio.addEventListener('playing', () => {
+                    this.isLoading = false;
                     this.updateStatus('播放中');
                     this.updatePlayButton(true);
                 });
                 
                 this.audio.addEventListener('pause', () => {
+                    this.isLoading = false;
                     this.updatePlayButton(false);
                 });
                 
                 this.audio.addEventListener('ended', () => {
+                    this.isLoading = false;
                     // 歌曲结束，根据播放模式处理
                     this.handleSongEnd();
                 });
                 
                 this.audio.addEventListener('error', (e) => {
                     console.error('播放错误:', e);
-                    this.updateStatus('播放失败，尝试下一首');
+                    this.isLoading = false;
+                    this.updateStatus('播放失败，等待重试');
                     
                     // 播放失败时尝试下一首
                     if (this.currentRadioType) {
                         setTimeout(() => {
                             this.handleSongEnd();
-                        }, 1000);
+                        }, 3000); // 失败后等待3秒再试
                     }
                 });
                 
@@ -987,6 +1036,12 @@
             playCurrentSong() {
                 if (!this.songs.length || this.currentSongIndex < 0) return;
                 
+                // 如果正在加载，不重复加载
+                if (this.isLoading) {
+                    console.log('正在加载中，稍后重试');
+                    return;
+                }
+                
                 const song = this.songs[this.currentSongIndex];
                 this.currentStation = {
                     name: song.name,
@@ -1001,33 +1056,42 @@
                 
                 this.audio.src = song.url;
                 
-                // 设置加载超时
+                // 延长加载超时时间到30秒
                 this.loadTimeout = setTimeout(() => {
-                    if (!this.isPlaying) {
-                        console.log('歌曲加载超时，自动播放下一首');
+                    if (this.isLoading) {
+                        console.log('歌曲加载超时（30秒），自动播放下一首');
+                        this.isLoading = false;
                         this.handleSongEnd();
                     }
-                }, 8000);
+                }, 30000); // 30秒超时
                 
                 this.audio.play()
                     .then(() => {
                         clearTimeout(this.loadTimeout);
+                        this.isLoading = false;
                         this.isPlaying = true;
                         this.updatePlayButton(true);
                     })
                     .catch(error => {
                         console.error('播放失败:', error);
                         clearTimeout(this.loadTimeout);
+                        this.isLoading = false;
                         
-                        // 播放失败，尝试下一首
+                        // 播放失败，等待3秒后尝试下一首
                         setTimeout(() => {
                             this.handleSongEnd();
-                        }, 1000);
+                        }, 3000);
                     });
             }
             
             handleSongEnd() {
                 if (!this.songs.length) return;
+                
+                // 如果正在加载，等待加载完成
+                if (this.isLoading) {
+                    console.log('正在加载中，稍后处理结束事件');
+                    return;
+                }
                 
                 switch (this.playMode) {
                     case 'random':
@@ -1071,6 +1135,15 @@
             
             playSongAtIndex(index) {
                 if (index < 0 || index >= this.songs.length || index === this.currentSongIndex) return;
+                
+                // 如果正在加载，先停止当前加载
+                if (this.isLoading) {
+                    this.audio.pause();
+                    this.isLoading = false;
+                    if (this.loadTimeout) {
+                        clearTimeout(this.loadTimeout);
+                    }
+                }
                 
                 this.currentSongIndex = index;
                 this.updateRadioDisplay();
@@ -1136,7 +1209,7 @@
                         console.log('电台加载超时');
                         this.updateStatus('加载超时');
                     }
-                }, 8000);
+                }, 30000); // 30秒超时
                 
                 this.audio.play()
                     .then(() => {
@@ -1164,6 +1237,7 @@
                 
                 this.audio.pause();
                 this.isPlaying = false;
+                this.isLoading = false;
                 this.updatePlayButton(false);
                 this.updateStatus('已暂停');
                 document.querySelector('.current-song').textContent = '播放已暂停';
