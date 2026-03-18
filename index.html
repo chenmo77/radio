@@ -270,7 +270,6 @@
             box-shadow: 0 0 10px rgba(211, 47, 47, 0.5);
         }
         
-        /* 使用SVG图标 - 纯白色 */
         .mode-btn svg {
             width: 24px;
             height: 24px;
@@ -278,22 +277,18 @@
             stroke: none;
         }
         
-        /* 随机图标 - 双箭头交叉 */
         .mode-btn[data-mode="random"] svg {
             transform: scale(1.1);
         }
         
-        /* 顺序图标 - 循环箭头 */
         .mode-btn[data-mode="sequential"] svg {
             transform: scale(1.1);
         }
         
-        /* 单曲图标 - 带1的循环 */
         .mode-btn[data-mode="single"] svg {
             transform: scale(1.1);
         }
         
-        /* 添加工具提示 */
         .mode-btn:hover::after {
             content: attr(data-tip);
             position: absolute;
@@ -436,6 +431,31 @@
             width: 24px;
             height: 24px;
             fill: currentColor;
+            transition: all 0.2s ease;
+        }
+        
+        /* 播放状态 - 显示暂停图标 */
+        .play-btn.playing svg {
+            display: none;
+        }
+        
+        .play-btn.playing::after {
+            content: "⏸";
+            font-size: 24px;
+            line-height: 1;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        /* 暂停状态 - 显示播放图标 */
+        .play-btn.paused svg {
+            display: block;
+        }
+        
+        .play-btn.paused::after {
+            display: none;
         }
         
         .progress-container {
@@ -620,6 +640,10 @@
                 height: 22px;
             }
             
+            .play-btn.playing::after {
+                font-size: 22px;
+            }
+            
             .progress-container {
                 max-width: 120px;
             }
@@ -706,6 +730,10 @@
                 height: 20px;
             }
             
+            .play-btn.playing::after {
+                font-size: 20px;
+            }
+            
             .current-station {
                 font-size: 14px;
             }
@@ -744,6 +772,10 @@
             .play-btn svg {
                 width: 18px;
                 height: 18px;
+            }
+            
+            .play-btn.playing::after {
+                font-size: 18px;
             }
             
             .current-station {
@@ -833,7 +865,7 @@
             <div class="player-time">00:00</div>
         </div>
         <div class="player-controls">
-            <button class="play-btn">
+            <button class="play-btn paused" id="play-pause-btn">
                 <svg viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"/>
                 </svg>
@@ -986,7 +1018,9 @@
                     }
                 });
                 
-                document.querySelector('.play-btn').addEventListener('click', () => {
+                // 播放/暂停按钮点击事件
+                document.getElementById('play-pause-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
                     this.togglePlay();
                 });
                 
@@ -1006,17 +1040,22 @@
                 
                 this.audio.addEventListener('pause', () => {
                     this.isLoading = false;
+                    this.isPlaying = false;
                     this.updatePlayButton(false);
                 });
                 
                 this.audio.addEventListener('ended', () => {
                     this.isLoading = false;
+                    this.isPlaying = false;
+                    this.updatePlayButton(false);
                     this.handleSongEnd();
                 });
                 
                 this.audio.addEventListener('error', (e) => {
                     console.error('播放错误:', e);
                     this.isLoading = false;
+                    this.isPlaying = false;
+                    this.updatePlayButton(false);
                     
                     if (this.currentRadioType) {
                         setTimeout(() => {
@@ -1217,6 +1256,8 @@
                         console.error('播放失败:', error);
                         clearTimeout(this.loadTimeout);
                         this.isLoading = false;
+                        this.isPlaying = false;
+                        this.updatePlayButton(false);
                         
                         setTimeout(() => {
                             this.handleSongEnd();
@@ -1342,6 +1383,8 @@
                     .catch(error => {
                         clearTimeout(this.loadTimeout);
                         console.error('播放失败:', error);
+                        this.isPlaying = false;
+                        this.updatePlayButton(false);
                     });
             }
             
@@ -1358,11 +1401,13 @@
             }
             
             updatePlayButton(playing) {
-                const playBtn = document.querySelector('.play-btn');
+                const playBtn = document.getElementById('play-pause-btn');
                 if (playing) {
-                    playBtn.classList.add('paused');
-                } else {
                     playBtn.classList.remove('paused');
+                    playBtn.classList.add('playing');
+                } else {
+                    playBtn.classList.remove('playing');
+                    playBtn.classList.add('paused');
                 }
             }
             
