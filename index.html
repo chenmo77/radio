@@ -336,29 +336,29 @@
         
         /* 底部播放器 */
         .player {
-            height: 90px;
-            background: #1a1a1a;
-            border-top: 2px solid #d32f2f;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;  /* ← 播放/暂停按钮居中 */
-            padding: 0 20px;
-            /* gap: 30px;  注释掉，避免干扰space-between 自动分配 */
-            z-index: 9999;
-            flex-shrink: 0;
-            width: 100%;
-            position: relative;
-            bottom: 0;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
-        }
-        
-        .player-info {
-            display: flex;
-            flex-direction: column;
-            flex: 2; /* 给左侧信息更多空间 */
-            min-width: 0;
-            overflow: hidden;
-        }
+    height: 90px;
+    background: #1a1a1a;
+    border-top: 2px solid #d32f2f;
+    display: flex;
+    align-items: center;
+    /* justify-content: space-between; */  /* 注释掉或删除 */
+    padding: 0 20px;
+    /* gap: 30px; */  /* 注释掉或删除 */
+    z-index: 9999;
+    flex-shrink: 0;
+    width: 100%;
+    position: relative;  /* 这个很重要，作为绝对定位的参考 */
+    bottom: 0;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+}
+
+.player-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;  /* 恢复正常flex占比 */
+    min-width: 0;
+    overflow: hidden;
+}
         
         .current-station {
             font-size: 16px;
@@ -385,11 +385,15 @@
         }
         
         .player-controls {
-            display: flex;
-            align-items: center;
-            justify-content: center; /* 居中播放按钮 */
-            flex-shrink: 0;
-        }
+    position: absolute;  /* 绝对定位 */
+    left: 50%;           /* 左边缘在50%处 */
+    transform: translateX(-50%);  /* 向左移动自身宽度的一半，实现完美居中 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    z-index: 20;  /* 确保在上层 */
+}
         
         .play-btn {
             background: #d32f2f;
@@ -462,14 +466,15 @@
         }
         
         .progress-container {
-            flex: 3; /* 给进度条更多空间 */
-            max-width: 500px;
-            min-width: 100px;
-            position: relative;
-            display: flex;
-            align-items: center;
-            height: 100%;
-        }
+    flex: 1;  /* 恢复正常flex占比 */
+    max-width: 500px;
+    min-width: 100px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    margin-left: auto;  /* 让进度条靠右 */
+}
         
         .progress-bar {
             width: 100%;
