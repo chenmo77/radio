@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>HellYell电台 - 让美好发声</title>
     <style>
         * {
@@ -19,14 +19,17 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            position: fixed; /* 固定位置 */
+            width: 100%;
+            height: 100%;
         }
         
         .container {
             display: flex;
             flex: 1;
             overflow: hidden;
-            height: auto; /* 改为auto，让flex控制高度 */
             min-height: 0; /* 允许收缩 */
+            height: calc(100% - 90px); /* 减去播放器高度 */
         }
         
         /* 左侧导航 */
@@ -39,6 +42,7 @@
             position: relative;
             z-index: 10;
             height: 100%;
+            -webkit-overflow-scrolling: touch; /* iOS平滑滚动 */
         }
         
         .logo {
@@ -106,7 +110,7 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            min-height: 0; /* 允许收缩 */
+            min-height: 0;
         }
         
         .content-section {
@@ -114,7 +118,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            min-height: 0; /* 允许收缩 */
+            min-height: 0;
         }
         
         .content-section h2 {
@@ -127,23 +131,16 @@
             flex-shrink: 0;
         }
         
-        /* 电台列表（普通分类）- 确保有滚动条 */
+        /* 电台列表（普通分类） */
         .station-list {
             display: grid;
             gap: 10px;
             overflow-y: auto;
             padding-right: 5px;
             flex: 1;
-            min-height: 0; /* 允许收缩 */
-            height: 100%; /* 确保占满高度 */
-        }
-        
-        /* 确保所有station-list都有滚动条 */
-        #foreign-music-list,
-        #chinese-music-list,
-        #news-comprehensive-list {
-            overflow-y: auto !important;
-            max-height: 100%;
+            min-height: 0;
+            height: 100%;
+            -webkit-overflow-scrolling: touch;
         }
         
         .station-item {
@@ -187,7 +184,7 @@
             margin-left: 10px;
         }
         
-        /* 电台播放器样式（怀旧电台和汽车电台专用） */
+        /* 电台播放器样式 */
         .radio-player-container {
             background: #1a1a1a;
             border-radius: 12px;
@@ -200,7 +197,7 @@
             height: 100%;
             width: 100%;
             overflow: hidden;
-            min-height: 0; /* 允许收缩 */
+            min-height: 0;
         }
         
         .current-song-display {
@@ -220,7 +217,6 @@
             word-break: break-word;
         }
         
-        /* 播放模式按钮组 */
         .mode-buttons {
             display: flex;
             justify-content: center;
@@ -253,7 +249,6 @@
             color: #fff;
         }
         
-        /* 歌曲列表滚动区域 */
         .song-list-scroll {
             flex: 1;
             overflow-y: auto;
@@ -263,6 +258,7 @@
             padding: 8px;
             min-height: 0;
             scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
         }
         
         .song-list-item {
@@ -288,23 +284,21 @@
             font-weight: 600;
         }
         
-        /* 底部播放器 - 确保始终可见 */
+        /* 底部播放器 - 固定在底部 */
         .player {
             height: 90px;
             background: #1a1a1a;
-            border-top: 1px solid #2a2a2a;
+            border-top: 2px solid #d32f2f; /* 更明显的边框 */
             display: flex;
             align-items: center;
             padding: 0 20px;
             gap: 20px;
-            z-index: 1000;
+            z-index: 9999; /* 最高层级 */
             flex-shrink: 0;
             width: 100%;
             position: relative;
             bottom: 0;
-            margin-top: 0; /* 移除auto */
-            visibility: visible; /* 确保可见 */
-            opacity: 1; /* 确保可见 */
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.5); /* 添加阴影使其更突出 */
         }
         
         .player-info {
@@ -317,7 +311,7 @@
         .current-station {
             font-size: 16px;
             font-weight: 500;
-            color: #fff;
+            color: #d32f2f; /* 红色突出 */
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -325,7 +319,7 @@
         
         .current-song {
             font-size: 14px;
-            color: #ccc;
+            color: #fff;
             margin-top: 6px;
             white-space: nowrap;
             overflow: hidden;
@@ -334,7 +328,7 @@
         
         .player-time {
             font-size: 14px;
-            color: #666;
+            color: #999;
             margin-top: 6px;
         }
         
@@ -359,10 +353,12 @@
             font-size: 20px;
             position: relative;
             flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(211, 47, 47, 0.3);
         }
         
         .play-btn:hover {
             background: #b71c1c;
+            transform: scale(1.05);
         }
         
         .play-btn::before {
@@ -418,22 +414,16 @@
             border-radius: 3px;
         }
         
-        .sidebar::-webkit-scrollbar-thumb:hover,
-        .station-list::-webkit-scrollbar-thumb:hover,
-        .song-list-scroll::-webkit-scrollbar-thumb:hover {
-            background: #b71c1c;
-        }
-        
         /* 手机端适配 */
         @media (max-width: 768px) {
             body {
-                height: 100vh;
-                overflow: hidden;
+                position: fixed;
+                width: 100%;
+                height: 100%;
             }
             
             .container {
-                height: calc(100vh - 85px); /* 减去播放器高度 */
-                min-height: 0;
+                height: calc(100% - 85px); /* 减去播放器高度 */
             }
             
             .sidebar {
@@ -465,7 +455,6 @@
             
             .main-content {
                 padding: 15px;
-                min-height: 0;
             }
             
             .content-section h2 {
@@ -515,20 +504,17 @@
                 font-size: 14px;
             }
             
-            /* 确保播放器在手机端可见 */
+            /* 手机端播放器 - 确保可见 */
             .player {
                 height: 85px;
-                padding: 0 15px;
-                gap: 15px;
+                padding: 0 12px;
+                gap: 12px;
                 position: relative;
                 bottom: 0;
-                visibility: visible;
-                opacity: 1;
-                z-index: 2000;
+                z-index: 9999;
                 background: #1a1a1a;
-                border-top: 1px solid #2a2a2a;
-                margin-top: 0;
-                flex-shrink: 0;
+                border-top: 2px solid #d32f2f;
+                box-shadow: 0 -4px 12px rgba(0,0,0,0.8);
             }
             
             .current-station {
@@ -552,13 +538,13 @@
             }
             
             .progress-container {
-                max-width: 150px;
+                max-width: 120px;
             }
         }
         
         @media (max-width: 480px) {
             .container {
-                height: calc(100vh - 80px);
+                height: calc(100% - 80px);
             }
             
             .sidebar {
@@ -616,13 +602,12 @@
                 font-size: 13px;
             }
             
-            /* 确保播放器在小屏幕手机上也可见 */
+            /* 小屏幕手机播放器 */
             .player {
                 height: 80px;
                 padding: 0 10px;
-                gap: 10px;
-                visibility: visible;
-                opacity: 1;
+                gap: 8px;
+                border-top: 2px solid #d32f2f;
             }
             
             .play-btn {
@@ -646,7 +631,7 @@
             }
             
             .progress-container {
-                max-width: 100px;
+                max-width: 80px;
             }
             
             .progress-bar {
@@ -654,12 +639,12 @@
             }
         }
         
-        /* 确保在非常小的屏幕上也能显示完整 */
+        /* 超小屏幕 */
         @media (max-width: 360px) {
             .player {
+                height: 75px;
                 padding: 0 6px;
                 gap: 6px;
-                height: 75px;
             }
             
             .play-btn {
@@ -683,7 +668,7 @@
             }
             
             .progress-container {
-                max-width: 70px;
+                max-width: 60px;
             }
         }
     </style>
@@ -748,7 +733,7 @@
     </div>
 
     <!-- 底部播放器 -->
-    <div class="player">
+    <div class="player" id="bottom-player">
         <div class="player-info">
             <div class="current-station">未选择电台</div>
             <div class="current-song">请选择电台开始播放</div>
@@ -777,7 +762,6 @@
                     const response = await fetch(dataFile);
                     const data = await response.json();
                     
-                    // 如果是电台分类（怀旧或汽车），存储为歌曲列表
                     if (sectionId === 'huaijiu-radio' || sectionId === 'qiche-radio') {
                         this.radioSongs[sectionId] = data;
                         this.renderRadioPlayer(sectionId, data);
@@ -821,7 +805,7 @@
                         <button class="mode-btn" data-mode="list">列表循环</button>
                     </div>
                     
-                    <div class="song-list-scroll" id="song-scroll-list">
+                    <div class="song-list-scroll" id="song-scroll-list-${sectionId}">
                         ${songs.map((song, index) => `
                             <div class="song-list-item ${index === 0 ? 'active' : ''}" data-index="${index}">
                                 ${song.name}
@@ -873,18 +857,22 @@
                 this.ensurePlayerVisible();
             }
             
-            // 确保播放器可见
             ensurePlayerVisible() {
-                const player = document.querySelector('.player');
+                const player = document.getElementById('bottom-player');
                 if (player) {
+                    player.style.display = 'flex';
                     player.style.visibility = 'visible';
                     player.style.opacity = '1';
-                    player.style.display = 'flex';
+                    player.style.height = '90px';
+                    
+                    // 在手机端调整容器高度
+                    if (window.innerWidth <= 768) {
+                        document.querySelector('.container').style.height = 'calc(100% - 85px)';
+                    }
                 }
             }
             
             setupEventListeners() {
-                // 电台点击事件
                 document.addEventListener('click', (e) => {
                     const stationItem = e.target.closest('.station-item');
                     if (stationItem) {
@@ -892,25 +880,21 @@
                     }
                 });
                 
-                // 播放按钮
                 document.querySelector('.play-btn').addEventListener('click', () => {
                     this.togglePlay();
                 });
                 
-                // 音频事件
                 this.audio.addEventListener('loadstart', () => {
                     this.isLoading = true;
-                    this.updateStatus('正在加载...');
                 });
                 
                 this.audio.addEventListener('canplay', () => {
                     this.isLoading = false;
-                    this.updateStatus('可以播放');
                 });
                 
                 this.audio.addEventListener('playing', () => {
                     this.isLoading = false;
-                    this.updateStatus('播放中');
+                    this.isPlaying = true;
                     this.updatePlayButton(true);
                 });
                 
@@ -927,7 +911,6 @@
                 this.audio.addEventListener('error', (e) => {
                     console.error('播放错误:', e);
                     this.isLoading = false;
-                    this.updateStatus('播放失败，等待重试');
                     
                     if (this.currentRadioType) {
                         setTimeout(() => {
@@ -1008,14 +991,19 @@
             scrollToCenter(element, container) {
                 if (!element || !container) return;
                 
-                const containerHeight = container.clientHeight;
-                const elementHeight = element.offsetHeight;
-                const elementTop = element.offsetTop;
+                // 获取容器和元素的位置信息
+                const containerRect = container.getBoundingClientRect();
+                const elementRect = element.getBoundingClientRect();
                 
-                const scrollTop = elementTop - (containerHeight / 2) + (elementHeight / 2);
+                // 计算元素相对于容器的位置
+                const elementRelativeTop = elementRect.top - containerRect.top;
                 
+                // 计算需要滚动的距离，使元素居中
+                const scrollTop = container.scrollTop + elementRelativeTop - (container.clientHeight / 2) + (element.clientHeight / 2);
+                
+                // 平滑滚动
                 container.scrollTo({
-                    top: scrollTop,
+                    top: Math.max(0, scrollTop),
                     behavior: 'smooth'
                 });
             }
@@ -1029,12 +1017,17 @@
                 this.songs = songs;
                 this.playMode = 'random';
                 
-                document.querySelectorAll('.mode-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                    if (btn.dataset.mode === 'random') {
-                        btn.classList.add('active');
-                    }
-                });
+                // 更新模式按钮
+                const container = document.getElementById(type === 'huaijiu' ? 'huaijiu-player' : 'qiche-player');
+                if (container) {
+                    const modeBtns = container.querySelectorAll('.mode-btn');
+                    modeBtns.forEach(btn => {
+                        btn.classList.remove('active');
+                        if (btn.dataset.mode === 'random') {
+                            btn.classList.add('active');
+                        }
+                    });
+                }
                 
                 this.currentSongIndex = Math.floor(Math.random() * songs.length);
                 
@@ -1045,7 +1038,8 @@
             updateRadioDisplay() {
                 if (!this.currentRadioType || !this.songs.length) return;
                 
-                const container = document.getElementById(this.currentRadioType === 'huaijiu' ? 'huaijiu-player' : 'qiche-player');
+                const containerId = this.currentRadioType === 'huaijiu' ? 'huaijiu-player' : 'qiche-player';
+                const container = document.getElementById(containerId);
                 if (!container) return;
                 
                 const currentSong = this.songs[this.currentSongIndex];
@@ -1053,24 +1047,35 @@
                 const titleElement = container.querySelector('.current-song-title');
                 if (titleElement) titleElement.textContent = currentSong.name;
                 
+                const scrollListId = `song-scroll-list-${this.currentRadioType === 'huaijiu' ? 'huaijiu-radio' : 'qiche-radio'}`;
+                const scrollList = document.getElementById(scrollListId);
                 const items = container.querySelectorAll('.song-list-item');
-                const scrollList = document.getElementById('song-scroll-list');
                 
                 items.forEach((item, index) => {
                     if (index === this.currentSongIndex) {
                         item.classList.add('active');
                         
-                        setTimeout(() => {
-                            this.scrollToCenter(item, scrollList);
-                        }, 100);
+                        // 滚动到中间位置
+                        if (scrollList) {
+                            setTimeout(() => {
+                                this.scrollToCenter(item, scrollList);
+                            }, 200);
+                        }
                     } else {
                         item.classList.remove('active');
                     }
                 });
                 
-                document.querySelector('.current-station').textContent = 
-                    this.currentRadioType === 'huaijiu' ? '怀旧电台' : '汽车电台';
-                document.querySelector('.current-song').textContent = `正在播放: ${currentSong.name}`;
+                // 更新底部播放器
+                const stationElement = document.querySelector('.current-station');
+                const songElement = document.querySelector('.current-song');
+                
+                if (stationElement) {
+                    stationElement.textContent = this.currentRadioType === 'huaijiu' ? '怀旧电台' : '汽车电台';
+                }
+                if (songElement) {
+                    songElement.textContent = `正在播放: ${currentSong.name}`;
+                }
             }
             
             playCurrentSong() {
@@ -1199,7 +1204,6 @@
                 
                 document.querySelector('.current-station').textContent = stationName;
                 document.querySelector('.current-song').textContent = '正在加载...';
-                this.updateStatus('已选择电台');
                 
                 this.play();
             }
@@ -1233,7 +1237,6 @@
                 this.loadTimeout = setTimeout(() => {
                     if (!this.isPlaying) {
                         console.log('电台加载超时');
-                        this.updateStatus('加载超时');
                     }
                 }, 30000);
                 
@@ -1252,7 +1255,6 @@
                     .catch(error => {
                         clearTimeout(this.loadTimeout);
                         console.error('播放失败:', error);
-                        this.updateStatus('播放失败，请检查网络');
                     });
             }
             
@@ -1265,7 +1267,6 @@
                 this.isPlaying = false;
                 this.isLoading = false;
                 this.updatePlayButton(false);
-                this.updateStatus('已暂停');
                 document.querySelector('.current-song').textContent = '播放已暂停';
             }
             
@@ -1276,10 +1277,6 @@
                 } else {
                     playBtn.classList.remove('paused');
                 }
-            }
-            
-            updateStatus(status) {
-                console.log('状态:', status);
             }
             
             updateTime() {
@@ -1304,6 +1301,15 @@
         // 初始化播放器
         document.addEventListener('DOMContentLoaded', () => {
             new RadioPlayer();
+        });
+        
+        // 窗口大小改变时调整
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 768) {
+                document.querySelector('.container').style.height = 'calc(100% - 85px)';
+            } else {
+                document.querySelector('.container').style.height = 'calc(100% - 90px)';
+            }
         });
     </script>
 </body>
