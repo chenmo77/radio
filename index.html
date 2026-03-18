@@ -230,7 +230,7 @@
             line-height: 1.4;
         }
         
-        /* 播放模式按钮组 - 图标样式 */
+        /* 播放模式按钮组 - 纯白色图标 */
         .mode-buttons {
             display: flex;
             justify-content: center;
@@ -244,7 +244,7 @@
         .mode-btn {
             background: #2a2a2a;
             border: 1px solid #3a3a3a;
-            color: #ccc;
+            color: #fff;
             width: 48px;
             height: 48px;
             border-radius: 50%;
@@ -270,28 +270,30 @@
             box-shadow: 0 0 10px rgba(211, 47, 47, 0.5);
         }
         
-        /* 图标内容 */
-        .mode-btn[data-mode="random"]::before {
-            content: "🔀";
-            font-size: 20px;
+        /* 使用SVG图标 - 纯白色 */
+        .mode-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+            stroke: none;
         }
         
-        .mode-btn[data-mode="sequential"]::before {
-            content: "🔁";
-            font-size: 20px;
+        /* 随机图标 - 双箭头交叉 */
+        .mode-btn[data-mode="random"] svg {
+            transform: scale(1.1);
         }
         
-        .mode-btn[data-mode="single"]::before {
-            content: "🔂";
-            font-size: 20px;
+        /* 顺序图标 - 循环箭头 */
+        .mode-btn[data-mode="sequential"] svg {
+            transform: scale(1.1);
         }
         
-        /* 移除之前的文字 */
-        .mode-btn span {
-            display: none;
+        /* 单曲图标 - 带1的循环 */
+        .mode-btn[data-mode="single"] svg {
+            transform: scale(1.1);
         }
         
-        /* 添加工具提示（可选） */
+        /* 添加工具提示 */
         .mode-btn:hover::after {
             content: attr(data-tip);
             position: absolute;
@@ -305,18 +307,7 @@
             font-size: 12px;
             white-space: nowrap;
             z-index: 10;
-        }
-        
-        .mode-btn[data-mode="random"]:hover::after {
-            content: "随机";
-        }
-        
-        .mode-btn[data-mode="sequential"]:hover::after {
-            content: "顺序";
-        }
-        
-        .mode-btn[data-mode="single"]:hover::after {
-            content: "单曲";
+            pointer-events: none;
         }
         
         .song-list-scroll {
@@ -441,14 +432,10 @@
             transform: scale(1.05);
         }
         
-        .play-btn::before {
-            content: "▶";
-            position: absolute;
-        }
-        
-        .play-btn.paused::before {
-            content: "⏸";
-            font-size: 18px;
+        .play-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
         }
         
         .progress-container {
@@ -585,7 +572,11 @@
             .mode-btn {
                 width: 44px;
                 height: 44px;
-                font-size: 18px;
+            }
+            
+            .mode-btn svg {
+                width: 22px;
+                height: 22px;
             }
             
             .song-list-item {
@@ -622,7 +613,11 @@
             .play-btn {
                 width: 55px;
                 height: 55px;
-                font-size: 18px;
+            }
+            
+            .play-btn svg {
+                width: 22px;
+                height: 22px;
             }
             
             .progress-container {
@@ -682,7 +677,11 @@
             .mode-btn {
                 width: 40px;
                 height: 40px;
-                font-size: 16px;
+            }
+            
+            .mode-btn svg {
+                width: 20px;
+                height: 20px;
             }
             
             .song-list-item {
@@ -700,7 +699,11 @@
             .play-btn {
                 width: 48px;
                 height: 48px;
-                font-size: 16px;
+            }
+            
+            .play-btn svg {
+                width: 20px;
+                height: 20px;
             }
             
             .current-station {
@@ -736,7 +739,11 @@
             .play-btn {
                 width: 44px;
                 height: 44px;
-                font-size: 14px;
+            }
+            
+            .play-btn svg {
+                width: 18px;
+                height: 18px;
             }
             
             .current-station {
@@ -826,7 +833,11 @@
             <div class="player-time">00:00</div>
         </div>
         <div class="player-controls">
-            <button class="play-btn"></button>
+            <button class="play-btn">
+                <svg viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+            </button>
         </div>
         <div class="progress-container">
             <div class="progress-bar">
@@ -885,9 +896,22 @@
                     </div>
                     
                     <div class="mode-buttons">
-                        <button class="mode-btn active" data-mode="random" data-tip="随机"></button>
-                        <button class="mode-btn" data-mode="sequential" data-tip="顺序"></button>
-                        <button class="mode-btn" data-mode="single" data-tip="单曲"></button>
+                        <button class="mode-btn active" data-mode="random" data-tip="随机">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M10.59 9.17L5.41 4L4 5.41l5.17 5.17l1.42-1.41zM14.5 4l2.04 2.04L4 18.59L5.41 20L17.96 7.46L20 9.5V4h-5.5zm0.33 9.41l-1.41 1.41l3.13 3.13L14.5 20H20v-5.5l-2.04 2.04l-3.13-3.13z"/>
+                            </svg>
+                        </button>
+                        <button class="mode-btn" data-mode="sequential" data-tip="顺序">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+                            </svg>
+                        </button>
+                        <button class="mode-btn" data-mode="single" data-tip="单曲">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+                                <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                            </svg>
+                        </button>
                     </div>
                     
                     <div class="song-list-scroll" id="song-scroll-list-${sectionId}">
@@ -922,7 +946,7 @@
                 this.volume = 0.5;
                 this.dataLoader = new StationDataLoader();
                 this.loadTimeout = null;
-                this.playMode = 'random'; // 'random', 'sequential', 'single'
+                this.playMode = 'random';
                 this.isLoading = false;
                 
                 this.init();
@@ -935,10 +959,8 @@
                 this.setupVolume();
                 this.setupRadioControls();
                 
-                // 默认显示国际音乐台
                 document.getElementById('foreign-music').style.display = 'block';
                 
-                // 确保播放器可见
                 this.ensurePlayerVisible();
             }
             
@@ -1212,7 +1234,6 @@
                 
                 switch (this.playMode) {
                     case 'random':
-                        // 随机模式：随机选择下一首，永远播放下去
                         let nextIndex;
                         do {
                             nextIndex = Math.floor(Math.random() * this.songs.length);
@@ -1223,14 +1244,12 @@
                         break;
                         
                     case 'sequential':
-                        // 顺序模式：顺序下一首，播完最后一首后从头开始
                         this.currentSongIndex = (this.currentSongIndex + 1) % this.songs.length;
                         this.updateRadioDisplay();
                         this.playCurrentSong();
                         break;
                         
                     case 'single':
-                        // 单曲循环：重复播放当前歌曲
                         this.playCurrentSong();
                         break;
                 }
@@ -1366,7 +1385,6 @@
             }
         }
 
-        // 初始化播放器
         document.addEventListener('DOMContentLoaded', () => {
             new RadioPlayer();
         });
