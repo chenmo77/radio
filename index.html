@@ -1157,6 +1157,29 @@
                 if (songElement) {
                     songElement.textContent = this.currentSongName;
                 }
+                
+                // 更新页面标题
+                this.updatePageTitle();
+            }
+            
+            // 新增：更新页面标题的方法
+            updatePageTitle() {
+                const titleElement = document.querySelector('title');
+                let currentContent = '';
+                
+                if (this.currentRadioType && this.songs[this.currentSongIndex]) {
+                    // 正在播放怀旧电台或汽车电台的歌曲
+                    currentContent = this.songs[this.currentSongIndex].name;
+                } else if (this.currentStation) {
+                    // 正在播放普通电台
+                    currentContent = this.currentStation.name;
+                }
+                
+                if (currentContent) {
+                    titleElement.textContent = `${currentContent} - HellYell电台 - 让美好发声`;
+                } else {
+                    titleElement.textContent = 'HellYell电台 - 让美好发声';
+                }
             }
             
             setupProgressDrag() {
