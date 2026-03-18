@@ -25,7 +25,8 @@
             display: flex;
             flex: 1;
             overflow: hidden;
-            height: calc(100vh - 90px); /* 减去底部播放器高度 */
+            height: auto; /* 改为auto，让flex控制高度 */
+            min-height: 0; /* 允许收缩 */
         }
         
         /* 左侧导航 */
@@ -105,6 +106,7 @@
             height: 100%;
             display: flex;
             flex-direction: column;
+            min-height: 0; /* 允许收缩 */
         }
         
         .content-section {
@@ -112,6 +114,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            min-height: 0; /* 允许收缩 */
         }
         
         .content-section h2 {
@@ -124,13 +127,23 @@
             flex-shrink: 0;
         }
         
-        /* 电台列表（普通分类） */
+        /* 电台列表（普通分类）- 确保有滚动条 */
         .station-list {
             display: grid;
             gap: 10px;
             overflow-y: auto;
             padding-right: 5px;
             flex: 1;
+            min-height: 0; /* 允许收缩 */
+            height: 100%; /* 确保占满高度 */
+        }
+        
+        /* 确保所有station-list都有滚动条 */
+        #foreign-music-list,
+        #chinese-music-list,
+        #news-comprehensive-list {
+            overflow-y: auto !important;
+            max-height: 100%;
         }
         
         .station-item {
@@ -187,6 +200,7 @@
             height: 100%;
             width: 100%;
             overflow: hidden;
+            min-height: 0; /* 允许收缩 */
         }
         
         .current-song-display {
@@ -288,7 +302,9 @@
             width: 100%;
             position: relative;
             bottom: 0;
-            margin-top: auto; /* 确保在flex容器中靠底 */
+            margin-top: 0; /* 移除auto */
+            visibility: visible; /* 确保可见 */
+            opacity: 1; /* 确保可见 */
         }
         
         .player-info {
@@ -410,8 +426,14 @@
         
         /* 手机端适配 */
         @media (max-width: 768px) {
+            body {
+                height: 100vh;
+                overflow: hidden;
+            }
+            
             .container {
-                height: calc(100vh - 85px);
+                height: calc(100vh - 85px); /* 减去播放器高度 */
+                min-height: 0;
             }
             
             .sidebar {
@@ -443,6 +465,7 @@
             
             .main-content {
                 padding: 15px;
+                min-height: 0;
             }
             
             .content-section h2 {
@@ -492,10 +515,20 @@
                 font-size: 14px;
             }
             
+            /* 确保播放器在手机端可见 */
             .player {
                 height: 85px;
                 padding: 0 15px;
                 gap: 15px;
+                position: relative;
+                bottom: 0;
+                visibility: visible;
+                opacity: 1;
+                z-index: 2000;
+                background: #1a1a1a;
+                border-top: 1px solid #2a2a2a;
+                margin-top: 0;
+                flex-shrink: 0;
             }
             
             .current-station {
@@ -504,16 +537,22 @@
             
             .current-song {
                 font-size: 13px;
+                margin-top: 4px;
             }
             
             .player-time {
                 font-size: 13px;
+                margin-top: 4px;
             }
             
             .play-btn {
                 width: 55px;
                 height: 55px;
                 font-size: 18px;
+            }
+            
+            .progress-container {
+                max-width: 150px;
             }
         }
         
@@ -577,10 +616,13 @@
                 font-size: 13px;
             }
             
+            /* 确保播放器在小屏幕手机上也可见 */
             .player {
                 height: 80px;
                 padding: 0 10px;
                 gap: 10px;
+                visibility: visible;
+                opacity: 1;
             }
             
             .play-btn {
@@ -595,24 +637,29 @@
             
             .current-song {
                 font-size: 12px;
-                margin-top: 4px;
+                margin-top: 3px;
             }
             
             .player-time {
                 font-size: 12px;
-                margin-top: 4px;
+                margin-top: 3px;
             }
             
             .progress-container {
                 max-width: 100px;
+            }
+            
+            .progress-bar {
+                height: 4px;
             }
         }
         
         /* 确保在非常小的屏幕上也能显示完整 */
         @media (max-width: 360px) {
             .player {
-                padding: 0 8px;
-                gap: 8px;
+                padding: 0 6px;
+                gap: 6px;
+                height: 75px;
             }
             
             .play-btn {
@@ -627,10 +674,12 @@
             
             .current-song {
                 font-size: 11px;
+                margin-top: 2px;
             }
             
             .player-time {
                 font-size: 11px;
+                margin-top: 2px;
             }
             
             .progress-container {
@@ -798,14 +847,14 @@
                 this.audio = new Audio();
                 this.isPlaying = false;
                 this.currentStation = null;
-                this.currentRadioType = null; // 'huaijiu' 或 'qiche'
+                this.currentRadioType = null;
                 this.currentSongIndex = 0;
                 this.songs = [];
                 this.volume = 0.5;
                 this.dataLoader = new StationDataLoader();
                 this.loadTimeout = null;
-                this.playMode = 'random'; // 'random', 'sequential', 'single', 'list'
-                this.isLoading = false; // 添加加载状态标记
+                this.playMode = 'random';
+                this.isLoading = false;
                 
                 this.init();
             }
@@ -819,10 +868,23 @@
                 
                 // 默认显示国际音乐台
                 document.getElementById('foreign-music').style.display = 'block';
+                
+                // 确保播放器可见
+                this.ensurePlayerVisible();
+            }
+            
+            // 确保播放器可见
+            ensurePlayerVisible() {
+                const player = document.querySelector('.player');
+                if (player) {
+                    player.style.visibility = 'visible';
+                    player.style.opacity = '1';
+                    player.style.display = 'flex';
+                }
             }
             
             setupEventListeners() {
-                // 电台点击事件 - 使用事件委托
+                // 电台点击事件
                 document.addEventListener('click', (e) => {
                     const stationItem = e.target.closest('.station-item');
                     if (stationItem) {
@@ -859,7 +921,6 @@
                 
                 this.audio.addEventListener('ended', () => {
                     this.isLoading = false;
-                    // 歌曲结束，根据播放模式处理
                     this.handleSongEnd();
                 });
                 
@@ -868,11 +929,10 @@
                     this.isLoading = false;
                     this.updateStatus('播放失败，等待重试');
                     
-                    // 播放失败时尝试下一首
                     if (this.currentRadioType) {
                         setTimeout(() => {
                             this.handleSongEnd();
-                        }, 3000); // 失败后等待3秒再试
+                        }, 3000);
                     }
                 });
                 
@@ -882,38 +942,31 @@
             }
             
             setupNavigation() {
-                // 分类导航点击事件
                 document.querySelectorAll('.nav-item').forEach(item => {
                     item.addEventListener('click', (e) => {
                         e.preventDefault();
                         
-                        // 更新活跃状态
                         document.querySelectorAll('.nav-item').forEach(nav => {
                             nav.classList.remove('active');
                         });
                         item.classList.add('active');
                         
-                        // 获取目标分类
                         const targetId = item.getAttribute('data-target');
                         
-                        // 隐藏所有内容区域
                         document.querySelectorAll('.content-section').forEach(section => {
                             section.style.display = 'none';
                         });
                         
-                        // 显示目标区域
                         const targetSection = document.getElementById(targetId);
                         if (targetSection) {
                             targetSection.style.display = 'flex';
                             targetSection.style.flexDirection = 'column';
                             
-                            // 如果是电台分类（怀旧或汽车），初始化电台播放
                             if (targetId === 'huaijiu-radio') {
                                 this.initRadioPlay('huaijiu');
                             } else if (targetId === 'qiche-radio') {
                                 this.initRadioPlay('qiche');
                             } else {
-                                // 普通电台分类
                                 this.currentRadioType = null;
                             }
                         }
@@ -922,24 +975,20 @@
             }
             
             setupRadioControls() {
-                // 模式按钮点击事件
                 document.addEventListener('click', (e) => {
                     const modeBtn = e.target.closest('.mode-btn');
                     if (modeBtn && this.currentRadioType) {
                         e.stopPropagation();
                         
-                        // 更新按钮状态
                         document.querySelectorAll('.mode-btn').forEach(btn => {
                             btn.classList.remove('active');
                         });
                         modeBtn.classList.add('active');
                         
-                        // 设置播放模式
                         this.playMode = modeBtn.dataset.mode;
                     }
                 });
                 
-                // 歌曲列表点击事件 - 只有点击才播放
                 document.addEventListener('click', (e) => {
                     const songItem = e.target.closest('.song-list-item');
                     if (songItem && this.currentRadioType) {
@@ -956,7 +1005,6 @@
                 this.audio.volume = this.volume;
             }
             
-            // 将元素滚动到容器中间
             scrollToCenter(element, container) {
                 if (!element || !container) return;
                 
@@ -979,11 +1027,8 @@
                 if (!songs || songs.length === 0) return;
                 
                 this.songs = songs;
-                
-                // 默认设置为随机循环模式
                 this.playMode = 'random';
                 
-                // 更新模式显示
                 document.querySelectorAll('.mode-btn').forEach(btn => {
                     btn.classList.remove('active');
                     if (btn.dataset.mode === 'random') {
@@ -991,7 +1036,6 @@
                     }
                 });
                 
-                // 随机选择一首歌开始播放
                 this.currentSongIndex = Math.floor(Math.random() * songs.length);
                 
                 this.updateRadioDisplay();
@@ -1006,11 +1050,9 @@
                 
                 const currentSong = this.songs[this.currentSongIndex];
                 
-                // 更新当前歌曲显示
                 const titleElement = container.querySelector('.current-song-title');
                 if (titleElement) titleElement.textContent = currentSong.name;
                 
-                // 更新列表激活状态
                 const items = container.querySelectorAll('.song-list-item');
                 const scrollList = document.getElementById('song-scroll-list');
                 
@@ -1018,7 +1060,6 @@
                     if (index === this.currentSongIndex) {
                         item.classList.add('active');
                         
-                        // 将当前歌曲滚动到中间位置
                         setTimeout(() => {
                             this.scrollToCenter(item, scrollList);
                         }, 100);
@@ -1027,7 +1068,6 @@
                     }
                 });
                 
-                // 更新底部播放器信息
                 document.querySelector('.current-station').textContent = 
                     this.currentRadioType === 'huaijiu' ? '怀旧电台' : '汽车电台';
                 document.querySelector('.current-song').textContent = `正在播放: ${currentSong.name}`;
@@ -1036,7 +1076,6 @@
             playCurrentSong() {
                 if (!this.songs.length || this.currentSongIndex < 0) return;
                 
-                // 如果正在加载，不重复加载
                 if (this.isLoading) {
                     console.log('正在加载中，稍后重试');
                     return;
@@ -1049,21 +1088,19 @@
                     isRadio: true
                 };
                 
-                // 清除之前的超时
                 if (this.loadTimeout) {
                     clearTimeout(this.loadTimeout);
                 }
                 
                 this.audio.src = song.url;
                 
-                // 延长加载超时时间到30秒
                 this.loadTimeout = setTimeout(() => {
                     if (this.isLoading) {
                         console.log('歌曲加载超时（30秒），自动播放下一首');
                         this.isLoading = false;
                         this.handleSongEnd();
                     }
-                }, 30000); // 30秒超时
+                }, 30000);
                 
                 this.audio.play()
                     .then(() => {
@@ -1077,7 +1114,6 @@
                         clearTimeout(this.loadTimeout);
                         this.isLoading = false;
                         
-                        // 播放失败，等待3秒后尝试下一首
                         setTimeout(() => {
                             this.handleSongEnd();
                         }, 3000);
@@ -1087,7 +1123,6 @@
             handleSongEnd() {
                 if (!this.songs.length) return;
                 
-                // 如果正在加载，等待加载完成
                 if (this.isLoading) {
                     console.log('正在加载中，稍后处理结束事件');
                     return;
@@ -1095,7 +1130,6 @@
                 
                 switch (this.playMode) {
                     case 'random':
-                        // 随机循环：随机选择下一首
                         let nextIndex;
                         do {
                             nextIndex = Math.floor(Math.random() * this.songs.length);
@@ -1106,13 +1140,11 @@
                         break;
                         
                     case 'sequential':
-                        // 顺序播放：顺序下一首，播完最后一首后停止
                         if (this.currentSongIndex < this.songs.length - 1) {
                             this.currentSongIndex++;
                             this.updateRadioDisplay();
                             this.playCurrentSong();
                         } else {
-                            // 最后一首播放完毕，停止播放
                             this.isPlaying = false;
                             this.updatePlayButton(false);
                             document.querySelector('.current-song').textContent = '播放结束';
@@ -1120,12 +1152,10 @@
                         break;
                         
                     case 'single':
-                        // 单曲循环：重复播放当前歌曲
                         this.playCurrentSong();
                         break;
                         
                     case 'list':
-                        // 列表循环：顺序下一首，播完最后一首后从头开始
                         this.currentSongIndex = (this.currentSongIndex + 1) % this.songs.length;
                         this.updateRadioDisplay();
                         this.playCurrentSong();
@@ -1136,7 +1166,6 @@
             playSongAtIndex(index) {
                 if (index < 0 || index >= this.songs.length || index === this.currentSongIndex) return;
                 
-                // 如果正在加载，先停止当前加载
                 if (this.isLoading) {
                     this.audio.pause();
                     this.isLoading = false;
@@ -1151,12 +1180,10 @@
             }
             
             selectStation(stationElement) {
-                // 移除之前选中的样式
                 document.querySelectorAll('.station-item').forEach(item => {
                     item.classList.remove('active');
                 });
                 
-                // 添加当前选中样式
                 stationElement.classList.add('active');
                 
                 const stationName = stationElement.querySelector('.station-name').textContent;
@@ -1168,13 +1195,12 @@
                     element: stationElement
                 };
                 
-                this.currentRadioType = null; // 退出电台模式
+                this.currentRadioType = null;
                 
                 document.querySelector('.current-station').textContent = stationName;
                 document.querySelector('.current-song').textContent = '正在加载...';
                 this.updateStatus('已选择电台');
                 
-                // 自动播放
                 this.play();
             }
             
@@ -1209,7 +1235,7 @@
                         console.log('电台加载超时');
                         this.updateStatus('加载超时');
                     }
-                }, 30000); // 30秒超时
+                }, 30000);
                 
                 this.audio.play()
                     .then(() => {
