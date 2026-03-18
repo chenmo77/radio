@@ -341,13 +341,12 @@
     border-top: 2px solid #d32f2f;
     display: flex;
     align-items: center;
-    /* justify-content: space-between; */  /* 注释掉或删除 */
     padding: 0 20px;
-    /* gap: 30px; */  /* 注释掉或删除 */
+    gap: 30px;  /* 恢复gap，保持元素间距 */
     z-index: 9999;
     flex-shrink: 0;
     width: 100%;
-    position: relative;  /* 这个很重要，作为绝对定位的参考 */
+    position: relative;  /* 作为绝对定位的参考 */
     bottom: 0;
     box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
 }
@@ -355,7 +354,7 @@
 .player-info {
     display: flex;
     flex-direction: column;
-    flex: 1;  /* 恢复正常flex占比 */
+    flex: 1;
     min-width: 0;
     overflow: hidden;
 }
@@ -385,14 +384,16 @@
         }
         
         .player-controls {
-    position: absolute;  /* 绝对定位 */
-    left: 50%;           /* 左边缘在50%处 */
-    transform: translateX(-50%);  /* 向左移动自身宽度的一半，实现完美居中 */
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    z-index: 20;  /* 确保在上层 */
+    z-index: 20;
+    /* 添加左右外边距，避免压到其他元素 */
+    margin: 0 15px;  /* 增加左右间距 */
 }
         
         .play-btn {
@@ -466,7 +467,7 @@
         }
         
         .progress-container {
-    flex: 1;  /* 恢复正常flex占比 */
+    flex: 1;
     max-width: 500px;
     min-width: 100px;
     position: relative;
@@ -715,9 +716,12 @@
                 border-width: 11px 0 11px 18px;
                 left: 20px;
             }
+
+            .player-controls {
+                margin: 0 10px;  /* 手机端间距小一些 */
+            }
             
             .progress-container {
-                flex: 3;
                 max-width: 300px;
             }
             
@@ -835,6 +839,10 @@
             .player-time {
                 font-size: 12px;
                 margin-top: 3px;
+            }
+
+            .player-controls {
+                margin: 0 8px;
             }
             
             .progress-container {
