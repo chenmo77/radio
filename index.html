@@ -1315,7 +1315,7 @@
                 
                 const song = this.songs[this.currentSongIndex];
                 
-                // 判断是否切换了歌曲
+                // 判断是否切换了歌曲（对比URL）
                 const isNewSong = (this.currentSongUrl !== song.url);
                 
                 this.currentStation = {
@@ -1328,13 +1328,19 @@
                     clearTimeout(this.loadTimeout);
                 }
                 
-                // 如果是新歌，重置播放位置到0
+                // 只有在切换歌曲时才重置播放位置
                 if (isNewSong) {
                     this.audio.currentTime = 0;
                     this.currentSongUrl = song.url;
+                } else {
+                    // 如果是同一首歌，保持当前播放位置不变
+                    console.log('同一首歌，保持播放位置:', this.audio.currentTime);
                 }
                 
-                this.audio.src = song.url;
+                // 只有当src改变时才重新设置src
+                if (this.audio.src !== song.url) {
+                    this.audio.src = song.url;
+                }
                 
                 this.loadTimeout = setTimeout(() => {
                     if (this.isLoading) {
@@ -1424,7 +1430,7 @@
                 const stationName = stationElement.querySelector('.station-name').textContent;
                 const stationUrl = stationElement.dataset.url;
                 
-                // 判断是否切换了电台
+                // 判断是否切换了电台（对比URL）
                 const isNewStation = (this.currentStation && this.currentStation.url !== stationUrl);
                 
                 this.currentStation = {
@@ -1435,10 +1441,13 @@
                 
                 this.currentRadioType = null;
                 
-                // 如果是新电台，重置播放位置
+                // 只有在切换电台时才重置播放位置
                 if (isNewStation) {
                     this.audio.currentTime = 0;
                     this.currentSongUrl = stationUrl;
+                } else {
+                    // 如果是同一个电台，保持当前播放位置不变
+                    console.log('同一个电台，保持播放位置:', this.audio.currentTime);
                 }
                 
                 this.currentStationName = stationName;
@@ -1472,7 +1481,10 @@
                     clearTimeout(this.loadTimeout);
                 }
                 
-                this.audio.src = this.currentStation.url;
+                // 只有当src改变时才重新设置src
+                if (this.audio.src !== this.currentStation.url) {
+                    this.audio.src = this.currentStation.url;
+                }
                 
                 this.loadTimeout = setTimeout(() => {
                     if (!this.isPlaying) {
