@@ -472,9 +472,9 @@
         
         .progress-bar {
             width: 100%;
-            height: 6px;
+            height: 4px; /* 进度条高度稍微减小，更精致 */
             background: #2a2a2a;
-            border-radius: 3px;
+            border-radius: 2px;
             overflow: visible;
             cursor: pointer;
             position: relative;
@@ -483,36 +483,59 @@
         .progress {
             height: 100%;
             background: #d32f2f;
-            border-radius: 3px;
+            border-radius: 2px;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: flex-end;
         }
         
-        /* 进度条上的圆形滑块 */
+        /* 进度条上的圆形滑块 - 精调版 */
         .progress-handle {
-            width: 16px;
-            height: 16px;
-            background: #d32f2f;
-            border: 2px solid white;
+            width: 20px; /* 整体大小保持不变 */
+            height: 20px;
+            background: white; /* 外圈白色 */
+            border: none;
             border-radius: 50%;
             position: absolute;
-            right: -8px;
+            right: -10px; /* 一半宽度，居中 */
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            transition: transform 0.1s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
             z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 红色内圈 - 和进度条高度一致 */
+        .progress-handle::after {
+            content: '';
+            width: 4px; /* 和进度条高度一致 */
+            height: 4px;
+            background: #d32f2f;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.15s ease;
         }
         
         .progress-handle:hover {
-            transform: translateY(-50%) scale(1.2);
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.5);
+        }
+        
+        .progress-handle:hover::after {
+            width: 5px;
+            height: 5px;
         }
         
         .progress-handle:active {
-            transform: translateY(-50%) scale(1.1);
+            transform: translateY(-50%) scale(1.05);
         }
         
         /* 滚动条样式 */
@@ -687,10 +710,19 @@
                 max-width: 120px;
             }
             
+            .progress-bar {
+                height: 3px;
+            }
+            
             .progress-handle {
-                width: 14px;
-                height: 14px;
-                right: -7px;
+                width: 18px;
+                height: 18px;
+                right: -9px;
+            }
+            
+            .progress-handle::after {
+                width: 3px;
+                height: 3px;
             }
         }
         
@@ -799,14 +831,18 @@
             }
             
             .progress-bar {
-                height: 4px;
+                height: 3px;
             }
             
             .progress-handle {
-                width: 12px;
-                height: 12px;
-                right: -6px;
-                border-width: 1.5px;
+                width: 16px;
+                height: 16px;
+                right: -8px;
+            }
+            
+            .progress-handle::after {
+                width: 3px;
+                height: 3px;
             }
         }
         
@@ -859,10 +895,19 @@
                 max-width: 60px;
             }
             
+            .progress-bar {
+                height: 2px;
+            }
+            
             .progress-handle {
-                width: 10px;
-                height: 10px;
-                right: -5px;
+                width: 14px;
+                height: 14px;
+                right: -7px;
+            }
+            
+            .progress-handle::after {
+                width: 2px;
+                height: 2px;
             }
         }
     </style>
