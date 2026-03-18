@@ -255,8 +255,8 @@
             justify-content: center;
             font-size: 20px;
             position: relative;
-            outline: none; /* 移除焦点轮廓 */
-            -webkit-tap-highlight-color: transparent; /* 移除移动端点击高亮 */
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
         }
         
         .mode-btn:hover {
@@ -422,8 +422,8 @@
             position: relative;
             flex-shrink: 0;
             box-shadow: 0 2px 8px rgba(211, 47, 47, 0.3);
-            outline: none; /* 移除焦点轮廓 */
-            -webkit-tap-highlight-color: transparent; /* 移除移动端点击高亮 */
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
         }
         
         .play-btn:hover {
@@ -1031,6 +1031,9 @@
                 this.currentStationName = '未选择电台';
                 this.currentSongName = '请选择电台开始播放';
                 
+                // 保存当前正在播放的歌曲URL，用于判断是否同一首歌
+                this.currentSongUrl = null;
+                
                 this.init();
             }
             
@@ -1311,6 +1314,10 @@
                 }
                 
                 const song = this.songs[this.currentSongIndex];
+                
+                // 判断是否切换了歌曲
+                const isNewSong = (this.currentSongUrl !== song.url);
+                
                 this.currentStation = {
                     name: song.name,
                     url: song.url,
@@ -1321,16 +1328,13 @@
                     clearTimeout(this.loadTimeout);
                 }
                 
-                // 保存当前播放位置
-                const currentTime = this.audio.currentTime;
-                const wasPlaying = this.isPlaying;
+                // 如果是新歌，重置播放位置到0
+                if (isNewSong) {
+                    this.audio.currentTime = 0;
+                    this.currentSongUrl = song.url;
+                }
                 
                 this.audio.src = song.url;
-                
-                // 如果是同一首歌，恢复播放位置
-                if (this.currentStation && this.currentStation.url === song.url && currentTime > 0) {
-                    this.audio.currentTime = currentTime;
-                }
                 
                 this.loadTimeout = setTimeout(() => {
                     if (this.isLoading) {
@@ -1420,6 +1424,9 @@
                 const stationName = stationElement.querySelector('.station-name').textContent;
                 const stationUrl = stationElement.dataset.url;
                 
+                // 判断是否切换了电台
+                const isNewStation = (this.currentStation && this.currentStation.url !== stationUrl);
+                
                 this.currentStation = {
                     name: stationName,
                     url: stationUrl,
@@ -1427,6 +1434,12 @@
                 };
                 
                 this.currentRadioType = null;
+                
+                // 如果是新电台，重置播放位置
+                if (isNewStation) {
+                    this.audio.currentTime = 0;
+                    this.currentSongUrl = stationUrl;
+                }
                 
                 this.currentStationName = stationName;
                 this.currentSongName = '正在加载...';
@@ -1459,16 +1472,7 @@
                     clearTimeout(this.loadTimeout);
                 }
                 
-                // 保存当前播放位置
-                const currentTime = this.audio.currentTime;
-                const wasPlaying = this.isPlaying;
-                
                 this.audio.src = this.currentStation.url;
-                
-                // 如果是同一首歌，恢复播放位置
-                if (this.currentStation && this.currentStation.url === this.audio.src && currentTime > 0) {
-                    this.audio.currentTime = currentTime;
-                }
                 
                 this.loadTimeout = setTimeout(() => {
                     if (!this.isPlaying) {
