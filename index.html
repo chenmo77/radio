@@ -136,7 +136,7 @@
             display: grid;
             gap: 10px;
             overflow-y: auto;
-            overflow-x: hidden; /* 隐藏横向滚动条 */
+            overflow-x: hidden;
             padding-right: 5px;
             flex: 1;
             min-height: 0;
@@ -151,9 +151,9 @@
             padding: 15px 18px;
             cursor: pointer;
             transition: all 0.2s ease;
-            width: 100%; /* 确保宽度100% */
-            word-wrap: break-word; /* 长单词换行 */
-            word-break: break-word; /* 强制长单词换行 */
+            width: 100%;
+            word-wrap: break-word;
+            word-break: break-word;
         }
         
         .station-item:hover {
@@ -179,7 +179,7 @@
             flex: 1;
             word-wrap: break-word;
             word-break: break-word;
-            white-space: normal; /* 允许换行 */
+            white-space: normal;
         }
         
         .live-badge {
@@ -190,7 +190,7 @@
             font-size: 13px;
             font-weight: 500;
             margin-left: 10px;
-            flex-shrink: 0; /* 防止徽章被压缩 */
+            flex-shrink: 0;
         }
         
         /* 电台播放器样式 */
@@ -218,56 +218,111 @@
             border: 1px solid #3a3a3a;
             flex-shrink: 0;
             width: 100%;
-            overflow: hidden; /* 防止内容溢出 */
+            overflow: hidden;
         }
         
         .current-song-title {
             font-size: 18px;
             font-weight: 600;
             color: #d32f2f;
-            word-break: break-word; /* 长标题换行 */
-            white-space: normal; /* 允许换行 */
+            word-break: break-word;
+            white-space: normal;
             line-height: 1.4;
         }
         
+        /* 播放模式按钮组 - 图标样式 */
         .mode-buttons {
             display: flex;
             justify-content: center;
-            gap: 12px;
+            gap: 20px;
             margin: 0 0 20px 0;
-            flex-wrap: wrap;
             flex-shrink: 0;
             width: 100%;
+            padding: 5px 0;
         }
         
         .mode-btn {
             background: #2a2a2a;
             border: 1px solid #3a3a3a;
             color: #ccc;
-            padding: 8px 16px;
-            border-radius: 30px;
-            font-size: 14px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
             cursor: pointer;
             transition: all 0.2s ease;
-            min-width: 80px;
-            white-space: nowrap; /* 按钮文字不换行 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            position: relative;
         }
         
         .mode-btn:hover {
             background: #3a3a3a;
             border-color: #d32f2f;
+            transform: scale(1.05);
         }
         
         .mode-btn.active {
             background: #d32f2f;
             border-color: #d32f2f;
             color: #fff;
+            box-shadow: 0 0 10px rgba(211, 47, 47, 0.5);
+        }
+        
+        /* 图标内容 */
+        .mode-btn[data-mode="random"]::before {
+            content: "🔀";
+            font-size: 20px;
+        }
+        
+        .mode-btn[data-mode="sequential"]::before {
+            content: "🔁";
+            font-size: 20px;
+        }
+        
+        .mode-btn[data-mode="single"]::before {
+            content: "🔂";
+            font-size: 20px;
+        }
+        
+        /* 移除之前的文字 */
+        .mode-btn span {
+            display: none;
+        }
+        
+        /* 添加工具提示（可选） */
+        .mode-btn:hover::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 10;
+        }
+        
+        .mode-btn[data-mode="random"]:hover::after {
+            content: "随机";
+        }
+        
+        .mode-btn[data-mode="sequential"]:hover::after {
+            content: "顺序";
+        }
+        
+        .mode-btn[data-mode="single"]:hover::after {
+            content: "单曲";
         }
         
         .song-list-scroll {
             flex: 1;
             overflow-y: auto;
-            overflow-x: hidden; /* 关键：隐藏横向滚动条 */
+            overflow-x: hidden;
             border: 1px solid #2a2a2a;
             border-radius: 8px;
             background: #0f0f0f;
@@ -275,7 +330,7 @@
             min-height: 0;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
-            width: 100%; /* 确保宽度100% */
+            width: 100%;
         }
         
         .song-list-item {
@@ -285,12 +340,12 @@
             transition: all 0.2s ease;
             border-radius: 6px;
             font-size: 15px;
-            word-wrap: break-word; /* 长文本换行 */
-            word-break: break-word; /* 强制长单词换行 */
-            white-space: normal; /* 允许换行 */
+            word-wrap: break-word;
+            word-break: break-word;
+            white-space: normal;
             line-height: 1.4;
-            width: 100%; /* 确保宽度100% */
-            overflow: hidden; /* 防止内容溢出 */
+            width: 100%;
+            overflow: hidden;
         }
         
         .song-list-item:last-child {
@@ -329,7 +384,7 @@
             flex-direction: column;
             flex: 1;
             min-width: 0;
-            overflow: hidden; /* 防止文字溢出 */
+            overflow: hidden;
         }
         
         .current-station {
@@ -392,15 +447,14 @@
         }
         
         .play-btn.paused::before {
-            content: "■";
-            letter-spacing: -3px;
-            font-weight: bold;
+            content: "⏸";
+            font-size: 18px;
         }
         
         .progress-container {
             flex: 1;
             max-width: 400px;
-            min-width: 60px; /* 确保在小屏幕上也有宽度 */
+            min-width: 60px;
         }
         
         .progress-bar {
@@ -420,12 +474,12 @@
             transition: width 0.1s ease;
         }
         
-        /* 滚动条样式 - 只保留垂直滚动条 */
+        /* 滚动条样式 */
         .sidebar::-webkit-scrollbar,
         .station-list::-webkit-scrollbar,
         .song-list-scroll::-webkit-scrollbar {
             width: 6px;
-            height: 0; /* 隐藏水平滚动条 */
+            height: 0;
         }
         
         .sidebar::-webkit-scrollbar-track,
@@ -441,12 +495,11 @@
             border-radius: 3px;
         }
         
-        /* 隐藏水平滚动条 */
         .sidebar,
         .station-list,
         .song-list-scroll {
             overflow-x: hidden;
-            scrollbar-width: thin; /* Firefox */
+            scrollbar-width: thin;
             scrollbar-color: #d32f2f #1a1a1a;
         }
         
@@ -525,14 +578,14 @@
             }
             
             .mode-buttons {
-                gap: 8px;
+                gap: 15px;
                 margin-bottom: 15px;
             }
             
             .mode-btn {
-                padding: 6px 12px;
-                font-size: 13px;
-                min-width: 70px;
+                width: 44px;
+                height: 44px;
+                font-size: 18px;
             }
             
             .song-list-item {
@@ -622,14 +675,14 @@
             }
             
             .mode-buttons {
-                gap: 5px;
+                gap: 12px;
                 margin-bottom: 12px;
             }
             
             .mode-btn {
-                padding: 5px 8px;
-                font-size: 12px;
-                min-width: 60px;
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
             }
             
             .song-list-item {
@@ -832,10 +885,9 @@
                     </div>
                     
                     <div class="mode-buttons">
-                        <button class="mode-btn active" data-mode="random">随机循环</button>
-                        <button class="mode-btn" data-mode="sequential">顺序播放</button>
-                        <button class="mode-btn" data-mode="single">单曲循环</button>
-                        <button class="mode-btn" data-mode="list">列表循环</button>
+                        <button class="mode-btn active" data-mode="random" data-tip="随机"></button>
+                        <button class="mode-btn" data-mode="sequential" data-tip="顺序"></button>
+                        <button class="mode-btn" data-mode="single" data-tip="单曲"></button>
                     </div>
                     
                     <div class="song-list-scroll" id="song-scroll-list-${sectionId}">
@@ -870,7 +922,7 @@
                 this.volume = 0.5;
                 this.dataLoader = new StationDataLoader();
                 this.loadTimeout = null;
-                this.playMode = 'random';
+                this.playMode = 'random'; // 'random', 'sequential', 'single'
                 this.isLoading = false;
                 
                 this.init();
@@ -898,7 +950,6 @@
                     player.style.opacity = '1';
                     player.style.height = '90px';
                     
-                    // 在手机端调整容器高度
                     if (window.innerWidth <= 768) {
                         document.querySelector('.container').style.height = 'calc(100% - 85px)';
                     }
@@ -1024,17 +1075,13 @@
             scrollToCenter(element, container) {
                 if (!element || !container) return;
                 
-                // 获取容器和元素的位置信息
                 const containerRect = container.getBoundingClientRect();
                 const elementRect = element.getBoundingClientRect();
                 
-                // 计算元素相对于容器的位置
                 const elementRelativeTop = elementRect.top - containerRect.top;
                 
-                // 计算需要滚动的距离，使元素居中
                 const scrollTop = container.scrollTop + elementRelativeTop - (container.clientHeight / 2) + (element.clientHeight / 2);
                 
-                // 平滑滚动
                 container.scrollTo({
                     top: Math.max(0, scrollTop),
                     behavior: 'smooth'
@@ -1050,7 +1097,6 @@
                 this.songs = songs;
                 this.playMode = 'random';
                 
-                // 更新模式按钮
                 const container = document.getElementById(type === 'huaijiu' ? 'huaijiu-player' : 'qiche-player');
                 if (container) {
                     const modeBtns = container.querySelectorAll('.mode-btn');
@@ -1088,7 +1134,6 @@
                     if (index === this.currentSongIndex) {
                         item.classList.add('active');
                         
-                        // 滚动到中间位置
                         if (scrollList) {
                             setTimeout(() => {
                                 this.scrollToCenter(item, scrollList);
@@ -1099,7 +1144,6 @@
                     }
                 });
                 
-                // 更新底部播放器
                 const stationElement = document.querySelector('.current-station');
                 const songElement = document.querySelector('.current-song');
                 
@@ -1168,6 +1212,7 @@
                 
                 switch (this.playMode) {
                     case 'random':
+                        // 随机模式：随机选择下一首，永远播放下去
                         let nextIndex;
                         do {
                             nextIndex = Math.floor(Math.random() * this.songs.length);
@@ -1178,24 +1223,14 @@
                         break;
                         
                     case 'sequential':
-                        if (this.currentSongIndex < this.songs.length - 1) {
-                            this.currentSongIndex++;
-                            this.updateRadioDisplay();
-                            this.playCurrentSong();
-                        } else {
-                            this.isPlaying = false;
-                            this.updatePlayButton(false);
-                            document.querySelector('.current-song').textContent = '播放结束';
-                        }
-                        break;
-                        
-                    case 'single':
+                        // 顺序模式：顺序下一首，播完最后一首后从头开始
+                        this.currentSongIndex = (this.currentSongIndex + 1) % this.songs.length;
+                        this.updateRadioDisplay();
                         this.playCurrentSong();
                         break;
                         
-                    case 'list':
-                        this.currentSongIndex = (this.currentSongIndex + 1) % this.songs.length;
-                        this.updateRadioDisplay();
+                    case 'single':
+                        // 单曲循环：重复播放当前歌曲
                         this.playCurrentSong();
                         break;
                 }
@@ -1336,7 +1371,6 @@
             new RadioPlayer();
         });
         
-        // 窗口大小改变时调整
         window.addEventListener('resize', () => {
             if (window.innerWidth <= 768) {
                 document.querySelector('.container').style.height = 'calc(100% - 85px)';
