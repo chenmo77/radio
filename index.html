@@ -193,7 +193,7 @@
             flex-shrink: 0;
         }
         
-        /* 电台播放器样式 */
+        /* 电台播放器样式 - 移除当前歌曲显示 */
         .radio-player-container {
             background: #1a1a1a;
             border-radius: 12px;
@@ -209,25 +209,9 @@
             min-height: 0;
         }
         
+        /* 移除当前歌曲显示区域 */
         .current-song-display {
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 15px 10px;
-            background: linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 100%);
-            border-radius: 10px;
-            border: 1px solid #3a3a3a;
-            flex-shrink: 0;
-            width: 100%;
-            overflow: hidden;
-        }
-        
-        .current-song-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #d32f2f;
-            word-break: break-word;
-            white-space: normal;
-            line-height: 1.4;
+            display: none;
         }
         
         /* 播放模式按钮组 */
@@ -480,6 +464,10 @@
             flex: 1;
             max-width: 400px;
             min-width: 60px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            height: 100%;
         }
         
         .progress-bar {
@@ -487,16 +475,44 @@
             height: 6px;
             background: #2a2a2a;
             border-radius: 3px;
-            overflow: hidden;
+            overflow: visible;
             cursor: pointer;
+            position: relative;
         }
         
         .progress {
-            width: 30%;
             height: 100%;
             background: #d32f2f;
             border-radius: 3px;
-            transition: width 0.1s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        
+        /* 进度条上的圆形滑块 */
+        .progress-handle {
+            width: 16px;
+            height: 16px;
+            background: #d32f2f;
+            border: 2px solid white;
+            border-radius: 50%;
+            position: absolute;
+            right: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: transform 0.1s ease;
+            z-index: 10;
+        }
+        
+        .progress-handle:hover {
+            transform: translateY(-50%) scale(1.2);
+        }
+        
+        .progress-handle:active {
+            transform: translateY(-50%) scale(1.1);
         }
         
         /* 滚动条样式 */
@@ -593,15 +609,6 @@
                 padding: 15px;
             }
             
-            .current-song-display {
-                padding: 12px 8px;
-                margin-bottom: 15px;
-            }
-            
-            .current-song-title {
-                font-size: 16px;
-            }
-            
             .mode-buttons {
                 gap: 15px;
                 margin-bottom: 15px;
@@ -679,6 +686,12 @@
             .progress-container {
                 max-width: 120px;
             }
+            
+            .progress-handle {
+                width: 14px;
+                height: 14px;
+                right: -7px;
+            }
         }
         
         @media (max-width: 480px) {
@@ -714,15 +727,6 @@
             
             .radio-player-container {
                 padding: 12px;
-            }
-            
-            .current-song-display {
-                padding: 10px 5px;
-                margin-bottom: 12px;
-            }
-            
-            .current-song-title {
-                font-size: 15px;
             }
             
             .mode-buttons {
@@ -797,6 +801,13 @@
             .progress-bar {
                 height: 4px;
             }
+            
+            .progress-handle {
+                width: 12px;
+                height: 12px;
+                right: -6px;
+                border-width: 1.5px;
+            }
         }
         
         @media (max-width: 360px) {
@@ -846,6 +857,12 @@
             
             .progress-container {
                 max-width: 60px;
+            }
+            
+            .progress-handle {
+                width: 10px;
+                height: 10px;
+                right: -5px;
             }
         }
     </style>
@@ -921,7 +938,9 @@
         </div>
         <div class="progress-container">
             <div class="progress-bar" id="progress-bar">
-                <div class="progress" id="progress"></div>
+                <div class="progress" id="progress">
+                    <div class="progress-handle" id="progress-handle"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -971,10 +990,6 @@
                 if (!container || !songs || songs.length === 0) return;
                 
                 container.innerHTML = `
-                    <div class="current-song-display">
-                        <div class="current-song-title">${songs[0].name}</div>
-                    </div>
-                    
                     <div class="mode-buttons">
                         <button class="mode-btn active" data-mode="random" data-tip="随机">
                             <svg viewBox="0 0 24 24">
@@ -1034,6 +1049,9 @@
                 // 保存当前正在播放的歌曲URL，用于判断是否同一首歌
                 this.currentSongUrl = null;
                 
+                // 拖动相关
+                this.isDragging = false;
+                
                 this.init();
             }
             
@@ -1043,6 +1061,7 @@
                 this.setupNavigation();
                 this.setupVolume();
                 this.setupRadioControls();
+                this.setupProgressDrag();
                 
                 document.getElementById('foreign-music').style.display = 'block';
                 
@@ -1076,6 +1095,92 @@
                 }
             }
             
+            setupProgressDrag() {
+                const progressBar = document.getElementById('progress-bar');
+                const progressHandle = document.getElementById('progress-handle');
+                
+                const handleDrag = (e) => {
+                    if (!this.isDragging || !this.audio.duration) return;
+                    
+                    e.preventDefault();
+                    
+                    const rect = progressBar.getBoundingClientRect();
+                    let x = e.clientX - rect.left;
+                    
+                    // 限制范围
+                    x = Math.max(0, Math.min(x, rect.width));
+                    
+                    const percentage = x / rect.width;
+                    const newTime = percentage * this.audio.duration;
+                    
+                    this.audio.currentTime = newTime;
+                };
+                
+                progressBar.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    this.isDragging = true;
+                    
+                    const rect = progressBar.getBoundingClientRect();
+                    let x = e.clientX - rect.left;
+                    x = Math.max(0, Math.min(x, rect.width));
+                    
+                    const percentage = x / rect.width;
+                    const newTime = percentage * this.audio.duration;
+                    this.audio.currentTime = newTime;
+                });
+                
+                progressHandle.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.isDragging = true;
+                });
+                
+                document.addEventListener('mousemove', handleDrag);
+                
+                document.addEventListener('mouseup', () => {
+                    this.isDragging = false;
+                });
+                
+                // 触摸事件支持
+                progressBar.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.isDragging = true;
+                    
+                    const touch = e.touches[0];
+                    const rect = progressBar.getBoundingClientRect();
+                    let x = touch.clientX - rect.left;
+                    x = Math.max(0, Math.min(x, rect.width));
+                    
+                    const percentage = x / rect.width;
+                    const newTime = percentage * this.audio.duration;
+                    this.audio.currentTime = newTime;
+                });
+                
+                progressHandle.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.isDragging = true;
+                });
+                
+                document.addEventListener('touchmove', (e) => {
+                    if (!this.isDragging) return;
+                    e.preventDefault();
+                    
+                    const touch = e.touches[0];
+                    const rect = progressBar.getBoundingClientRect();
+                    let x = touch.clientX - rect.left;
+                    x = Math.max(0, Math.min(x, rect.width));
+                    
+                    const percentage = x / rect.width;
+                    const newTime = percentage * this.audio.duration;
+                    this.audio.currentTime = newTime;
+                });
+                
+                document.addEventListener('touchend', () => {
+                    this.isDragging = false;
+                });
+            }
+            
             setupEventListeners() {
                 document.addEventListener('click', (e) => {
                     const stationItem = e.target.closest('.station-item');
@@ -1087,18 +1192,6 @@
                 document.getElementById('play-pause-btn').addEventListener('click', (e) => {
                     e.stopPropagation();
                     this.togglePlay();
-                });
-                
-                // 点击进度条跳转
-                document.getElementById('progress-bar').addEventListener('click', (e) => {
-                    if (!this.audio.duration) return;
-                    
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const percentage = x / rect.width;
-                    const newTime = percentage * this.audio.duration;
-                    
-                    this.audio.currentTime = newTime;
                 });
                 
                 this.audio.addEventListener('loadstart', () => {
@@ -1160,7 +1253,9 @@
                 });
                 
                 this.audio.addEventListener('timeupdate', () => {
-                    this.updateTime();
+                    if (!this.isDragging) {
+                        this.updateTime();
+                    }
                 });
             }
             
@@ -1277,11 +1372,6 @@
                 const container = document.getElementById(containerId);
                 if (!container) return;
                 
-                const currentSong = this.songs[this.currentSongIndex];
-                
-                const titleElement = container.querySelector('.current-song-title');
-                if (titleElement) titleElement.textContent = currentSong.name;
-                
                 const scrollListId = `song-scroll-list-${this.currentRadioType === 'huaijiu' ? 'huaijiu-radio' : 'qiche-radio'}`;
                 const scrollList = document.getElementById(scrollListId);
                 const items = container.querySelectorAll('.song-list-item');
@@ -1301,7 +1391,9 @@
                 });
                 
                 this.currentStationName = this.currentRadioType === 'huaijiu' ? '怀旧电台' : '汽车电台';
-                this.currentSongName = `正在播放: ${currentSong.name}`;
+                if (this.songs[this.currentSongIndex]) {
+                    this.currentSongName = `正在播放: ${this.songs[this.currentSongIndex].name}`;
+                }
                 this.updateDisplayInfo();
             }
             
