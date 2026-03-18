@@ -100,7 +100,7 @@
         .main-content {
             flex: 1;
             padding: 20px;
-            overflow: hidden; /* 改为hidden，不让整个页面滚动 */
+            overflow: hidden;
             background: #0f0f0f;
             height: 100%;
             display: flex;
@@ -247,7 +247,8 @@
             border-radius: 8px;
             background: #0f0f0f;
             padding: 8px;
-            min-height: 0; /* 重要：让flex子项可以正确收缩 */
+            min-height: 0;
+            scroll-behavior: smooth; /* 添加平滑滚动 */
         }
         
         .song-list-item {
@@ -273,7 +274,7 @@
             font-weight: 600;
         }
         
-        /* 底部播放器 */
+        /* 底部播放器 - 确保始终可见 */
         .player {
             height: 90px;
             background: #1a1a1a;
@@ -282,8 +283,11 @@
             align-items: center;
             padding: 0 20px;
             gap: 20px;
-            z-index: 100;
+            z-index: 1000;
             flex-shrink: 0;
+            width: 100%;
+            position: relative;
+            bottom: 0;
         }
         
         .player-info {
@@ -759,8 +763,6 @@
                 this.dataLoader = new StationDataLoader();
                 this.loadTimeout = null;
                 this.playMode = 'random'; // 'random', 'sequential', 'single', 'list'
-                this.scrollTimeout = null;
-                this.isUserScrolling = false;
                 
                 this.init();
             }
@@ -888,7 +890,7 @@
                     }
                 });
                 
-                // 歌曲列表点击事件
+                // 歌曲列表点击事件 - 只有点击才播放
                 document.addEventListener('click', (e) => {
                     const songItem = e.target.closest('.song-list-item');
                     if (songItem && this.currentRadioType) {
@@ -899,60 +901,26 @@
                         }
                     }
                 });
-                
-                // 滚动列表自动播放 - 立即切换
-                const scrollHandler = () => {
-                    if (!this.currentRadioType) return;
-                    
-                    const scrollList = document.getElementById('song-scroll-list');
-                    if (!scrollList) return;
-                    
-                    const items = scrollList.querySelectorAll('.song-list-item');
-                    if (items.length === 0) return;
-                    
-                    // 获取滚动容器可见区域的中心位置
-                    const containerRect = scrollList.getBoundingClientRect();
-                    const containerCenter = containerRect.top + containerRect.height / 2;
-                    
-                    // 找到最接近中心的项
-                    let closestItem = null;
-                    let closestDistance = Infinity;
-                    
-                    items.forEach(item => {
-                        const rect = item.getBoundingClientRect();
-                        const itemCenter = rect.top + rect.height / 2;
-                        const distance = Math.abs(itemCenter - containerCenter);
-                        
-                        if (distance < closestDistance) {
-                            closestDistance = distance;
-                            closestItem = item;
-                        }
-                    });
-                    
-                    if (closestItem) {
-                        const index = parseInt(closestItem.dataset.index);
-                        if (!isNaN(index) && index !== this.currentSongIndex) {
-                            // 清除之前的超时，立即切换
-                            clearTimeout(this.scrollTimeout);
-                            this.scrollTimeout = setTimeout(() => {
-                                this.playSongAtIndex(index);
-                            }, 100); // 100ms延迟，避免频繁切换
-                        }
-                    }
-                };
-                
-                // 监听列表内部滚动
-                document.getElementById('song-scroll-list')?.addEventListener('scroll', () => {
-                    if (this.currentRadioType) {
-                        window.requestAnimationFrame(() => {
-                            scrollHandler();
-                        });
-                    }
-                }, true);
             }
             
             setupVolume() {
                 this.audio.volume = this.volume;
+            }
+            
+            // 将元素滚动到容器中间
+            scrollToCenter(element, container) {
+                if (!element || !container) return;
+                
+                const containerHeight = container.clientHeight;
+                const elementHeight = element.offsetHeight;
+                const elementTop = element.offsetTop;
+                
+                const scrollTop = elementTop - (containerHeight / 2) + (elementHeight / 2);
+                
+                container.scrollTo({
+                    top: scrollTop,
+                    behavior: 'smooth'
+                });
             }
             
             initRadioPlay(type) {
@@ -995,14 +963,16 @@
                 
                 // 更新列表激活状态
                 const items = container.querySelectorAll('.song-list-item');
+                const scrollList = document.getElementById('song-scroll-list');
+                
                 items.forEach((item, index) => {
                     if (index === this.currentSongIndex) {
                         item.classList.add('active');
                         
-                        // 滚动到当前项（如果是用户点击切换的）
-                        if (this.isUserScrolling) {
-                            item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                        }
+                        // 将当前歌曲滚动到中间位置
+                        setTimeout(() => {
+                            this.scrollToCenter(item, scrollList);
+                        }, 100);
                     } else {
                         item.classList.remove('active');
                     }
@@ -1102,15 +1072,9 @@
             playSongAtIndex(index) {
                 if (index < 0 || index >= this.songs.length || index === this.currentSongIndex) return;
                 
-                this.isUserScrolling = true;
                 this.currentSongIndex = index;
                 this.updateRadioDisplay();
                 this.playCurrentSong();
-                
-                // 重置用户滚动标记
-                setTimeout(() => {
-                    this.isUserScrolling = false;
-                }, 500);
             }
             
             selectStation(stationElement) {
