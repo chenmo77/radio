@@ -342,7 +342,7 @@
             display: flex;
             align-items: center;
             padding: 0 20px;
-            gap: 20px;
+            gap: 30px; /* 增加间距 */
             z-index: 9999;
             flex-shrink: 0;
             width: 100%;
@@ -354,7 +354,7 @@
         .player-info {
             display: flex;
             flex-direction: column;
-            flex: 1;
+            flex: 2; /* 给左侧信息更多空间 */
             min-width: 0;
             overflow: hidden;
         }
@@ -386,7 +386,7 @@
         .player-controls {
             display: flex;
             align-items: center;
-            gap: 15px;
+            justify-content: center; /* 居中播放按钮 */
             flex-shrink: 0;
         }
         
@@ -461,9 +461,9 @@
         }
         
         .progress-container {
-            flex: 1;
-            max-width: 400px;
-            min-width: 60px;
+            flex: 3; /* 给进度条更多空间 */
+            max-width: 500px;
+            min-width: 100px;
             position: relative;
             display: flex;
             align-items: center;
@@ -472,7 +472,7 @@
         
         .progress-bar {
             width: 100%;
-            height: 4px; /* 进度条高度稍微减小，更精致 */
+            height: 4px;
             background: #2a2a2a;
             border-radius: 2px;
             overflow: visible;
@@ -492,13 +492,13 @@
         
         /* 进度条上的圆形滑块 - 精调版 */
         .progress-handle {
-            width: 20px; /* 整体大小保持不变 */
+            width: 20px;
             height: 20px;
-            background: white; /* 外圈白色 */
+            background: white;
             border: none;
             border-radius: 50%;
             position: absolute;
-            right: -10px; /* 一半宽度，居中 */
+            right: -10px;
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
@@ -510,11 +510,11 @@
             justify-content: center;
         }
         
-        /* 红色内圈 - 和进度条高度一致 */
+        /* 红色内圈 - 放大1.5倍 */
         .progress-handle::after {
             content: '';
-            width: 4px; /* 和进度条高度一致 */
-            height: 4px;
+            width: 6px;  /* 4px * 1.5 = 6px */
+            height: 6px;
             background: #d32f2f;
             border-radius: 50%;
             position: absolute;
@@ -530,8 +530,8 @@
         }
         
         .progress-handle:hover::after {
-            width: 5px;
-            height: 5px;
+            width: 7px;  /* 6px * 1.1 ≈ 7px */
+            height: 7px;
         }
         
         .progress-handle:active {
@@ -656,14 +656,18 @@
             
             .player {
                 height: 85px;
-                padding: 0 12px;
-                gap: 12px;
+                padding: 0 15px;
+                gap: 20px;
                 position: relative;
                 bottom: 0;
                 z-index: 9999;
                 background: #1a1a1a;
                 border-top: 2px solid #d32f2f;
                 box-shadow: 0 -4px 12px rgba(0,0,0,0.8);
+            }
+            
+            .player-info {
+                flex: 2;
             }
             
             .current-station {
@@ -707,7 +711,8 @@
             }
             
             .progress-container {
-                max-width: 120px;
+                flex: 3;
+                max-width: 300px;
             }
             
             .progress-bar {
@@ -721,8 +726,8 @@
             }
             
             .progress-handle::after {
-                width: 3px;
-                height: 3px;
+                width: 5px;  /* 手机端也相应放大 */
+                height: 5px;
             }
         }
         
@@ -783,8 +788,8 @@
             
             .player {
                 height: 80px;
-                padding: 0 10px;
-                gap: 8px;
+                padding: 0 12px;
+                gap: 15px;
                 border-top: 2px solid #d32f2f;
             }
             
@@ -827,7 +832,7 @@
             }
             
             .progress-container {
-                max-width: 80px;
+                max-width: 200px;
             }
             
             .progress-bar {
@@ -841,16 +846,16 @@
             }
             
             .progress-handle::after {
-                width: 3px;
-                height: 3px;
+                width: 5px;
+                height: 5px;
             }
         }
         
         @media (max-width: 360px) {
             .player {
                 height: 75px;
-                padding: 0 6px;
-                gap: 6px;
+                padding: 0 8px;
+                gap: 10px;
             }
             
             .play-btn {
@@ -892,7 +897,7 @@
             }
             
             .progress-container {
-                max-width: 60px;
+                max-width: 150px;
             }
             
             .progress-bar {
@@ -906,8 +911,8 @@
             }
             
             .progress-handle::after {
-                width: 2px;
-                height: 2px;
+                width: 4px;
+                height: 4px;
             }
         }
     </style>
