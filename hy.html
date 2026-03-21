@@ -131,12 +131,11 @@
             gap: 44px;
         }
 
-        /* 喇叭区域：整体上移，与右侧整体中轴线对齐 */
         .speaker-area {
             width: 42%;
             aspect-ratio: 1/1;
             position: relative;
-            transform: translateY(-10px); /* 上移 */
+            transform: translateY(-10px);
         }
         .speaker-hole {
             position: absolute;
@@ -146,14 +145,13 @@
             border-radius: 50%;
         }
 
-        /* 右侧按钮区：整体右移，让音量旋钮与下方按钮中轴线对齐 */
         .btn-area {
             width: 42%;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 32px;
-            transform: translateX(6px); /* 整体右移 */
+            transform: translateX(6px);
         }
 
         .volume-box {
@@ -282,6 +280,8 @@
 
 <script>
     let audio = new Audio();
+    audio.preload = "auto";
+
     let playlist = [];
     let filteredPlaylist = [];
     let currentIndex = 0;
@@ -328,7 +328,10 @@
             shuffleList(filteredPlaylist);
             loadMusic(0);
         } catch (e) {
-            filteredPlaylist = [{name:'测试歌手 - 测试歌曲', url:'https://music.163.com/song/media/outer/url?id=1916319449.mp3'}];
+            filteredPlaylist = [{
+                name: '测试歌手 - 测试歌曲',
+                url: 'https://music.163.com/song/media/outer/url?id=1916319449.mp3'
+            }];
             loadMusic(0);
         }
     }
@@ -379,8 +382,23 @@
 
         audio.src = targetTrack.url;
         audio.volume = volume;
-        audio.load();
         updateVolumeKnob();
+    }
+
+    audio.onended = () => {
+        playCount++;
+        loadMusic(currentIndex + 1);
+        safePlay();
+    };
+
+    function safePlay() {
+        if (!isPlay) return;
+        let promise = audio.play();
+        if (promise !== undefined) {
+            promise.catch(err => {
+                console.log("后台播放被限制", err);
+            });
+        }
     }
 
     function togglePlay() {
@@ -390,7 +408,7 @@
             document.getElementById('pauseIcon').style.display = 'none';
             document.getElementById('nowPlaying').classList.remove('show');
         } else {
-            audio.play();
+            safePlay();
             document.getElementById('playIcon').style.display = 'none';
             document.getElementById('pauseIcon').style.display = 'inline-block';
             document.getElementById('nowPlaying').classList.add('show');
@@ -401,20 +419,8 @@
     function next() {
         playCount++;
         loadMusic(currentIndex + 1);
-        if (isPlay) autoPlay();
+        safePlay();
     }
-
-    function autoPlay() {
-        setTimeout(()=>{
-            audio.play();
-            document.getElementById('playIcon').style.display = 'none';
-            document.getElementById('pauseIcon').style.display = 'inline-block';
-            document.getElementById('nowPlaying').classList.add('show');
-        }, 300);
-    }
-
-    audio.onerror = next;
-    audio.onended = next;
 
     audio.ontimeupdate = () => {
         if (!audio.duration) return;
@@ -433,12 +439,12 @@
 
     function initVolume() {
         document.getElementById('volMinus').onclick = () => {
-            volume = Math.max(0, (Math.round(volume*10)/10)-0.1);
+            volume = Math.max(0, Math.round((volume - 0.1)*10)/10);
             audio.volume = volume;
             updateVolumeKnob();
         };
         document.getElementById('volPlus').onclick = () => {
-            volume = Math.min(1, (Math.round(volume*10)/10)+0.1);
+            volume = Math.min(1, Math.round((volume + 0.1)*10)/10);
             audio.volume = volume;
             updateVolumeKnob();
         };
