@@ -1,88 +1,57 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HellYell音乐电台</title>
-<style>
-  *{margin:0;padding:0;box-sizing:border-box;font-family:"MiSans","Microsoft YaHei",sans-serif;font-weight:700}
-  html,body{width:100%;height:100%;background:#e6e0e0;display:flex;justify-content:center;align-items:center;padding:10px}
-  .player-container{width:100%;max-width:560px;aspect-ratio:1/1.12;background:#fff;border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,0.25);display:flex;flex-direction:column;overflow:hidden}
-  .screen-section{height:38%;background:#E60012;padding:24px 28px;display:flex;flex-direction:column;justify-content:center}
-  .music-info{width:100%;color:#fff}
-
-  /* 歌名、歌手名 丝滑渐隐渐显动画 */
-  .music-name-wrapper, .singer-name {
-    transition: opacity 0.5s ease;
-    opacity: 1;
-  }
-
-  .music-name{font-size:30px;white-space:nowrap}
-  .music-name.marquee{display:inline-block;animation:textScroll 16s linear infinite}
-  @keyframes textScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-  .singer-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
-  .singer-name{font-size:16px;opacity:.85}
-  .now-playing{font-size:11px;letter-spacing:1.5px;color:rgba(255,255,255,0.7);visibility:hidden;animation:glow 1.8s infinite alternate}
-  .now-playing.show{visibility:visible}
-  @keyframes glow{0%{opacity:.6}100%{opacity:1}}
-  .time-progress{width:100%}
-  .progress-wrap{width:100%;height:4px;background:rgba(255,255,255,0.25);border-radius:2px;overflow:hidden}
-  .progress-bar{height:100%;background:#fff;width:0%;transition:width .1s linear;position:relative}
-  .progress-thumb{position:absolute;right:-8px;top:50%;transform:translateY(-50%);width:10px;height:10px;background:#fff;border-radius:50%}
-  .time-row{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.65);margin-top:6px}
-
-  /* 手机端：喇叭整体上移对齐 */
-  .control-section{
-    height:62%;
-    padding:40px 40px 30px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:44px;
-    transform:translateX(0);
-  }
-  .speaker-area{
-    width:42%;
-    aspect-ratio:1/1;
-    position:relative;
-    transform:translateY(-8px);
-  }
-
-  /* 电脑端：右移50px */
-  @media (min-width: 768px) {
-    .control-section{
-      transform:translateX(50px);
-    }
-    .speaker-area{
-      transform:translateY(0);
-    }
-  }
-
-  .speaker-hole{position:absolute;width:8px;height:8px;background:#141414;border-radius:50%}
-  .btn-area{width:42%;display:flex;flex-direction:column;align-items:center;gap:32px}
-  .volume-box{position:relative;width:80px;height:80px}
-  .volume-knob{width:100%;height:100%;background:linear-gradient(145deg,#fff,#e0e0e0);border-radius:50%;box-shadow:0 4px 10px rgba(0,0,0,0.1);position:relative}
-  .volume-knob::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:2.5px;height:20px;background:#555;transform-origin:center 40px}
-  .vol-label{position:absolute;font-size:18px;color:#444;cursor:pointer}
-  .vol-minus{bottom:-24px;left:12px}
-  .vol-plus{bottom:-24px;right:12px}
-  .play-btns{display:flex;align-items:center;gap:26px}
-  .ctrl-btn{background:transparent;border:none;font-size:26px;color:#444;cursor:pointer;width:40px;height:40px;display:flex;align-items:center;justify-content:center;padding:0}
-  #playIcon{font-size:20px;transform:translateY(1px)}
-  .pause-icon{display:inline-block;width:14px;height:16px;position:relative;transform:translateY(1px)}
-  .pause-icon::before,.pause-icon::after{content:'';position:absolute;width:5px;height:16px;background:#444;border-radius:1px;top:50%;transform:translateY(-50%)}
-  .pause-icon::before{left:0}
-  .pause-icon::after{right:0}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>HellYell音乐电台</title>
+    <style>
+        /* ========== 此处完整保留您提供的所有 CSS 样式，无任何改动 ========== */
+        *{margin:0;padding:0;box-sizing:border-box;font-family:"MiSans","Microsoft YaHei",sans-serif;font-weight:700}
+        html,body{width:100%;height:100%;background:#e6e0e0;display:flex;justify-content:center;align-items:center;padding:10px}
+        .player-container{width:100%;max-width:560px;aspect-ratio:1/1.12;background:#fff;border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,0.25);display:flex;flex-direction:column;overflow:hidden}
+        .screen-section{height:38%;background:#E60012;padding:24px 28px;display:flex;flex-direction:column;justify-content:center}
+        .music-info{width:100%;color:#fff}
+        .music-name-wrapper, .singer-name {transition: opacity 0.5s ease;opacity:1}
+        .music-name{font-size:30px;white-space:nowrap}
+        .music-name.marquee{display:inline-block;animation:textScroll 16s linear infinite}
+        @keyframes textScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+        .singer-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+        .singer-name{font-size:16px;opacity:.85}
+        .now-playing{font-size:11px;letter-spacing:1.5px;color:rgba(255,255,255,0.7);visibility:hidden;animation:glow 1.8s infinite alternate}
+        .now-playing.show{visibility:visible}
+        @keyframes glow{0%{opacity:.6}100%{opacity:1}}
+        .time-progress{width:100%}
+        .progress-wrap{width:100%;height:4px;background:rgba(255,255,255,0.25);border-radius:2px;overflow:hidden}
+        .progress-bar{height:100%;background:#fff;width:0%;transition:width .1s linear;position:relative}
+        .progress-thumb{position:absolute;right:-8px;top:50%;transform:translateY(-50%);width:10px;height:10px;background:#fff;border-radius:50%}
+        .time-row{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.65);margin-top:6px}
+        .control-section{height:62%;padding:40px 40px 30px;display:flex;justify-content:center;align-items:center;gap:44px;transform:translateX(0)}
+        .speaker-area{width:42%;aspect-ratio:1/1;position:relative;transform:translateY(-8px)}
+        @media (min-width:768px){.control-section{transform:translateX(50px)}.speaker-area{transform:translateY(0)}}
+        .speaker-hole{position:absolute;width:8px;height:8px;background:#141414;border-radius:50%}
+        .btn-area{width:42%;display:flex;flex-direction:column;align-items:center;gap:32px}
+        .volume-box{position:relative;width:80px;height:80px}
+        .volume-knob{width:100%;height:100%;background:linear-gradient(145deg,#fff,#e0e0e0);border-radius:50%;box-shadow:0 4px 10px rgba(0,0,0,0.1);position:relative}
+        .volume-knob::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:2.5px;height:20px;background:#555;transform-origin:center 40px}
+        .vol-label{position:absolute;font-size:18px;color:#444;cursor:pointer}
+        .vol-minus{bottom:-24px;left:12px}
+        .vol-plus{bottom:-24px;right:12px}
+        .play-btns{display:flex;align-items:center;gap:26px}
+        .ctrl-btn{background:transparent;border:none;font-size:26px;color:#444;cursor:pointer;width:40px;height:40px;display:flex;align-items:center;justify-content:center;padding:0}
+        #playIcon{font-size:20px;transform:translateY(1px)}
+        .pause-icon{display:inline-block;width:14px;height:16px;position:relative;transform:translateY(1px)}
+        .pause-icon::before,.pause-icon::after{content:'';position:absolute;width:5px;height:16px;background:#444;border-radius:1px;top:50%;transform:translateY(-50%)}
+        .pause-icon::before{left:0}
+        .pause-icon::after{right:0}
+    </style>
 </head>
 <body>
-
 <div class="player-container">
   <div class="screen-section">
     <div class="music-info">
-      <div class="music-name-wrapper"><div id="musicName" class="music-name"></div></div>
+      <div class="music-name-wrapper"><div id="musicName" class="music-name">HellYell Radio</div></div>
       <div class="singer-row">
-        <div id="singerName" class="singer-name"></div>
+        <div id="singerName" class="singer-name">欢迎收听</div>
         <div id="nowPlaying" class="now-playing">NOW PLAYING</div>
       </div>
     </div>
@@ -108,6 +77,7 @@
 </div>
 
 <script>
+// ==================== 核心修复：使用轮询检测结束，不依赖 ended 事件 ====================
 const audio = new Audio();
 audio.preload = "auto";
 
@@ -116,9 +86,9 @@ let filteredPlaylist = [];
 let isPlaying = false;
 let volume = 0.6;
 let playCount = 0;
-
-let playCheckTimer = null;
-const PLAY_TIMEOUT = 6000;
+let hasStarted = false;
+let currentTrackUrl = null;
+let endCheckInterval = null; // 轮询定时器
 
 const promoTrack = {
   name: "HellYell Radio - 欢迎收听",
@@ -146,28 +116,13 @@ function createCircleSpeaker() {
 }
 
 function fmt(t){
+  if(isNaN(t) || !isFinite(t)) return '00:00';
   const m = String(Math.floor(t/60)).padStart(2,'0');
   const s = String(Math.floor(t%60)).padStart(2,'0');
   return m+':'+s;
 }
 
-function clearPlayCheck(){
-  if(playCheckTimer) clearTimeout(playCheckTimer);
-  playCheckTimer = null;
-}
-
-function startPlayCheck(){
-  clearPlayCheck();
-  playCheckTimer = setTimeout(()=>{
-    if(isPlaying && audio.currentTime <= 0){
-      next();
-    }
-  }, PLAY_TIMEOUT);
-}
-
-// 丝滑渐隐 → 切换文字 → 渐显
-function loadTrack(track){
-  clearPlayCheck();
+function updateDisplay(track){
   const parts = track.name.split(' - ');
   const singer = parts[0]||'';
   const music = parts.slice(1).join(' - ')||track.name;
@@ -175,17 +130,14 @@ function loadTrack(track){
   const nameEl = document.getElementById('musicName');
   const singerEl = document.getElementById('singerName');
 
-  // 渐隐
   nameEl.parentElement.style.opacity = '0';
   singerEl.style.opacity = '0';
 
   setTimeout(() => {
-    // 切换文字
     nameEl.innerText = music;
     singerEl.innerText = singer;
     nameEl.classList.remove('marquee');
 
-    // 渐显
     nameEl.parentElement.style.opacity = '1';
     singerEl.style.opacity = '1';
 
@@ -197,69 +149,133 @@ function loadTrack(track){
   }, 250);
 
   document.title = `${music} - ${singer}`;
-  audio.src = track.url;
-  audio.volume = volume;
-  updateVolumeKnob();
 }
 
 function getNextTrack(){
   playCount++;
-  if(playCount > 1 && playCount %7 ===0){
+  if(playCount > 1 && playCount % 7 === 0){
     return promoTrack;
   }else{
+    if(filteredPlaylist.length === 0) return promoTrack;
     return filteredPlaylist[Math.floor(Math.random()*filteredPlaylist.length)];
   }
 }
 
-function playTrack(track){
-  loadTrack(track);
-  if(!isPlaying) return;
-  audio.play().catch(()=>{next();});
-  startPlayCheck();
+// ========== 播放核心 ==========
+function playTrack(track) {
+  if (currentTrackUrl === track.url && !audio.paused) return;
+  
+  currentTrackUrl = track.url;
+  updateDisplay(track);
+  
+  // 暂停并重置
+  audio.pause();
+  audio.currentTime = 0; // 重要：切换时从头开始
+  audio.src = track.url;
+  audio.volume = volume;
+  updateVolumeKnob();
+  
+  if (isPlaying) {
+    audio.play().catch(e => console.log('播放失败', e));
+  }
 }
 
-function next(){
-  const track = getNextTrack();
-  playTrack(track);
+function playNext() {
+  if (!hasStarted) return;
+  const nextTrack = getNextTrack();
+  playTrack(nextTrack);
+}
+
+// ========== 轮询检测：解决息屏后不自动切换的问题 ==========
+function startEndCheck() {
+  if (endCheckInterval) clearInterval(endCheckInterval);
+  endCheckInterval = setInterval(() => {
+    // 只有在播放状态、有歌曲时长、且未结束时才检测
+    if (isPlaying && audio.duration && !isNaN(audio.duration) && audio.duration > 0) {
+      // 当前播放位置距离结束小于 0.3 秒时，认为即将结束
+      if (audio.currentTime >= audio.duration - 0.3 && audio.currentTime > 0) {
+        // 避免重复触发
+        if (!audio._endingFlag) {
+          audio._endingFlag = true;
+          console.log('轮询检测到歌曲即将结束，自动切换下一首');
+          // 先暂停当前播放，再切换下一首
+          audio.pause();
+          playNext();
+        }
+      } else {
+        audio._endingFlag = false;
+      }
+    }
+  }, 500); // 每0.5秒检测一次，足够及时且省资源
+}
+
+function stopEndCheck() {
+  if (endCheckInterval) {
+    clearInterval(endCheckInterval);
+    endCheckInterval = null;
+  }
+}
+
+// ========== UI 控制 ==========
+function startPlayback() {
+  if(hasStarted) return;
+  hasStarted = true;
+  isPlaying = true;
+  
+  document.getElementById('playIcon').style.display = 'none';
+  document.getElementById('pauseIcon').style.display = 'inline-block';
+  document.getElementById('nowPlaying').classList.add('show');
+  
+  playCount = 0;
+  playTrack(promoTrack);
+  startEndCheck(); // 启动轮询检测
 }
 
 function togglePlay(){
+  if(!hasStarted){
+    startPlayback();
+    return;
+  }
+  
   if(isPlaying){
     audio.pause();
-    clearPlayCheck();
     isPlaying = false;
     document.getElementById('playIcon').style.display = 'inline';
     document.getElementById('pauseIcon').style.display = 'none';
     document.getElementById('nowPlaying').classList.remove('show');
-  }else{
+    stopEndCheck(); // 暂停时停止轮询
+  } else {
     isPlaying = true;
-    audio.play().catch(()=>{next();});
-    startPlayCheck();
     document.getElementById('playIcon').style.display = 'none';
     document.getElementById('pauseIcon').style.display = 'inline-block';
     document.getElementById('nowPlaying').classList.add('show');
+    audio.play().catch(e => console.log('恢复播放失败', e));
+    startEndCheck(); // 恢复播放时重启轮询
   }
 }
 
-audio.ontimeupdate = ()=>{
-  if(!audio.duration) return;
-  const per = (audio.currentTime/audio.duration)*100;
-  document.getElementById('progressBar').style.width = per+'%';
-  document.getElementById('currentTime').innerText = fmt(audio.currentTime);
-  document.getElementById('durationTime').innerText = fmt(audio.duration);
-
-  if(audio.currentTime>0.2) clearPlayCheck();
-  if(audio.currentTime >= audio.duration - 1) next();
-};
+// 更新进度条
+function updateProgress(){
+  if(audio.duration && !isNaN(audio.duration) && audio.duration > 0){
+    const per = (audio.currentTime/audio.duration)*100;
+    document.getElementById('progressBar').style.width = per+'%';
+    document.getElementById('currentTime').innerText = fmt(audio.currentTime);
+    document.getElementById('durationTime').innerText = fmt(audio.duration);
+  }
+}
+audio.addEventListener('timeupdate', updateProgress);
 
 function updateVolumeKnob(){
   const min=-150,max=150;
   const angle=min+volume*(max-min);
-  document.getElementById('volumeKnob').style.transform=`rotate(${angle}deg)`;
+  const knob = document.getElementById('volumeKnob');
+  if(knob) knob.style.transform=`rotate(${angle}deg)`;
 }
 
+// ========== 初始化 ==========
 async function init(){
   createCircleSpeaker();
+  
   try{
     const [hj,qc]=await Promise.all([
       fetch('https://radio.hellyell.com/huaijiu-musiclist.json').then(r=>r.json()),
@@ -271,26 +287,58 @@ async function init(){
       return s!=='HellYell怀旧电台'&&s!=='HellYell汽车电台';
     });
   }catch(e){
+    console.log('加载失败', e);
     filteredPlaylist=[{name:"测试 - 测试歌曲",url:"https://music.163.com/song/media/outer/url?id=1916319449.mp3"}];
   }
 
-  playCount=0;
-  playTrack(promoTrack);
+  // 初始状态：显示播放按钮，不播放
+  isPlaying = false;
+  hasStarted = false;
+  document.getElementById('playIcon').style.display = 'inline';
+  document.getElementById('pauseIcon').style.display = 'none';
+  document.getElementById('nowPlaying').classList.remove('show');
+  
+  document.getElementById('musicName').innerText = 'HellYell Radio';
+  document.getElementById('singerName').innerText = '欢迎收听';
+  document.title = 'HellYell音乐电台';
 
-  document.getElementById('playBtn').onclick=togglePlay;
-  document.getElementById('nextBtn').onclick=next;
-  document.getElementById('volMinus').onclick=()=>{
-    volume=Math.max(0,Math.round((volume-0.1)*10)/10);
-    audio.volume=volume;updateVolumeKnob();
+  // 绑定按钮事件
+  document.getElementById('playBtn').onclick = togglePlay;
+  document.getElementById('nextBtn').onclick = () => {
+    if(hasStarted && !isPlaying){
+      // 暂停状态下点击下一首，先开始播放再切换
+      isPlaying = true;
+      document.getElementById('playIcon').style.display = 'none';
+      document.getElementById('pauseIcon').style.display = 'inline-block';
+      document.getElementById('nowPlaying').classList.add('show');
+      playNext();
+      startEndCheck();
+    } else if(hasStarted && isPlaying){
+      playNext();
+    }
   };
-  document.getElementById('volPlus').onclick=()=>{
-    volume=Math.min(1,Math.round((volume+0.1)*10)/10);
-    audio.volume=volume;updateVolumeKnob();
+  document.getElementById('volMinus').onclick = () => {
+    volume = Math.max(0, Math.round((volume-0.1)*10)/10);
+    audio.volume = volume;
+    updateVolumeKnob();
+  };
+  document.getElementById('volPlus').onclick = () => {
+    volume = Math.min(1, Math.round((volume+0.1)*10)/10);
+    audio.volume = volume;
+    updateVolumeKnob();
   };
   updateVolumeKnob();
+  
+  // 页面可见性变化时检查状态
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && isPlaying && audio.paused && hasStarted) {
+      audio.play().catch(() => {});
+      startEndCheck();
+    }
+  });
 }
 
-window.onload=init;
+window.onload = init;
 </script>
 </body>
 </html>
