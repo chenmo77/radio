@@ -113,16 +113,15 @@ audio.preload = "auto";
 
 let playlist = [];
 let filteredPlaylist = [];
-let isPlaying = false;
+let isPlaying = true;  // 默认播放状态
 let volume = 0.6;
 let playCount = 0;
 
 let playCheckTimer = null;
-const PLAY_TIMEOUT = 6000;
+let isSwitching = false;  // 防止重复切换
+let currentTrackUrl = null;  // 记录当前播放的URL
 
-// 关键修复：记录当前播放的歌曲，用于解决息屏后状态丢失问题
-let currentTrack = null;
-let isEndingTriggered = false;
+const PLAY_TIMEOUT = 6000;
 
 const promoTrack = {
   name: "HellYell Radio - 欢迎收听",
@@ -150,7 +149,7 @@ function createCircleSpeaker() {
 }
 
 function fmt(t){
-  if(isNaN(t)) return '00:00';
+  if(isNaN(t) || !isFinite(t)) return '00:00';
   const m = String(Math.floor(t/60)).padStart(2,'0');
   const s = String(Math.floor(t%60)).padStart(2,'0');
   return m+':'+s;
@@ -164,18 +163,14 @@ function clearPlayCheck(){
 function startPlayCheck(){
   clearPlayCheck();
   playCheckTimer = setTimeout(()=>{
-    if(isPlaying && audio.currentTime <= 0.1){
+    if(isPlaying && audio.currentTime <= 0.1 && !isSwitching){
       next();
     }
   }, PLAY_TIMEOUT);
 }
 
-// 丝滑渐隐 → 切换文字 → 渐显
-function loadTrack(track){
-  if(!track) return;
-  currentTrack = track;
-  clearPlayCheck();
-  
+// 更新界面文字（不改变播放状态）
+function updateDisplay(track){
   const parts = track.name.split(' - ');
   const singer = parts[0]||'';
   const music = parts.slice(1).join(' - ')||track.name;
@@ -183,17 +178,14 @@ function loadTrack(track){
   const nameEl = document.getElementById('musicName');
   const singerEl = document.getElementById('singerName');
 
-  // 渐隐
   nameEl.parentElement.style.opacity = '0';
   singerEl.style.opacity = '0';
 
   setTimeout(() => {
-    // 切换文字
     nameEl.innerText = music;
     singerEl.innerText = singer;
     nameEl.classList.remove('marquee');
 
-    // 渐显
     nameEl.parentElement.style.opacity = '1';
     singerEl.style.opacity = '1';
 
@@ -205,65 +197,82 @@ function loadTrack(track){
   }, 250);
 
   document.title = `${music} - ${singer}`;
+}
+
+// 切换歌曲的核心函数
+function switchToTrack(track, autoPlay = true) {
+  if(isSwitching) return;
+  isSwitching = true;
   
-  // 关键修复：更新 audio 源
-  const wasPlaying = isPlaying;
-  const oldOnEnded = audio.onended;
+  clearPlayCheck();
+  currentTrackUrl = track.url;
+  
+  // 更新界面
+  updateDisplay(track);
+  
+  // 保存当前播放状态
+  const shouldPlay = autoPlay && isPlaying;
+  
+  // 移除旧的事件监听
   audio.onended = null;
   audio.pause();
+  
+  // 设置新源
   audio.src = track.url;
   audio.volume = volume;
   updateVolumeKnob();
   
-  // 关键修复：重新绑定 ended 事件
+  // 绑定 ended 事件
   audio.onended = () => {
-    console.log('ended event triggered');
-    if (isPlaying && currentTrack === track) {
+    if(isPlaying && !isSwitching && currentTrackUrl === track.url){
       next();
     }
   };
   
-  // 如果之前是播放状态，则自动开始播放
-  if (wasPlaying) {
+  // 开始播放
+  if(shouldPlay){
     const playPromise = audio.play();
-    if (playPromise !== undefined) {
-      playPromise.catch((e) => {
-        console.log('play failed:', e);
-        // 播放失败，延迟重试下一首
-        setTimeout(() => {
-          if (isPlaying && currentTrack === track) {
-            next();
-          }
-        }, 1000);
+    if(playPromise !== undefined){
+      playPromise.then(() => {
+        isSwitching = false;
+        startPlayCheck();
+      }).catch((e) => {
+        console.log('播放失败:', e);
+        isSwitching = false;
+        // 播放失败，尝试下一首
+        if(isPlaying){
+          setTimeout(() => next(), 500);
+        }
       });
+    } else {
+      isSwitching = false;
+      startPlayCheck();
     }
+  } else {
+    isSwitching = false;
   }
 }
 
 function getNextTrack(){
   playCount++;
-  if(playCount > 1 && playCount %7 ===0){
+  if(playCount > 1 && playCount % 7 === 0){
     return promoTrack;
   }else{
+    if(filteredPlaylist.length === 0) return promoTrack;
     return filteredPlaylist[Math.floor(Math.random()*filteredPlaylist.length)];
   }
 }
 
-function playTrack(track){
-  loadTrack(track);
-  startPlayCheck();
-}
-
 function next(){
-  // 重置结束标志
-  isEndingTriggered = false;
+  if(isSwitching) return;
   const track = getNextTrack();
-  playTrack(track);
+  switchToTrack(track, true);
 }
 
 function togglePlay(){
   if(isPlaying){
     audio.pause();
+    clearPlayCheck();
     isPlaying = false;
     document.getElementById('playIcon').style.display = 'inline';
     document.getElementById('pauseIcon').style.display = 'none';
@@ -274,65 +283,36 @@ function togglePlay(){
     document.getElementById('pauseIcon').style.display = 'inline-block';
     document.getElementById('nowPlaying').classList.add('show');
     
-    // 关键修复：重新绑定 ended 事件
+    // 重新绑定 ended 事件
     audio.onended = () => {
-      console.log('ended event triggered on resume');
-      if (isPlaying) {
+      if(isPlaying && !isSwitching){
         next();
       }
     };
     
     const playPromise = audio.play();
-    if (playPromise !== undefined) {
+    if(playPromise !== undefined){
       playPromise.catch(() => {
-        // 播放失败，尝试下一首
-        if (isPlaying) next();
+        if(isPlaying) next();
       });
     }
     startPlayCheck();
   }
 }
 
-// 关键修复：timeupdate 检测结束（多重保障）
-audio.addEventListener('timeupdate', () => {
-  if (!isPlaying) return;
-  
-  // 更新进度条
-  if(audio.duration && !isNaN(audio.duration)){
+// 更新进度条
+function updateProgress(){
+  if(audio.duration && !isNaN(audio.duration) && audio.duration > 0){
     const per = (audio.currentTime/audio.duration)*100;
     document.getElementById('progressBar').style.width = per+'%';
     document.getElementById('currentTime').innerText = fmt(audio.currentTime);
     document.getElementById('durationTime').innerText = fmt(audio.duration);
   }
   
-  // 清除加载超时检测
   if(audio.currentTime > 0.1) clearPlayCheck();
-  
-  // 关键修复：检测歌曲是否接近结束
-  if (audio.duration && audio.currentTime > 0) {
-    const remaining = audio.duration - audio.currentTime;
-    // 当剩余时间小于 0.3 秒时，触发下一首
-    if (remaining <= 0.3 && !isEndingTriggered) {
-      isEndingTriggered = true;
-      console.log('timeupdate detected near end');
-      // 延迟一下，确保 ended 事件有机会先触发
-      setTimeout(() => {
-        if (isPlaying && audio.currentTime >= audio.duration - 0.2) {
-          next();
-        }
-        isEndingTriggered = false;
-      }, 150);
-    }
-  }
-});
+}
 
-// 监听音频错误
-audio.addEventListener('error', (e) => {
-  console.log('audio error:', e);
-  if (isPlaying) {
-    next();
-  }
-});
+audio.addEventListener('timeupdate', updateProgress);
 
 function updateVolumeKnob(){
   const min=-150,max=150;
@@ -359,31 +339,33 @@ async function init(){
     filteredPlaylist=[{name:"测试 - 测试歌曲",url:"https://music.163.com/song/media/outer/url?id=1916319449.mp3"}];
   }
 
-  playCount = 0;
-  isPlaying = true;  // 默认自动播放
-  playTrack(promoTrack);
-  
-  // 关键修复：确保播放状态正确
+  // 设置初始播放状态
+  isPlaying = true;
   document.getElementById('playIcon').style.display = 'none';
   document.getElementById('pauseIcon').style.display = 'inline-block';
   document.getElementById('nowPlaying').classList.add('show');
+  
+  // 开始播放欢迎曲
+  playCount = 0;
+  switchToTrack(promoTrack, true);
 
   document.getElementById('playBtn').onclick=togglePlay;
   document.getElementById('nextBtn').onclick=next;
   document.getElementById('volMinus').onclick=()=>{
     volume=Math.max(0,Math.round((volume-0.1)*10)/10);
-    audio.volume=volume;updateVolumeKnob();
+    audio.volume=volume;
+    updateVolumeKnob();
   };
   document.getElementById('volPlus').onclick=()=>{
     volume=Math.min(1,Math.round((volume+0.1)*10)/10);
-    audio.volume=volume;updateVolumeKnob();
+    audio.volume=volume;
+    updateVolumeKnob();
   };
   updateVolumeKnob();
   
   // 页面可见性变化时检查状态
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && isPlaying && audio.paused) {
-      // 页面重新可见时，如果应该播放但暂停了，尝试恢复
+    if (!document.hidden && isPlaying && audio.paused && !isSwitching) {
       audio.play().catch(() => {});
       startPlayCheck();
     }
