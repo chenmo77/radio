@@ -122,7 +122,6 @@
             margin-top: 6px;
         }
 
-        /* 底部居中布局 */
         .control-section {
             height: 62%;
             padding: 40px 40px 30px;
@@ -164,16 +163,18 @@
             background: linear-gradient(145deg, #fff, #e0e0e0);
             border-radius: 50%;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            position: relative;
         }
         .volume-knob::after {
             content: '';
             position: absolute;
-            top: 10px;
+            top: 0;
             left: 50%;
             transform: translateX(-50%);
             width: 2.5px;
             height: 20px;
             background: #555;
+            transform-origin: center 40px;
         }
         .vol-label {
             position: absolute;
@@ -190,7 +191,6 @@
             gap: 26px;
         }
 
-        /* 按钮样式统一，播放/暂停与下一首完全一致 */
         .ctrl-btn {
             background: transparent;
             border: none;
@@ -205,20 +205,27 @@
             padding: 0;
         }
 
-        /* 暂停图标尺寸与播放图标统一 */
+        #playIcon {
+            font-size: 20px;
+            transform: translateY(1px);
+        }
+
         .pause-icon {
             display: inline-block;
-            width: 16px;
-            height: 22px;
+            width: 14px;
+            height: 16px;
             position: relative;
+            transform: translateY(1px);
         }
         .pause-icon::before, .pause-icon::after {
             content: '';
             position: absolute;
             width: 5px;
-            height: 22px;
-            background: #000;
+            height: 16px;
+            background: #444;
             border-radius: 1px;
+            top: 50%;
+            transform: translateY(-50%);
         }
         .pause-icon::before { left: 0; }
         .pause-icon::after { right: 0; }
@@ -259,7 +266,7 @@
                 <div class="vol-label vol-plus" id="volPlus">+</div>
             </div>
             <div class="play-btns">
-                <button id="playBtn" class="ctrl-btn play-btn">
+                <button id="playBtn" class="ctrl-btn">
                     <span id="playIcon">▶</span>
                     <span id="pauseIcon" class="pause-icon" style="display:none;"></span>
                 </button>
@@ -275,7 +282,7 @@
     let filteredPlaylist = [];
     let currentIndex = 0;
     let isPlay = false;
-    let volume = 0.5;
+    let volume = 0.6; // 默认音量 60%
     let playCount = 0;
 
     const promoTrack = {
@@ -369,6 +376,7 @@
         audio.src = targetTrack.url;
         audio.volume = volume;
         audio.load();
+        updateVolumeKnob();
     }
 
     function togglePlay() {
@@ -412,19 +420,28 @@
         document.getElementById('durationTime').innerText = formatTime(audio.duration);
     };
 
+    // ————————————————————————————————————————
+    // 你要的音量旋钮角度逻辑（已精确实现）
+    // ————————————————————————————————————————
+    function updateVolumeKnob() {
+        const minAngle = -150;  // 0%
+        const maxAngle = 150;   // 100%
+        const angle = minAngle + volume * (maxAngle - minAngle);
+        document.getElementById('volumeKnob').style.transform = `rotate(${angle}deg)`;
+    }
+
     function initVolume() {
-        const knob = document.getElementById('volumeKnob');
         document.getElementById('volMinus').onclick = () => {
             volume = Math.max(0, (Math.round(volume*10)/10)-0.1);
             audio.volume = volume;
-            knob.style.transform = `rotate(${(-90 + volume * 270)}deg)`;
+            updateVolumeKnob();
         };
         document.getElementById('volPlus').onclick = () => {
             volume = Math.min(1, (Math.round(volume*10)/10)+0.1);
             audio.volume = volume;
-            knob.style.transform = `rotate(${(-90 + volume * 270)}deg)`;
+            updateVolumeKnob();
         };
-        knob.style.transform = `rotate(${(-90 + volume * 270)}deg)`;
+        updateVolumeKnob();
     }
 
     window.onload = () => {
