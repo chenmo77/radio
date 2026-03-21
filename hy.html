@@ -12,6 +12,7 @@
             font-family: "MiSans", "Microsoft YaHei", sans-serif;
             font-weight: 700;
         }
+
         html, body {
             width: 100%;
             height: 100%;
@@ -21,6 +22,7 @@
             align-items: center;
             padding: 10px;
         }
+
         .player-container {
             width: 100%;
             max-width: 560px;
@@ -32,6 +34,7 @@
             flex-direction: column;
             overflow: hidden;
         }
+
         .screen-section {
             height: 38%;
             background: #E60012;
@@ -40,10 +43,12 @@
             flex-direction: column;
             justify-content: center;
         }
+
         .music-info {
             width: 100%;
             color: #fff;
         }
+
         .music-name-wrapper {
             width: 100%;
             overflow: hidden;
@@ -61,6 +66,7 @@
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
         }
+
         .singer-row {
             display: flex;
             justify-content: space-between;
@@ -80,6 +86,7 @@
         }
         .now-playing.show { visibility: visible; }
         @keyframes glow { 0%{opacity:0.6;} 100%{opacity:1;} }
+
         .time-progress {
             width: 100%;
         }
@@ -114,6 +121,7 @@
             color: rgba(255,255,255,0.65);
             margin-top: 6px;
         }
+
         .control-section {
             height: 62%;
             padding: 40px 40px 30px;
@@ -122,6 +130,7 @@
             align-items: center;
             gap: 44px;
         }
+
         .speaker-area {
             width: 42%;
             aspect-ratio: 1/1;
@@ -135,6 +144,7 @@
             background: #141414;
             border-radius: 50%;
         }
+
         .btn-area {
             width: 42%;
             display: flex;
@@ -143,6 +153,7 @@
             gap: 32px;
             transform: translateX(6px);
         }
+
         .volume-box {
             position: relative;
             width: 80px;
@@ -175,11 +186,13 @@
         }
         .vol-minus { bottom: -24px; left: 12px; }
         .vol-plus { bottom: -24px; right: 12px; }
+
         .play-btns {
             display: flex;
             align-items: center;
             gap: 26px;
         }
+
         .ctrl-btn {
             background: transparent;
             border: none;
@@ -193,10 +206,12 @@
             justify-content: center;
             padding: 0;
         }
+
         #playIcon {
             font-size: 20px;
             transform: translateY(1px);
         }
+
         .pause-icon {
             display: inline-block;
             width: 14px;
@@ -219,6 +234,7 @@
     </style>
 </head>
 <body>
+
 <div class="player-container">
     <div class="screen-section">
         <div class="music-info">
@@ -242,6 +258,7 @@
             </div>
         </div>
     </div>
+
     <div class="control-section">
         <div class="speaker-area" id="speakerArea"></div>
         <div class="btn-area">
@@ -260,204 +277,182 @@
         </div>
     </div>
 </div>
+
 <script>
-    const audio = new Audio();
-    audio.preload = "auto";
+let audio = new Audio();
+audio.preload = "auto";
 
-    let playlist = [];
-    let filteredPlaylist = [];
-    let currentIndex = 0;
-    let isPlaying = false;
-    let volume = 0.6;
-    let playCount = 0;
-    const isRandom = true; // 开启随机播放
+let playlist = [];
+let filteredPlaylist = [];
+let currentIndex = 0;
+let isPlaying = false;
+let volume = 0.6;
+let playCount = 0;
 
-    const promoTrack = {
-        name: "HellYell Radio - 欢迎收听HellYell音乐电台",
-        url: "https://radio.hellyell.com/hy.mp3"
-    };
+const promoTrack = {
+    name: "HellYell Radio - 欢迎收听HellYell音乐电台",
+    url: "https://radio.hellyell.com/hy.mp3"
+};
 
-    // 喇叭孔
-    function createCircleSpeaker() {
-        const container = document.getElementById('speakerArea');
-        const rings = 5;
-        const holesPerRing = [12, 18, 24, 30, 36];
-        for (let r = 0; r < rings; r++) {
-            const radius = 18 + r * 14;
-            const count = holesPerRing[r];
-            for (let i = 0; i < count; i++) {
-                const angle = (i / count) * Math.PI * 2;
-                const x = 50 + radius * Math.cos(angle);
-                const y = 50 + radius * Math.sin(angle);
-                const dot = document.createElement('div');
-                dot.className = 'speaker-hole';
-                dot.style.left = x + '%';
-                dot.style.top = y + '%';
-                container.appendChild(dot);
-            }
+function createCircleSpeaker() {
+    const container = document.getElementById('speakerArea');
+    const rings = 5;
+    const holesPerRing = [12, 18, 24, 30, 36];
+    for (let r = 0; r < rings; r++) {
+        const radius = 18 + r * 14;
+        const count = holesPerRing[r];
+        for (let i = 0; i < count; i++) {
+            const angle = (i / count) * Math.PI * 2;
+            const x = 50 + radius * Math.cos(angle);
+            const y = 50 + radius * Math.sin(angle);
+            const dot = document.createElement('div');
+            dot.className = 'speaker-hole';
+            dot.style.left = x + '%';
+            dot.style.top = y + '%';
+            container.appendChild(dot);
         }
     }
+}
 
-    // 加载歌单
-    async function loadAllList() {
-        try {
-            const [hj, qc] = await Promise.all([
-                fetch('https://radio.hellyell.com/huaijiu-musiclist.json').then(r=>r.json()),
-                fetch('https://radio.hellyell.com/qiche-musiclist.json').then(r=>r.json())
-            ]);
-            playlist = [...hj, ...qc];
-            filteredPlaylist = playlist.filter(item => {
-                const [singer] = item.name.split(' - ');
-                return singer !== 'HellYell怀旧电台' && singer !== 'HellYell汽车电台';
-            });
-            shuffleList(filteredPlaylist);
-            loadMusic(0);
-        } catch (e) {
-            filteredPlaylist = [{
-                name: '测试歌手 - 测试歌曲',
-                url: 'https://music.163.com/song/media/outer/url?id=1916319449.mp3'
-            }];
-            loadMusic(0);
-        }
+async function loadAllList() {
+    try {
+        const [hj, qc] = await Promise.all([
+            fetch('https://radio.hellyell.com/huaijiu-musiclist.json').then(r=>r.json()),
+            fetch('https://radio.hellyell.com/qiche-musiclist.json').then(r=>r.json())
+        ]);
+        playlist = [...hj, ...qc];
+        filteredPlaylist = playlist.filter(item => {
+            const [singer] = item.name.split(' - ');
+            return singer !== 'HellYell怀旧电台' && singer !== 'HellYell汽车电台';
+        });
+        loadMusic(0);
+    } catch (e) {
+        filteredPlaylist = [{
+            name: '测试歌手 - 测试歌曲',
+            url: 'https://music.163.com/song/media/outer/url?id=1916319449.mp3'
+        }];
+        loadMusic(0);
+    }
+}
+
+function formatTime(t) {
+    const m = Math.floor(t / 60).toString().padStart(2, '0');
+    const s = Math.floor(t % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+}
+
+function loadMusic(index) {
+    let targetTrack;
+
+    if (playCount > 0 && playCount % 7 === 0) {
+        targetTrack = promoTrack;
+    } else {
+        currentIndex = (index + filteredPlaylist.length) % filteredPlaylist.length;
+        targetTrack = filteredPlaylist[currentIndex];
     }
 
-    // 洗牌
-    function shuffleList(list) {
-        for(let i=list.length-1;i>0;i--){
-            const j = Math.floor(Math.random()*(i+1));
-            [list[i],list[j]] = [list[j],list[i]];
-        }
-    }
+    const [singer, music] = targetTrack.name.split(' - ');
+    document.getElementById('singerName').innerText = singer;
 
-    // 时间格式化
-    function formatTime(t) {
-        const m = Math.floor(t / 60).toString().padStart(2, '0');
-        const s = Math.floor(t % 60).toString().padStart(2, '0');
-        return `${m}:${s}`;
-    }
+    const nameEl = document.getElementById('musicName');
+    const wrap = document.querySelector('.music-name-wrapper');
+    nameEl.classList.remove('marquee');
+    nameEl.innerText = music;
 
-    // 加载歌曲
-    function loadMusic(index) {
-        let targetTrack;
-        if (playCount > 0 && playCount % 7 === 0) {
-            targetTrack = promoTrack;
+    setTimeout(() => {
+        if (nameEl.scrollWidth > wrap.offsetWidth) {
+            nameEl.innerText = `${music}　${music}`;
+            nameEl.classList.add('marquee');
         } else {
-            if (isRandom) {
-                currentIndex = Math.floor(Math.random() * filteredPlaylist.length);
-            } else {
-                currentIndex = (index + filteredPlaylist.length) % filteredPlaylist.length;
-            }
-            targetTrack = filteredPlaylist[currentIndex];
+            nameEl.innerText = music;
+            nameEl.classList.remove('marquee');
         }
+    }, 100);
 
-        const [singer, music] = targetTrack.name.split(' - ');
-        document.getElementById('singerName').innerText = singer;
-        
-        const nameEl = document.getElementById('musicName');
-        const wrap = document.querySelector('.music-name-wrapper');
-        nameEl.classList.remove('marquee');
-        nameEl.innerText = music;
+    document.title = `${music}-${singer}-HellYell音乐电台`;
+    document.getElementById('nowPlaying').classList.remove('show');
 
-        setTimeout(() => {
-            if (nameEl.scrollWidth > wrap.offsetWidth) {
-                nameEl.innerText = `${music}　${music}`;
-                nameEl.classList.add('marquee');
-            } else {
-                nameEl.innerText = music;
-                nameEl.classList.remove('marquee');
-            }
-        }, 100);
+    audio.src = targetTrack.url;
+    audio.volume = volume;
+    updateVolumeKnob();
+}
 
-        document.title = `${music}-${singer}-HellYell音乐电台`;
+function tryPlay() {
+    if (!isPlaying) return;
+    audio.play().catch(err => {
+        console.log("播放被限制，将在恢复后继续");
+    });
+}
+
+function togglePlay() {
+    if (isPlaying) {
+        audio.pause();
+        isPlaying = false;
+        document.getElementById('playIcon').style.display = 'inline';
+        document.getElementById('pauseIcon').style.display = 'none';
         document.getElementById('nowPlaying').classList.remove('show');
+    } else {
+        isPlaying = true;
+        tryPlay();
+        document.getElementById('playIcon').style.display = 'none';
+        document.getElementById('pauseIcon').style.display = 'inline-block';
+        document.getElementById('nowPlaying').classList.add('show');
+    }
+}
 
-        audio.src = targetTrack.url;
+function next() {
+    playCount++;
+    loadMusic(currentIndex + 1);
+    tryPlay();
+}
+
+// 关键修复：强制切歌，不依赖浏览器 onended
+audio.ontimeupdate = () => {
+    if (!audio.duration) return;
+    const p = (audio.currentTime / audio.duration) * 100;
+    document.getElementById('progressBar').style.width = p + '%';
+    document.getElementById('currentTime').innerText = formatTime(audio.currentTime);
+    document.getElementById('durationTime').innerText = formatTime(audio.duration);
+
+    // 接近结束强制切歌（息屏也能触发）
+    if (audio.duration > 0 && audio.currentTime >= audio.duration - 0.3) {
+        next();
+    }
+};
+
+// 备用兜底
+audio.onended = () => {
+    next();
+};
+
+function updateVolumeKnob() {
+    const minAngle = -150;
+    const maxAngle = 150;
+    const angle = minAngle + volume * (maxAngle - minAngle);
+    document.getElementById('volumeKnob').style.transform = `rotate(${angle}deg)`;
+}
+
+function initVolume() {
+    document.getElementById('volMinus').onclick = () => {
+        volume = Math.max(0, Math.round((volume - 0.1)*10)/10);
         audio.volume = volume;
         updateVolumeKnob();
-    }
-
-    // 安全播放（兼容息屏）
-    function safePlay() {
-        if (!isPlaying) return;
-        const promise = audio.play();
-        if (promise) {
-            promise.catch(err => {
-                console.warn("播放被限制，重试", err);
-                setTimeout(() => safePlay(), 300);
-            });
-        }
-    }
-
-    // 播放/暂停
-    function togglePlay() {
-        if (isPlaying) {
-            audio.pause();
-            isPlaying = false;
-            document.getElementById('playIcon').style.display = 'inline';
-            document.getElementById('pauseIcon').style.display = 'none';
-            document.getElementById('nowPlaying').classList.remove('show');
-        } else {
-            isPlaying = true;
-            safePlay();
-            document.getElementById('playIcon').style.display = 'none';
-            document.getElementById('pauseIcon').style.display = 'inline-block';
-            document.getElementById('nowPlaying').classList.add('show');
-        }
-    }
-
-    // 下一首
-    function next() {
-        playCount++;
-        loadMusic(currentIndex + 1);
-        safePlay();
-    }
-
-    // 播放结束自动切歌（息屏也生效）
-    audio.onended = () => {
-        playCount++;
-        loadMusic(currentIndex + 1);
-        safePlay();
     };
-
-    // 进度条
-    audio.ontimeupdate = () => {
-        if (!audio.duration) return;
-        const p = (audio.currentTime / audio.duration) * 100;
-        document.getElementById('progressBar').style.width = p + '%';
-        document.getElementById('currentTime').innerText = formatTime(audio.currentTime);
-        document.getElementById('durationTime').innerText = formatTime(audio.duration);
-    };
-
-    // 音量旋钮
-    function updateVolumeKnob() {
-        const minAngle = -150;
-        const maxAngle = 150;
-        const angle = minAngle + volume * (maxAngle - minAngle);
-        document.getElementById('volumeKnob').style.transform = `rotate(${angle}deg)`;
-    }
-
-    function initVolume() {
-        document.getElementById('volMinus').onclick = () => {
-            volume = Math.max(0, Math.round((volume - 0.1)*10)/10);
-            audio.volume = volume;
-            updateVolumeKnob();
-        };
-        document.getElementById('volPlus').onclick = () => {
-            volume = Math.min(1, Math.round((volume + 0.1)*10)/10);
-            audio.volume = volume;
-            updateVolumeKnob();
-        };
+    document.getElementById('volPlus').onclick = () => {
+        volume = Math.min(1, Math.round((volume + 0.1)*10)/10);
+        audio.volume = volume;
         updateVolumeKnob();
-    }
-
-    // 初始化
-    window.onload = () => {
-        createCircleSpeaker();
-        loadAllList();
-        initVolume();
-        document.getElementById('playBtn').onclick = togglePlay;
-        document.getElementById('nextBtn').onclick = next;
     };
+    updateVolumeKnob();
+}
+
+window.onload = () => {
+    createCircleSpeaker();
+    loadAllList();
+    initVolume();
+    document.getElementById('playBtn').onclick = togglePlay;
+    document.getElementById('nextBtn').onclick = next;
+};
 </script>
 </body>
 </html>
