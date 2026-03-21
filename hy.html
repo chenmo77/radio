@@ -6,11 +6,17 @@
 <title>HellYell音乐电台</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;font-family:"MiSans","Microsoft YaHei",sans-serif;font-weight:700}
-  html,body{width:100%;height:100%;background:#e6e6e6;display:flex;justify-content:center;align-items:center;padding:10px}
+  html,body{width:100%;height:100%;background:#e6e0e0;display:flex;justify-content:center;align-items:center;padding:10px}
   .player-container{width:100%;max-width:560px;aspect-ratio:1/1.12;background:#fff;border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,0.25);display:flex;flex-direction:column;overflow:hidden}
   .screen-section{height:38%;background:#E60012;padding:24px 28px;display:flex;flex-direction:column;justify-content:center}
   .music-info{width:100%;color:#fff}
-  .music-name-wrapper{width:100%;overflow:hidden;margin-bottom:6px}
+
+  /* 歌名、歌手名 丝滑渐隐渐显动画 */
+  .music-name-wrapper, .singer-name {
+    transition: opacity 0.5s ease;
+    opacity: 1;
+  }
+
   .music-name{font-size:30px;white-space:nowrap}
   .music-name.marquee{display:inline-block;animation:textScroll 16s linear infinite}
   @keyframes textScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
@@ -25,7 +31,7 @@
   .progress-thumb{position:absolute;right:-8px;top:50%;transform:translateY(-50%);width:10px;height:10px;background:#fff;border-radius:50%}
   .time-row{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.65);margin-top:6px}
 
-  /* 手机端：喇叭整体上移，和右侧旋钮按钮中心点对齐 */
+  /* 手机端：喇叭整体上移对齐 */
   .control-section{
     height:62%;
     padding:40px 40px 30px;
@@ -42,7 +48,7 @@
     transform:translateY(-8px);
   }
 
-  /* 电脑端：右移50px，喇叭不上移 */
+  /* 电脑端：右移50px */
   @media (min-width: 768px) {
     .control-section{
       transform:translateX(50px);
@@ -159,24 +165,36 @@ function startPlayCheck(){
   }, PLAY_TIMEOUT);
 }
 
+// 丝滑渐隐 → 切换文字 → 渐显
 function loadTrack(track){
   clearPlayCheck();
   const parts = track.name.split(' - ');
   const singer = parts[0]||'';
   const music = parts.slice(1).join(' - ')||track.name;
 
-  document.getElementById('singerName').innerText = singer;
-  const el = document.getElementById('musicName');
-  const wrap = document.querySelector('.music-name-wrapper');
-  el.innerText = music;
-  el.classList.remove('marquee');
+  const nameEl = document.getElementById('musicName');
+  const singerEl = document.getElementById('singerName');
 
-  setTimeout(()=>{
-    if(el.scrollWidth > wrap.offsetWidth){
-      el.innerText = music+'　'+music;
-      el.classList.add('marquee');
-    }
-  },100);
+  // 渐隐
+  nameEl.parentElement.style.opacity = '0';
+  singerEl.style.opacity = '0';
+
+  setTimeout(() => {
+    // 切换文字
+    nameEl.innerText = music;
+    singerEl.innerText = singer;
+    nameEl.classList.remove('marquee');
+
+    // 渐显
+    nameEl.parentElement.style.opacity = '1';
+    singerEl.style.opacity = '1';
+
+    setTimeout(() => {
+      if(nameEl.scrollWidth > nameEl.parentElement.offsetWidth){
+        nameEl.classList.add('marquee');
+      }
+    }, 100);
+  }, 250);
 
   document.title = `${music} - ${singer}`;
   audio.src = track.url;
