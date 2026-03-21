@@ -25,6 +25,7 @@
   .progress-thumb{position:absolute;right:-8px;top:50%;transform:translateY(-50%);width:10px;height:10px;background:#fff;border-radius:50%}
   .time-row{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.65);margin-top:6px}
 
+  /* 默认：手机端 → 不偏移 */
   .control-section{
     height:62%;
     padding:40px 40px 30px;
@@ -32,7 +33,14 @@
     justify-content:center;
     align-items:center;
     gap:44px;
-    transform:translateX(50px);
+    transform:translateX(0);
+  }
+
+  /* 电脑端专用 → 右移50px */
+  @media (min-width: 768px) {
+    .control-section{
+      transform:translateX(50px);
+    }
   }
 
   .speaker-area{width:42%;aspect-ratio:1/1;position:relative}
