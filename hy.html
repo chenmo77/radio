@@ -32,7 +32,6 @@
     justify-content:center;
     align-items:center;
     gap:44px;
-    /* 整体右移 50px（你要的最终距离）*/
     transform:translateX(50px);
   }
 
@@ -99,62 +98,56 @@ let playCount = 0;
 let playCheckTimer = null;
 const PLAY_TIMEOUT = 6000;
 
-// ========== 已修改：hy.mp3 歌曲名改为 欢迎收听 ==========
 const promoTrack = {
   name: "HellYell Radio - 欢迎收听",
   url: "https://radio.hellyell.com/hy.mp3"
 };
 
-// 喇叭
 function createCircleSpeaker() {
   const c = document.getElementById('speakerArea');
   const rings = 5;
-  const holes = [12, 18, 24, 30, 36];
-  for (let r = 0; r < rings; r++) {
-    const ra = 18 + r * 14;
+  const holes = [12,18,24,30,36];
+  for(let r=0;r<rings;r++){
+    const ra = 18 + r*14;
     const cnt = holes[r];
-    for (let i = 0; i < cnt; i++) {
-      const ang = (i / cnt) * Math.PI * 2;
-      const x = 50 + ra * Math.cos(ang);
-      const y = 50 + ra * Math.sin(ang);
+    for(let i=0;i<cnt;i++){
+      const ang = (i/cnt)*Math.PI*2;
+      const x = 50 + ra*Math.cos(ang);
+      const y = 50 + ra*Math.sin(ang);
       const d = document.createElement('div');
       d.className = 'speaker-hole';
-      d.style.left = x + '%';
-      d.style.top = y + '%';
+      d.style.left = x+'%';
+      d.style.top = y+'%';
       c.appendChild(d);
     }
   }
 }
 
-// 时间格式化
-function fmt(t) {
-  const m = String(Math.floor(t / 60)).padStart(2, '0');
-  const s = String(Math.floor(t % 60)).padStart(2, '0');
-  return m + ':' + s;
+function fmt(t){
+  const m = String(Math.floor(t/60)).padStart(2,'0');
+  const s = String(Math.floor(t%60)).padStart(2,'0');
+  return m+':'+s;
 }
 
-// 清理超时检测
-function clearPlayCheck() {
-  if (playCheckTimer) clearTimeout(playCheckTimer);
+function clearPlayCheck(){
+  if(playCheckTimer) clearTimeout(playCheckTimer);
   playCheckTimer = null;
 }
 
-// 6秒播放失败自动切歌
-function startPlayCheck() {
+function startPlayCheck(){
   clearPlayCheck();
-  playCheckTimer = setTimeout(() => {
-    if (isPlaying && audio.currentTime <= 0) {
+  playCheckTimer = setTimeout(()=>{
+    if(isPlaying && audio.currentTime <= 0){
       next();
     }
   }, PLAY_TIMEOUT);
 }
 
-// 加载歌曲显示信息
-function loadTrack(track) {
+function loadTrack(track){
   clearPlayCheck();
   const parts = track.name.split(' - ');
-  const singer = parts[0] || '';
-  const music = parts.slice(1).join(' - ') || track.name;
+  const singer = parts[0]||'';
+  const music = parts.slice(1).join(' - ')||track.name;
 
   document.getElementById('singerName').innerText = singer;
   const el = document.getElementById('musicName');
@@ -162,12 +155,12 @@ function loadTrack(track) {
   el.innerText = music;
   el.classList.remove('marquee');
 
-  setTimeout(() => {
-    if (el.scrollWidth > wrap.offsetWidth) {
-      el.innerText = music + '　' + music;
+  setTimeout(()=>{
+    if(el.scrollWidth > wrap.offsetWidth){
+      el.innerText = music+'　'+music;
       el.classList.add('marquee');
     }
-  }, 100);
+  },100);
 
   document.title = `${music} - ${singer}`;
   audio.src = track.url;
@@ -175,44 +168,38 @@ function loadTrack(track) {
   updateVolumeKnob();
 }
 
-// ========== 逻辑已复查：随机切换 + 7首插播 ==========
-function getNextTrack() {
+function getNextTrack(){
   playCount++;
-  // 规则：第1首=欢迎收听，之后每7首插播一次欢迎收听
-  if (playCount > 1 && playCount % 7 === 0) {
+  if(playCount > 1 && playCount %7 ===0){
     return promoTrack;
-  } else {
-    return filteredPlaylist[Math.floor(Math.random() * filteredPlaylist.length)];
+  }else{
+    return filteredPlaylist[Math.floor(Math.random()*filteredPlaylist.length)];
   }
 }
 
-// 播放
-function playTrack(track) {
+function playTrack(track){
   loadTrack(track);
-  if (!isPlaying) return;
-  const p = audio.play();
-  if (p) p.catch(() => next());
+  if(!isPlaying) return;
+  audio.play().catch(()=>{next();});
   startPlayCheck();
 }
 
-// 下一首
-function next() {
+function next(){
   const track = getNextTrack();
   playTrack(track);
 }
 
-// 播放暂停
-function togglePlay() {
-  if (isPlaying) {
+function togglePlay(){
+  if(isPlaying){
     audio.pause();
     clearPlayCheck();
     isPlaying = false;
     document.getElementById('playIcon').style.display = 'inline';
     document.getElementById('pauseIcon').style.display = 'none';
     document.getElementById('nowPlaying').classList.remove('show');
-  } else {
+  }else{
     isPlaying = true;
-    audio.play().catch(() => next());
+    audio.play().catch(()=>{next();});
     startPlayCheck();
     document.getElementById('playIcon').style.display = 'none';
     document.getElementById('pauseIcon').style.display = 'inline-block';
@@ -220,70 +207,56 @@ function togglePlay() {
   }
 }
 
-// ========== 手机息屏播放已修复：不依赖后台定时器 ==========
-audio.ontimeupdate = () => {
-  if (!audio.duration) return;
-  const per = (audio.currentTime / audio.duration) * 100;
-  document.getElementById('progressBar').style.width = per + '%';
+audio.ontimeupdate = ()=>{
+  if(!audio.duration) return;
+  const per = (audio.currentTime/audio.duration)*100;
+  document.getElementById('progressBar').style.width = per+'%';
   document.getElementById('currentTime').innerText = fmt(audio.currentTime);
   document.getElementById('durationTime').innerText = fmt(audio.duration);
 
-  if (audio.currentTime > 0.2) clearPlayCheck();
-
-  // 歌曲结束自动切歌（手机息屏可稳定触发）
-  if (audio.duration > 0 && audio.currentTime >= audio.duration - 1) {
-    next();
-  }
+  if(audio.currentTime>0.2) clearPlayCheck();
+  if(audio.currentTime >= audio.duration - 1) next();
 };
 
-// 音量旋钮
-function updateVolumeKnob() {
-  const min = -150, max = 150;
-  const angle = min + volume * (max - min);
-  document.getElementById('volumeKnob').style.transform = `rotate(${angle}deg)`;
+function updateVolumeKnob(){
+  const min=-150,max=150;
+  const angle=min+volume*(max-min);
+  document.getElementById('volumeKnob').style.transform=`rotate(${angle}deg)`;
 }
 
-// 初始化
-async function init() {
+async function init(){
   createCircleSpeaker();
-  try {
-    const [hj, qc] = await Promise.all([
-      fetch('https://radio.hellyell.com/huaijiu-musiclist.json').then(r => r.json()),
-      fetch('https://radio.hellyell.com/qiche-musiclist.json').then(r => r.json())
+  try{
+    const [hj,qc]=await Promise.all([
+      fetch('https://radio.hellyell.com/huaijiu-musiclist.json').then(r=>r.json()),
+      fetch('https://radio.hellyell.com/qiche-musiclist.json').then(r=>r.json())
     ]);
-    playlist = [...hj, ...qc];
-    filteredPlaylist = playlist.filter(item => {
-      const s = item.name.split(' - ')[0];
-      return s !== 'HellYell怀旧电台' && s !== 'HellYell汽车电台';
+    playlist=[...hj,...qc];
+    filteredPlaylist=playlist.filter(item=>{
+      const s=item.name.split(' - ')[0];
+      return s!=='HellYell怀旧电台'&&s!=='HellYell汽车电台';
     });
-  } catch (e) {
-    filteredPlaylist = [{
-      name: "测试 - 测试歌曲",
-      url: "https://music.163.com/song/media/outer/url?id=1916319449.mp3"
-    }];
+  }catch(e){
+    filteredPlaylist=[{name:"测试 - 测试歌曲",url:"https://music.163.com/song/media/outer/url?id=1916319449.mp3"}];
   }
 
-  // 第一首固定：欢迎收听
-  playCount = 0;
+  playCount=0;
   playTrack(promoTrack);
 
-  document.getElementById('playBtn').onclick = togglePlay;
-  document.getElementById('nextBtn').onclick = next;
-  document.getElementById('volMinus').onclick = () => {
-    volume = Math.max(0, Math.round((volume - 0.1) * 10) / 10);
-    audio.volume = volume;
-    updateVolumeKnob();
+  document.getElementById('playBtn').onclick=togglePlay;
+  document.getElementById('nextBtn').onclick=next;
+  document.getElementById('volMinus').onclick=()=>{
+    volume=Math.max(0,Math.round((volume-0.1)*10)/10);
+    audio.volume=volume;updateVolumeKnob();
   };
-  document.getElementById('volPlus').onclick = () => {
-    volume = Math.min(1, Math.round((volume + 0.1) * 10) / 10);
-    audio.volume = volume;
-    updateVolumeKnob();
+  document.getElementById('volPlus').onclick=()=>{
+    volume=Math.min(1,Math.round((volume+0.1)*10)/10);
+    audio.volume=volume;updateVolumeKnob();
   };
-
   updateVolumeKnob();
 }
 
-window.onload = init;
+window.onload=init;
 </script>
 </body>
 </html>
