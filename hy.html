@@ -12,7 +12,6 @@
             font-family: "MiSans", "Microsoft YaHei", sans-serif;
             font-weight: 700;
         }
-
         html, body {
             width: 100%;
             height: 100%;
@@ -22,7 +21,6 @@
             align-items: center;
             padding: 10px;
         }
-
         .player-container {
             width: 100%;
             max-width: 560px;
@@ -34,7 +32,6 @@
             flex-direction: column;
             overflow: hidden;
         }
-
         .screen-section {
             height: 38%;
             background: #E60012;
@@ -43,12 +40,10 @@
             flex-direction: column;
             justify-content: center;
         }
-
         .music-info {
             width: 100%;
             color: #fff;
         }
-
         .music-name-wrapper {
             width: 100%;
             overflow: hidden;
@@ -66,7 +61,6 @@
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
         }
-
         .singer-row {
             display: flex;
             justify-content: space-between;
@@ -86,7 +80,6 @@
         }
         .now-playing.show { visibility: visible; }
         @keyframes glow { 0%{opacity:0.6;} 100%{opacity:1;} }
-
         .time-progress {
             width: 100%;
         }
@@ -121,7 +114,6 @@
             color: rgba(255,255,255,0.65);
             margin-top: 6px;
         }
-
         .control-section {
             height: 62%;
             padding: 40px 40px 30px;
@@ -130,7 +122,6 @@
             align-items: center;
             gap: 44px;
         }
-
         .speaker-area {
             width: 42%;
             aspect-ratio: 1/1;
@@ -144,7 +135,6 @@
             background: #141414;
             border-radius: 50%;
         }
-
         .btn-area {
             width: 42%;
             display: flex;
@@ -153,7 +143,6 @@
             gap: 32px;
             transform: translateX(6px);
         }
-
         .volume-box {
             position: relative;
             width: 80px;
@@ -186,13 +175,11 @@
         }
         .vol-minus { bottom: -24px; left: 12px; }
         .vol-plus { bottom: -24px; right: 12px; }
-
         .play-btns {
             display: flex;
             align-items: center;
             gap: 26px;
         }
-
         .ctrl-btn {
             background: transparent;
             border: none;
@@ -206,12 +193,10 @@
             justify-content: center;
             padding: 0;
         }
-
         #playIcon {
             font-size: 20px;
             transform: translateY(1px);
         }
-
         .pause-icon {
             display: inline-block;
             width: 14px;
@@ -234,7 +219,6 @@
     </style>
 </head>
 <body>
-
 <div class="player-container">
     <div class="screen-section">
         <div class="music-info">
@@ -258,7 +242,6 @@
             </div>
         </div>
     </div>
-
     <div class="control-section">
         <div class="speaker-area" id="speakerArea"></div>
         <div class="btn-area">
@@ -277,23 +260,24 @@
         </div>
     </div>
 </div>
-
 <script>
-    let audio = new Audio();
+    const audio = new Audio();
     audio.preload = "auto";
 
     let playlist = [];
     let filteredPlaylist = [];
     let currentIndex = 0;
-    let isPlay = false;
+    let isPlaying = false;
     let volume = 0.6;
     let playCount = 0;
+    const isRandom = true; // 开启随机播放
 
     const promoTrack = {
         name: "HellYell Radio - 欢迎收听HellYell音乐电台",
         url: "https://radio.hellyell.com/hy.mp3"
     };
 
+    // 喇叭孔
     function createCircleSpeaker() {
         const container = document.getElementById('speakerArea');
         const rings = 5;
@@ -314,6 +298,7 @@
         }
     }
 
+    // 加载歌单
     async function loadAllList() {
         try {
             const [hj, qc] = await Promise.all([
@@ -336,6 +321,7 @@
         }
     }
 
+    // 洗牌
     function shuffleList(list) {
         for(let i=list.length-1;i>0;i--){
             const j = Math.floor(Math.random()*(i+1));
@@ -343,19 +329,24 @@
         }
     }
 
+    // 时间格式化
     function formatTime(t) {
         const m = Math.floor(t / 60).toString().padStart(2, '0');
         const s = Math.floor(t % 60).toString().padStart(2, '0');
         return `${m}:${s}`;
     }
 
+    // 加载歌曲
     function loadMusic(index) {
         let targetTrack;
-
         if (playCount > 0 && playCount % 7 === 0) {
             targetTrack = promoTrack;
         } else {
-            currentIndex = (index + filteredPlaylist.length) % filteredPlaylist.length;
+            if (isRandom) {
+                currentIndex = Math.floor(Math.random() * filteredPlaylist.length);
+            } else {
+                currentIndex = (index + filteredPlaylist.length) % filteredPlaylist.length;
+            }
             targetTrack = filteredPlaylist[currentIndex];
         }
 
@@ -385,43 +376,50 @@
         updateVolumeKnob();
     }
 
-    audio.onended = () => {
-        playCount++;
-        loadMusic(currentIndex + 1);
-        safePlay();
-    };
-
+    // 安全播放（兼容息屏）
     function safePlay() {
-        if (!isPlay) return;
-        let promise = audio.play();
-        if (promise !== undefined) {
+        if (!isPlaying) return;
+        const promise = audio.play();
+        if (promise) {
             promise.catch(err => {
-                console.log("后台播放被限制", err);
+                console.warn("播放被限制，重试", err);
+                setTimeout(() => safePlay(), 300);
             });
         }
     }
 
+    // 播放/暂停
     function togglePlay() {
-        if (isPlay) {
+        if (isPlaying) {
             audio.pause();
+            isPlaying = false;
             document.getElementById('playIcon').style.display = 'inline';
             document.getElementById('pauseIcon').style.display = 'none';
             document.getElementById('nowPlaying').classList.remove('show');
         } else {
+            isPlaying = true;
             safePlay();
             document.getElementById('playIcon').style.display = 'none';
             document.getElementById('pauseIcon').style.display = 'inline-block';
             document.getElementById('nowPlaying').classList.add('show');
         }
-        isPlay = !isPlay;
     }
 
+    // 下一首
     function next() {
         playCount++;
         loadMusic(currentIndex + 1);
         safePlay();
     }
 
+    // 播放结束自动切歌（息屏也生效）
+    audio.onended = () => {
+        playCount++;
+        loadMusic(currentIndex + 1);
+        safePlay();
+    };
+
+    // 进度条
     audio.ontimeupdate = () => {
         if (!audio.duration) return;
         const p = (audio.currentTime / audio.duration) * 100;
@@ -430,6 +428,7 @@
         document.getElementById('durationTime').innerText = formatTime(audio.duration);
     };
 
+    // 音量旋钮
     function updateVolumeKnob() {
         const minAngle = -150;
         const maxAngle = 150;
@@ -451,6 +450,7 @@
         updateVolumeKnob();
     }
 
+    // 初始化
     window.onload = () => {
         createCircleSpeaker();
         loadAllList();
