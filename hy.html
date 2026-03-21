@@ -80,9 +80,9 @@
 <div class="player-container">
   <div class="screen-section">
     <div class="music-info">
-      <div class="music-name-wrapper"><div id="musicName" class="music-name"></div></div>
+      <div class="music-name-wrapper"><div id="musicName" class="music-name">HellYell Radio</div></div>
       <div class="singer-row">
-        <div id="singerName" class="singer-name"></div>
+        <div id="singerName" class="singer-name">欢迎收听</div>
         <div id="nowPlaying" class="now-playing">NOW PLAYING</div>
       </div>
     </div>
@@ -113,11 +113,12 @@ audio.preload = "auto";
 
 let playlist = [];
 let filteredPlaylist = [];
-let isPlaying = true;
+let isPlaying = false;  // 初始为 false，不自动播放
 let volume = 0.6;
 let playCount = 0;
-let isLoading = false;  // 防止重复加载
+let isLoading = false;
 let currentTrackUrl = null;
+let hasStarted = false;  // 是否已经开始播放过
 
 const promoTrack = {
   name: "HellYell Radio - 欢迎收听",
@@ -205,7 +206,6 @@ function playTrack(track) {
   
   // 清理旧事件
   audio.onended = null;
-  audio.pause();
   
   // 设置新源
   audio.src = track.url;
@@ -220,22 +220,18 @@ function playTrack(track) {
   };
   
   // 开始播放
-  if(isPlaying){
-    const playPromise = audio.play();
-    if(playPromise !== undefined){
-      playPromise.then(() => {
-        isLoading = false;
-      }).catch((e) => {
-        console.log('播放失败:', e);
-        isLoading = false;
-        // 播放失败，跳过这首
-        if(isPlaying){
-          setTimeout(() => playNext(), 500);
-        }
-      });
-    } else {
+  const playPromise = audio.play();
+  if(playPromise !== undefined){
+    playPromise.then(() => {
       isLoading = false;
-    }
+    }).catch((e) => {
+      console.log('播放失败:', e);
+      isLoading = false;
+      // 播放失败，跳过这首
+      if(isPlaying){
+        setTimeout(() => playNext(), 500);
+      }
+    });
   } else {
     isLoading = false;
   }
@@ -247,7 +243,27 @@ function playNext() {
   playTrack(nextTrack);
 }
 
+// 开始播放第一首歌
+function startPlayback() {
+  if(hasStarted) return;
+  hasStarted = true;
+  isPlaying = true;
+  
+  document.getElementById('playIcon').style.display = 'none';
+  document.getElementById('pauseIcon').style.display = 'inline-block';
+  document.getElementById('nowPlaying').classList.add('show');
+  
+  playCount = 0;
+  playTrack(promoTrack);
+}
+
 function togglePlay(){
+  if(!hasStarted){
+    // 首次点击，开始播放
+    startPlayback();
+    return;
+  }
+  
   if(isPlaying){
     audio.pause();
     isPlaying = false;
@@ -313,21 +329,32 @@ async function init(){
     filteredPlaylist=[{name:"测试 - 测试歌曲",url:"https://music.163.com/song/media/outer/url?id=1916319449.mp3"}];
   }
 
-  // 设置初始状态
-  isPlaying = true;
+  // 初始状态：显示播放按钮，不播放
+  isPlaying = false;
   isLoading = false;
-  document.getElementById('playIcon').style.display = 'none';
-  document.getElementById('pauseIcon').style.display = 'inline-block';
-  document.getElementById('nowPlaying').classList.add('show');
+  hasStarted = false;
+  document.getElementById('playIcon').style.display = 'inline';
+  document.getElementById('pauseIcon').style.display = 'none';
+  document.getElementById('nowPlaying').classList.remove('show');
   
-  // 开始播放欢迎曲
-  playCount = 0;
-  playTrack(promoTrack);
+  // 设置默认显示文字
+  document.getElementById('musicName').innerText = 'HellYell Radio';
+  document.getElementById('singerName').innerText = '欢迎收听';
+  document.title = 'HellYell音乐电台';
 
   // 绑定按钮事件
   document.getElementById('playBtn').onclick = togglePlay;
   document.getElementById('nextBtn').onclick = () => {
-    if(!isLoading) playNext();
+    if(hasStarted && !isLoading && isPlaying){
+      playNext();
+    } else if(hasStarted && !isPlaying){
+      // 暂停状态下点击下一首，先播放再切换
+      isPlaying = true;
+      document.getElementById('playIcon').style.display = 'none';
+      document.getElementById('pauseIcon').style.display = 'inline-block';
+      document.getElementById('nowPlaying').classList.add('show');
+      playNext();
+    }
   };
   document.getElementById('volMinus').onclick = () => {
     volume = Math.max(0, Math.round((volume-0.1)*10)/10);
@@ -343,7 +370,7 @@ async function init(){
   
   // 页面可见性变化时检查状态
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && isPlaying && audio.paused && !isLoading) {
+    if (!document.hidden && isPlaying && audio.paused && !isLoading && hasStarted) {
       audio.play().catch(() => {});
     }
   });
