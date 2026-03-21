@@ -110,7 +110,7 @@
             top: 50%;
             transform: translateY(-50%);
             width: 10px;
-            height: 10px;
+            the10px;
             background: #fff;
             border-radius: 50%;
         }
@@ -279,21 +279,20 @@
 </div>
 
 <script>
-let audio = new Audio();
+const audio = new Audio();
 audio.preload = "auto";
 
 let playlist = [];
 let filteredPlaylist = [];
-let currentIndex = 0;
 let isPlaying = false;
 let volume = 0.6;
-let playCount = 0;
 
 const promoTrack = {
     name: "HellYell Radio - 欢迎收听HellYell音乐电台",
     url: "https://radio.hellyell.com/hy.mp3"
 };
 
+// 喇叭
 function createCircleSpeaker() {
     const container = document.getElementById('speakerArea');
     const rings = 5;
@@ -314,6 +313,7 @@ function createCircleSpeaker() {
     }
 }
 
+// 加载歌单
 async function loadAllList() {
     try {
         const [hj, qc] = await Promise.all([
@@ -322,68 +322,45 @@ async function loadAllList() {
         ]);
         playlist = [...hj, ...qc];
         filteredPlaylist = playlist.filter(item => {
-            const [singer] = item.name.split(' - ');
-            return singer !== 'HellYell怀旧电台' && singer !== 'HellYell汽车电台';
+            const s = item.name.split(' - ')[0];
+            return s !== 'HellYell怀旧电台' && s !== 'HellYell汽车电台';
         });
-        loadMusic(0);
+        playRandom();
     } catch (e) {
         filteredPlaylist = [{
-            name: '测试歌手 - 测试歌曲',
-            url: 'https://music.163.com/song/media/outer/url?id=1916319449.mp3'
+            name: "测试 - 测试歌曲",
+            url: "https://music.163.com/song/media/outer/url?id=1916319449.mp3"
         }];
-        loadMusic(0);
+        playRandom();
     }
 }
 
-function formatTime(t) {
-    const m = Math.floor(t / 60).toString().padStart(2, '0');
-    const s = Math.floor(t % 60).toString().padStart(2, '0');
-    return `${m}:${s}`;
-}
+// 随机播放一首
+function playRandom() {
+    const track = filteredPlaylist.length
+        ? filteredPlaylist[Math.floor(Math.random() * filteredPlaylist.length)]
+        : promoTrack;
 
-function loadMusic(index) {
-    let targetTrack;
-
-    if (playCount > 0 && playCount % 7 === 0) {
-        targetTrack = promoTrack;
-    } else {
-        currentIndex = (index + filteredPlaylist.length) % filteredPlaylist.length;
-        targetTrack = filteredPlaylist[currentIndex];
-    }
-
-    const [singer, music] = targetTrack.name.split(' - ');
+    const [singer, music] = track.name.split(' - ');
     document.getElementById('singerName').innerText = singer;
-
     const nameEl = document.getElementById('musicName');
     const wrap = document.querySelector('.music-name-wrapper');
-    nameEl.classList.remove('marquee');
     nameEl.innerText = music;
-
+    nameEl.classList.remove('marquee');
     setTimeout(() => {
         if (nameEl.scrollWidth > wrap.offsetWidth) {
             nameEl.innerText = `${music}　${music}`;
             nameEl.classList.add('marquee');
-        } else {
-            nameEl.innerText = music;
-            nameEl.classList.remove('marquee');
         }
     }, 100);
-
-    document.title = `${music}-${singer}-HellYell音乐电台`;
-    document.getElementById('nowPlaying').classList.remove('show');
-
-    audio.src = targetTrack.url;
+    document.title = `${music}-${singer}`;
+    audio.src = track.url;
     audio.volume = volume;
     updateVolumeKnob();
+    if (isPlaying) audio.play().catch(() => {});
 }
 
-function tryPlay() {
-    if (!isPlaying) return;
-    audio.play().catch(err => {
-        console.log("播放被限制，将在恢复后继续");
-    });
-}
-
+// 播放/暂停
 function togglePlay() {
     if (isPlaying) {
         audio.pause();
@@ -393,42 +370,42 @@ function togglePlay() {
         document.getElementById('nowPlaying').classList.remove('show');
     } else {
         isPlaying = true;
-        tryPlay();
+        audio.play().catch(() => {});
         document.getElementById('playIcon').style.display = 'none';
         document.getElementById('pauseIcon').style.display = 'inline-block';
         document.getElementById('nowPlaying').classList.add('show');
     }
 }
 
+// 手动下一首 = 随机
 function next() {
-    playCount++;
-    loadMusic(currentIndex + 1);
-    tryPlay();
+    playRandom();
 }
 
-// 关键修复：强制切歌，不依赖浏览器 onended
-audio.ontimeupdate = () => {
+// 进度 + 自动切歌（息屏也能跑）
+audio.ontimeupdate = function() {
     if (!audio.duration) return;
-    const p = (audio.currentTime / audio.duration) * 100;
-    document.getElementById('progressBar').style.width = p + '%';
-    document.getElementById('currentTime').innerText = formatTime(audio.currentTime);
-    document.getElementById('durationTime').innerText = formatTime(audio.duration);
+    const per = (audio.currentTime / audio.duration) * 100;
+    document.getElementById('progressBar').style.width = per + '%';
+    document.getElementById('currentTime').innerText = fmt(audio.currentTime);
+    document.getElementById('durationTime').innerText = fmt(audio.duration);
 
-    // 接近结束强制切歌（息屏也能触发）
-    if (audio.duration > 0 && audio.currentTime >= audio.duration - 0.3) {
-        next();
+    // 最后 0.5 秒强制切随机歌曲
+    if (audio.currentTime > audio.duration - 0.5) {
+        playRandom();
     }
 };
 
-// 备用兜底
-audio.onended = () => {
-    next();
-};
+function fmt(t) {
+    const m = String(Math.floor(t / 60)).padStart(2, '0');
+    const s = String(Math.floor(t % 60)).padStart(2, '0');
+    return `${m}:${s}`;
+}
 
+// 音量旋钮
 function updateVolumeKnob() {
-    const minAngle = -150;
-    const maxAngle = 150;
-    const angle = minAngle + volume * (maxAngle - minAngle);
+    const min = -150, max = 150;
+    const angle = min + volume * (max - min);
     document.getElementById('volumeKnob').style.transform = `rotate(${angle}deg)`;
 }
 
