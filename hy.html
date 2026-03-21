@@ -2,33 +2,34 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HellYell电台 · 红白机版</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HellYell音乐电台</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            /* 全局统一：小米黑体 Bold */
             font-family: "MiSans", "小米兰亭", "Microsoft YaHei", sans-serif;
             font-weight: 700;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        body {
+        html, body {
+            width: 100%;
+            height: 100%;
             background-color: #e6e6e6;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            padding: 15px;
+            padding: 12px;
+            overflow: hidden;
         }
 
-        /* 主容器 */
         .player-container {
             width: 100%;
             max-width: 580px;
             aspect-ratio: 1 / 1.1;
-            background: #ffffff; /* 底部改成白色 —— 红白机风格 */
+            background: #ffffff;
             border-radius: 14px;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
             position: relative;
@@ -37,108 +38,97 @@
             flex-direction: column;
         }
 
-        /* 顶部屏幕 —— 纯红色 红白机风格 */
         .screen-section {
             height: 38%;
-            background: #E60012; /* 任天堂红白机经典红 */
-            position: relative;
+            background: #E60012;
             padding: 22px 26px;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            border-bottom: 3px solid #bcbcbc;
             z-index: 3;
         }
 
-        /* 歌曲信息 */
         .music-info {
             width: 100%;
             color: #ffffff;
             text-align: left;
         }
 
-        /* NOW PLAYING 小字 - 固定占位 + 统一小米粗体 + 发光闪烁 */
+        /* 歌曲名容器：和下方歌手名行同宽 */
+        .music-name-wrapper {
+            width: 100%;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+        .music-name {
+            font-size: 30px;
+            white-space: nowrap;
+            display: inline-block;
+        }
+        /* 无缝循环滚动：仅长歌名触发 */
+        .music-name.marquee {
+            animation: textScroll 15s linear infinite;
+        }
+        @keyframes textScroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* 歌手名 + NOW PLAYING 同一行 */
+        .singer-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+        }
+        .singer-name {
+            font-size: 16px;
+            opacity: 0.85;
+        }
         .now-playing {
             font-size: 11px;
             letter-spacing: 1.5px;
             color: rgba(255,255,255,0.7);
-            text-shadow: 0 0 6px rgba(255,255,255,0.4);
-            margin-bottom: 4px;
-            text-align: left;
-            visibility: hidden; /* 隐藏但占位，不跳动 */
+            visibility: hidden;
             animation: glowPulse 1.8s ease-in-out infinite;
+            white-space: nowrap;
         }
         .now-playing.show {
             visibility: visible;
         }
-        /* 柔和发光闪烁动画 */
         @keyframes glowPulse {
-            0% { opacity: 0.6; text-shadow: 0 0 4px rgba(255,255,255,0.3); }
-            50% { opacity: 1; text-shadow: 0 0 10px rgba(255,255,255,0.7); }
-            100% { opacity: 0.6; text-shadow: 0 0 4px rgba(255,255,255,0.3); }
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
         }
 
-        /* 歌曲名：带左右内边距，和进度条对齐 */
-        .music-name {
-            font-size: 30px;
-            margin-bottom: 6px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-align: left;
-            padding: 0 1px; /* 左右留白，和进度条对齐 */
-        }
-        .music-name.marquee {
-            display: inline-block;
-            animation: textScroll 7s linear infinite;
-            padding-left: 2px;
-            padding-right: 100%;
-        }
-        @keyframes textScroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-100%); }
-        }
-
-        /* 歌手名：加大底部间距 */
-        .singer-name {
-            font-size: 16px;
-            opacity: 0.85;
-            margin-bottom: 22px; /* 从14px → 22px，拉开与进度条距离 */
-            text-align: left;
-        }
-
-        /* 时间 + 进度条 容器 */
         .time-progress {
             width: 100%;
             display: flex;
             flex-direction: column;
             gap: 6px;
         }
-        /* 时间显示行：放在进度条下方，左右对齐 + 统一字体 */
         .time-row {
-            width: 100%;
             display: flex;
             justify-content: space-between;
             font-size: 11px;
             color: rgba(255,255,255,0.65);
+            font-family: "Courier New", monospace;
         }
-        /* 进度条：100%宽度 + 滑块 */
         .progress-wrap {
             width: 100%;
             height: 4px;
             background: rgba(255, 255, 255, 0.25);
             border-radius: 2px;
-            overflow: visible;
-            position: relative;
         }
         .progress-bar {
             height: 100%;
-            background: #ffffff;
+            background: #fff;
             width: 0%;
             transition: width 0.1s linear;
             border-radius: 2px;
             position: relative;
         }
-        /* 进度滑块 - 仅移动，不跳跃 */
         .progress-thumb {
             position: absolute;
             right: -8px;
@@ -148,68 +138,50 @@
             height: 10px;
             background: #fff;
             border-radius: 50%;
-            box-shadow: 0 0 5px rgba(255,255,255,0.5);
         }
 
-        /* 底部控制区 */
         .control-section {
             height: 62%;
             padding: 32px 36px;
             display: flex;
             align-items: center;
-            justify-content: flex-end; /* 整体靠右，实现居中布局 */
-            position: relative;
-            z-index: 2;
+            justify-content: flex-end;
             gap: 28px;
         }
 
-        /* 圆形喇叭区域：缩小50% + 单独往左微调，右侧不动 */
         .speaker-area {
             width: 50%;
             aspect-ratio: 1/1;
             position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: 8%; /* 往左微调，只动喇叭，不动右侧 */
+            margin-left: 8%;
         }
-        /* 圆形喇叭孔：标准大小 + 环形排列 */
         .speaker-hole {
             position: absolute;
-            width: 6px;
-            height: 6px;
+            width: 8px;
+            height: 8px;
             background: #141414;
             border-radius: 50%;
-            transform: translate(-50%, -50%);
         }
 
-        /* 右侧控制：完全不动，保持原位 */
         .btn-area {
             width: 50%;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             gap: 30px;
         }
 
-        /* 音量旋钮 + 点击加减 */
         .volume-box {
             position: relative;
-            width: 100px;
-            height: 100px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            width: 80px;
+            height: 80px;
         }
         .volume-knob {
             width: 100%;
             height: 100%;
-            background: linear-gradient(145deg, #ffffff, #e0e0e0); /* 白色旋钮更贴合 */
+            background: linear-gradient(145deg, #fff, #e0e0e0);
             border-radius: 50%;
-            pointer-events: none;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         .volume-knob::after {
             content: '';
@@ -226,12 +198,10 @@
             font-size: 18px;
             color: #444;
             cursor: pointer;
-            user-select: none;
         }
-        .vol-minus { bottom: -24px; left: 16px; }
-        .vol-plus { bottom: -24px; right: 16px; }
+        .vol-minus { bottom: -24px; left: 12px; }
+        .vol-plus { bottom: -24px; right: 12px; }
 
-        /* 播放按钮 */
         .play-btns {
             display: flex;
             align-items: center;
@@ -243,36 +213,48 @@
             font-size: 26px;
             color: #444;
             cursor: pointer;
-            transition: transform 0.15s;
         }
-        .ctrl-btn:hover {
-            transform: scale(1.15);
-            color: #111;
+        .play-btn {
+            font-size: 36px;
         }
-        .play-btn { font-size: 36px; }
+
+        .pause-icon {
+            display: inline-block;
+            width: 16px;
+            height: 24px;
+            position: relative;
+        }
+        .pause-icon::before, .pause-icon::after {
+            content: '';
+            position: absolute;
+            width: 5px;
+            height: 22px;
+            background: #000;
+            border-radius: 1px;
+        }
+        .pause-icon::before { left: 0; }
+        .pause-icon::after { right: 0; }
     </style>
 </head>
 <body>
 
 <div class="player-container">
-    <!-- 顶部屏幕 -->
     <div class="screen-section">
         <div class="music-info">
-            <!-- NOW PLAYING：固定占位不跳动 + 发光闪烁 -->
-            <div id="nowPlaying" class="now-playing">NOW PLAYING</div>
-            <!-- 歌曲名 + 歌手名 -->
-            <div id="musicName" class="music-name"></div>
-            <div id="singerName" class="singer-name"></div>
+            <div class="music-name-wrapper">
+                <div id="musicName" class="music-name"></div>
+            </div>
+            <div class="singer-row">
+                <div id="singerName" class="singer-name"></div>
+                <div id="nowPlaying" class="now-playing">NOW PLAYING</div>
+            </div>
         </div>
-
-        <!-- 时间 + 进度条 -->
         <div class="time-progress">
             <div class="progress-wrap">
                 <div id="progressBar" class="progress-bar">
                     <div id="progressThumb" class="progress-thumb"></div>
                 </div>
             </div>
-            <!-- 时间放在进度条下方 -->
             <div class="time-row">
                 <div id="currentTime">00:00</div>
                 <div id="durationTime">00:00</div>
@@ -280,12 +262,8 @@
         </div>
     </div>
 
-    <!-- 底部控制 -->
     <div class="control-section">
-        <!-- 圆形喇叭：单独往左微调 -->
         <div class="speaker-area" id="speakerArea"></div>
-
-        <!-- 右侧控制：完全不动，保持原位 -->
         <div class="btn-area">
             <div class="volume-box">
                 <div id="volumeKnob" class="volume-knob"></div>
@@ -293,8 +271,10 @@
                 <div class="vol-label vol-plus" id="volPlus">+</div>
             </div>
             <div class="play-btns">
-                <button id="prevBtn" class="ctrl-btn">⏮</button>
-                <button id="playBtn" class="ctrl-btn play-btn">▶</button>
+                <button id="playBtn" class="ctrl-btn play-btn">
+                    <span id="playIcon">▶</span>
+                    <span id="pauseIcon" class="pause-icon" style="display:none;"></span>
+                </button>
                 <button id="nextBtn" class="ctrl-btn">⏭</button>
             </div>
         </div>
@@ -304,26 +284,28 @@
 <script>
     let audio = new Audio();
     let playlist = [];
+    let filteredPlaylist = [];
     let currentIndex = 0;
     let isPlay = false;
     let volume = 0.5;
+    let playCount = 0;
 
-    // ======================================
-    // 生成圆形喇叭孔（整体缩小50%）
-    // ======================================
+    const promoTrack = {
+        name: "HellYell Radio - 欢迎收听HellYell音乐电台",
+        url: "https://radio.hellyell.com/hy.mp3"
+    };
+
     function createCircleSpeaker() {
         const container = document.getElementById('speakerArea');
         const rings = 5;
         const holesPerRing = [12, 18, 24, 30, 36];
-        
         for (let r = 0; r < rings; r++) {
-            const radius = 15 + r * 12;
+            const radius = 18 + r * 14;
             const count = holesPerRing[r];
             for (let i = 0; i < count; i++) {
                 const angle = (i / count) * Math.PI * 2;
                 const x = 50 + radius * Math.cos(angle);
                 const y = 50 + radius * Math.sin(angle);
-                
                 const dot = document.createElement('div');
                 dot.className = 'speaker-hole';
                 dot.style.left = x + '%';
@@ -333,9 +315,6 @@
         }
     }
 
-    // ======================================
-    // 加载歌单
-    // ======================================
     async function loadAllList() {
         try {
             const [hj, qc] = await Promise.all([
@@ -343,127 +322,121 @@
                 fetch('https://radio.hellyell.com/qiche-musiclist.json').then(r=>r.json())
             ]);
             playlist = [...hj, ...qc];
-            shuffleList();
+            filteredPlaylist = playlist.filter(item => {
+                const [singer] = item.name.split(' - ');
+                return singer !== 'HellYell怀旧电台' && singer !== 'HellYell汽车电台';
+            });
+            shuffleList(filteredPlaylist);
             loadMusic(0);
         } catch (e) {
-            console.error('歌单加载失败');
-            playlist = [{name:'测试歌手 - 测试歌曲', url:'https://music.163.com/song/media/outer/url?id=1916319449.mp3'}];
+            filteredPlaylist = [{name:'测试歌手 - 测试歌曲', url:'https://music.163.com/song/media/outer/url?id=1916319449.mp3'}];
             loadMusic(0);
         }
     }
 
-    // 随机歌单
-    function shuffleList() {
-        for(let i=playlist.length-1;i>0;i--){
+    function shuffleList(list) {
+        for(let i=list.length-1;i>0;i--){
             const j = Math.floor(Math.random()*(i+1));
-            [playlist[i],playlist[j]] = [playlist[j],playlist[i]];
+            [list[i],list[j]] = [list[j],list[i]];
         }
     }
 
-    // 格式化时间
     function formatTime(t) {
         const m = Math.floor(t / 60).toString().padStart(2, '0');
         const s = Math.floor(t % 60).toString().padStart(2, '0');
         return `${m}:${s}`;
     }
 
-    // ======================================
-    // 加载歌曲 + 失败自动切歌
-    // ======================================
     function loadMusic(index) {
-        if(!playlist.length) return;
-        currentIndex = (index + playlist.length) % playlist.length;
-        const item = playlist[currentIndex];
-        
-        const [singer, music] = item.name.split(' - ');
-        document.getElementById('singerName').innerText = singer;
-        document.getElementById('musicName').innerText = music;
+        let targetTrack;
 
-        // 重置UI
+        if (playCount > 0 && playCount % 7 === 0) {
+            targetTrack = promoTrack;
+        } else {
+            currentIndex = (index + filteredPlaylist.length) % filteredPlaylist.length;
+            targetTrack = filteredPlaylist[currentIndex];
+        }
+
+        const [singer, music] = targetTrack.name.split(' - ');
+        document.getElementById('singerName').innerText = singer;
+        
+        const nameEl = document.getElementById('musicName');
+        const wrapper = document.querySelector('.music-name-wrapper');
+        nameEl.classList.remove('marquee');
+        
+        // 先设置单份歌名，测量宽度
+        nameEl.innerText = music;
+        setTimeout(()=>{
+            const isLongName = nameEl.scrollWidth > wrapper.offsetWidth;
+            if (isLongName) {
+                // 长歌名：改为“歌名　歌名”（一个中文全角空格）并开启滚动
+                nameEl.innerText = `${music}　${music}`;
+                nameEl.classList.add('marquee');
+            } else {
+                // 短歌名：保持单份，不滚动
+                nameEl.innerText = music;
+                nameEl.classList.remove('marquee');
+            }
+        }, 100);
+
+        document.title = `${music}-${singer}-HellYell音乐电台`;
+
         document.getElementById('nowPlaying').classList.remove('show');
         document.getElementById('currentTime').innerText = '00:00';
         document.getElementById('durationTime').innerText = '00:00';
 
-        // 歌曲名滚动 + 左右留白不贴边
-        const nameEl = document.getElementById('musicName');
-        nameEl.classList.remove('marquee');
-        setTimeout(()=>{
-            if(nameEl.scrollWidth > nameEl.offsetWidth) nameEl.classList.add('marquee');
-        },100);
-
-        audio.src = item.url;
+        audio.src = targetTrack.url;
         audio.volume = volume;
         audio.load();
     }
 
-    // ======================================
-    // 播放控制
-    // ======================================
     function togglePlay() {
-        if(isPlay){
+        if (isPlay) {
             audio.pause();
-            document.getElementById('playBtn').innerText = '▶';
+            document.getElementById('playIcon').style.display = 'inline';
+            document.getElementById('pauseIcon').style.display = 'none';
             document.getElementById('nowPlaying').classList.remove('show');
-        }else{
+        } else {
             audio.play();
-            document.getElementById('playBtn').innerText = '⏸';
+            document.getElementById('playIcon').style.display = 'none';
+            document.getElementById('pauseIcon').style.display = 'inline-block';
             document.getElementById('nowPlaying').classList.add('show');
         }
         isPlay = !isPlay;
     }
 
-    function prev(){ loadMusic(currentIndex-1); autoPlay(); }
-    function next(){ loadMusic(currentIndex+1); autoPlay(); }
-    
-    // 自动播放
-    function autoPlay(){
-        if(isPlay) {
-            setTimeout(()=>{
-                audio.play();
-                document.getElementById('nowPlaying').classList.add('show');
-            }, 500);
-        }
+    function next() {
+        playCount++;
+        loadMusic(currentIndex + 1);
+        if (isPlay) autoPlay();
     }
 
-    // ======================================
-    // 音频加载失败 → 自动切下一首
-    // ======================================
-    audio.onerror = () => {
-        console.warn('歌曲加载失败，自动切换下一首');
-        let attempts = 0;
-        const tryNext = () => {
-            next();
-            attempts++;
-            if (attempts >= 10) {
-                console.error('连续10首加载失败，停止尝试');
-                isPlay = false;
-                document.getElementById('playBtn').innerText = '▶';
-                document.getElementById('nowPlaying').classList.remove('show');
-            }
-        };
-        tryNext();
-    };
+    function autoPlay() {
+        setTimeout(()=>{
+            audio.play();
+            document.getElementById('playIcon').style.display = 'none';
+            document.getElementById('pauseIcon').style.display = 'inline-block';
+            document.getElementById('nowPlaying').classList.add('show');
+        }, 300);
+    }
 
-    // 进度条 + 滑块移动（无跳跃）
+    audio.onerror = () => { next(); };
+
     audio.ontimeupdate = ()=>{
-        if(!audio.duration) return;
-        const p = (audio.currentTime/audio.duration)*100;
-        document.getElementById('progressBar').style.width = p+'%';
+        if (!audio.duration) return;
+        const p = (audio.currentTime / audio.duration) * 100;
+        document.getElementById('progressBar').style.width = p + '%';
         document.getElementById('currentTime').innerText = formatTime(audio.currentTime);
         document.getElementById('durationTime').innerText = formatTime(audio.duration);
     };
 
-    // 歌曲结束切歌
-    audio.onended = ()=> {
-        next();
-    };
+    audio.onended = ()=> { next(); };
 
-    // 音量控制
     function initVolumeClick() {
         const volMinus = document.getElementById('volMinus');
         const volPlus = document.getElementById('volPlus');
         const knob = document.getElementById('volumeKnob');
-        
+
         volMinus.onclick = () => {
             volume = Math.max(0, (Math.round(volume * 10) / 10) - 0.1);
             audio.volume = volume;
@@ -477,16 +450,13 @@
         knob.style.transform = `rotate(${(-90 + volume * 270)}deg)`;
     }
 
-    // 初始化
     window.onload = ()=>{
         createCircleSpeaker();
         loadAllList();
         initVolumeClick();
         document.getElementById('playBtn').onclick = togglePlay;
-        document.getElementById('prevBtn').onclick = prev;
         document.getElementById('nextBtn').onclick = next;
     };
 </script>
-
 </body>
 </html>
