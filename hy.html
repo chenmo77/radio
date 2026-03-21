@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>HellYell音乐电台</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;font-family:"MiSans","Microsoft YaHei",sans-serif;font-weight:700}
@@ -111,6 +111,11 @@
 const audio = new Audio();
 audio.preload = "auto";
 
+// 关键修复：确保音频在后台也能触发 ended 事件
+// 使用 AudioContext 保持活跃（不实际使用，仅保持后台活跃）
+let audioContext = null;
+let silentSource = null;
+
 let playlist = [];
 let filteredPlaylist = [];
 let isPlaying = false;
@@ -118,12 +123,41 @@ let volume = 0.6;
 let playCount = 0;
 
 let playCheckTimer = null;
+let endedCheckInterval = null; // 新增：ended 备用检测
 const PLAY_TIMEOUT = 6000;
 
 const promoTrack = {
   name: "HellYell Radio - 欢迎收听",
   url: "https://radio.hellyell.com/hy.mp3"
 };
+
+// 关键修复：保持后台活跃
+function initBackgroundKeepAlive() {
+  try {
+    // 创建一个无声的 AudioContext，让浏览器认为页面正在使用音频
+    // 这样息屏后音频事件仍会触发
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    // 创建一个极短且无声的 buffer，循环播放静音，保持音频上下文活跃
+    const bufferSize = 4096;
+    const emptyBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+    const source = audioContext.createBufferSource();
+    source.buffer = emptyBuffer;
+    source.loop = true;
+    source.connect(audioContext.destination);
+    source.start();
+    
+    // 用户首次交互时恢复 AudioContext（移动端需要）
+    const resumeAudioContext = () => {
+      if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+    };
+    document.addEventListener('click', resumeAudioContext, { once: true });
+    document.addEventListener('touchstart', resumeAudioContext, { once: true });
+  } catch(e) {
+    console.log('AudioContext 不支持，使用备用方案');
+  }
+}
 
 function createCircleSpeaker() {
   const c = document.getElementById('speakerArea');
@@ -163,6 +197,27 @@ function startPlayCheck(){
       next();
     }
   }, PLAY_TIMEOUT);
+}
+
+// 关键修复：ended 事件备用检测（解决息屏后 ended 不触发的问题）
+function startEndedCheck() {
+  if (endedCheckInterval) clearInterval(endedCheckInterval);
+  endedCheckInterval = setInterval(() => {
+    if (!isPlaying) return;
+    if (audio.duration && audio.currentTime >= audio.duration - 0.5 && audio.currentTime > 0) {
+      // 接近结束，触发下一首
+      if (!audio.paused && audio.currentTime > 0) {
+        next();
+      }
+    }
+  }, 500);
+}
+
+function stopEndedCheck() {
+  if (endedCheckInterval) {
+    clearInterval(endedCheckInterval);
+    endedCheckInterval = null;
+  }
 }
 
 // 丝滑渐隐 → 切换文字 → 渐显
@@ -214,7 +269,22 @@ function getNextTrack(){
 function playTrack(track){
   loadTrack(track);
   if(!isPlaying) return;
-  audio.play().catch(()=>{next();});
+  
+  // 关键修复：移除旧的 ended 事件，重新绑定
+  audio.onended = null;
+  const playPromise = audio.play();
+  if (playPromise !== undefined) {
+    playPromise.then(() => {
+      // 播放成功，绑定 ended 事件
+      audio.onended = () => {
+        if (isPlaying) {
+          next();
+        }
+      };
+    }).catch(() => {
+      next();
+    });
+  }
   startPlayCheck();
 }
 
@@ -233,7 +303,19 @@ function togglePlay(){
     document.getElementById('nowPlaying').classList.remove('show');
   }else{
     isPlaying = true;
-    audio.play().catch(()=>{next();});
+    // 关键修复：恢复播放时确保重新绑定 ended 事件
+    audio.onended = () => {
+      if (isPlaying) {
+        next();
+      }
+    };
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {
+        // 播放失败，尝试下一首
+        next();
+      });
+    }
     startPlayCheck();
     document.getElementById('playIcon').style.display = 'none';
     document.getElementById('pauseIcon').style.display = 'inline-block';
@@ -249,17 +331,41 @@ audio.ontimeupdate = ()=>{
   document.getElementById('durationTime').innerText = fmt(audio.duration);
 
   if(audio.currentTime>0.2) clearPlayCheck();
-  if(audio.currentTime >= audio.duration - 1) next();
 };
+
+// 关键修复：使用 timeupdate 检测结束作为备用方案
+// 在 timeupdate 中检测是否接近结束
+audio.addEventListener('timeupdate', () => {
+  if (!isPlaying) return;
+  if (audio.duration && audio.currentTime >= audio.duration - 0.3 && audio.currentTime > 0) {
+    // 确保只触发一次
+    if (!audio._endingTriggered) {
+      audio._endingTriggered = true;
+      // 延迟一下，确保 ended 事件优先，如果没触发则由这里接管
+      setTimeout(() => {
+        if (audio.currentTime >= audio.duration - 0.2 && isPlaying) {
+          next();
+        }
+        audio._endingTriggered = false;
+      }, 200);
+    }
+  } else if (audio.currentTime < audio.duration - 0.5) {
+    audio._endingTriggered = false;
+  }
+});
 
 function updateVolumeKnob(){
   const min=-150,max=150;
   const angle=min+volume*(max-min);
-  document.getElementById('volumeKnob').style.transform=`rotate(${angle}deg)`;
+  const knob = document.getElementById('volumeKnob');
+  if(knob) knob.style.transform=`rotate(${angle}deg)`;
 }
 
 async function init(){
   createCircleSpeaker();
+  // 初始化后台保活
+  initBackgroundKeepAlive();
+  
   try{
     const [hj,qc]=await Promise.all([
       fetch('https://radio.hellyell.com/huaijiu-musiclist.json').then(r=>r.json()),
@@ -288,6 +394,14 @@ async function init(){
     audio.volume=volume;updateVolumeKnob();
   };
   updateVolumeKnob();
+  
+  // 关键修复：页面可见性变化时重新激活
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && isPlaying && audio.paused) {
+      // 页面重新可见时，如果应该播放但暂停了，尝试恢复
+      audio.play().catch(() => {});
+    }
+  });
 }
 
 window.onload=init;
