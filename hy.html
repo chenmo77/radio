@@ -1,267 +1,91 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HellYell音乐电台</title>
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: "MiSans", "Microsoft YaHei", sans-serif;
-        font-weight: 700;
-    }
-    html, body {
-        width: 100%;
-        height: 100%;
-        background: #e6e6e6;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 10px;
-    }
-    .player-container {
-        width: 100%;
-        max-width: 560px;
-        aspect-ratio: 1 / 1.12;
-        background: #fff;
-        border-radius: 16px;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.25);
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-    }
-    .screen-section {
-        height: 38%;
-        background: #E60012;
-        padding: 24px 28px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-    .music-info {
-        width: 100%;
-        color: #fff;
-    }
-    .music-name-wrapper {
-        width: 100%;
-        overflow: hidden;
-        margin-bottom: 6px;
-    }
-    .music-name {
-        font-size: 30px;
-        white-space: nowrap;
-    }
-    .music-name.marquee {
-        display: inline-block;
-        animation: textScroll 16s linear infinite;
-    }
-    @keyframes textScroll {
-        0% { transform: translateX(0); }
-        100% { transform: translateX(-50%); }
-    }
-    .singer-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 22px;
-    }
-    .singer-name {
-        font-size: 16px;
-        opacity: 0.85;
-    }
-    .now-playing {
-        font-size: 11px;
-        letter-spacing: 1.5px;
-        color: rgba(255,255,255,0.7);
-        visibility: hidden;
-        animation: glow 1.8s infinite alternate;
-    }
-    .now-playing.show { visibility: visible; }
-    @keyframes glow { 0%{opacity:0.6;} 100%{opacity:1;} }
-    .time-progress {
-        width: 100%;
-    }
-    .progress-wrap {
-        width: 100%;
-        height: 4px;
-        background: rgba(255,255,255,0.25);
-        border-radius: 2px;
-        overflow: hidden;
-    }
-    .progress-bar {
-        height: 100%;
-        background: #fff;
-        width: 0%;
-        transition: width 0.1s linear;
-        position: relative;
-    }
-    .progress-thumb {
-        position: absolute;
-        right: -8px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 10px;
-        height: 10px;
-        background: #fff;
-        border-radius: 50%;
-    }
-    .time-row {
-        display: flex;
-        justify-content: space-between;
-        font-size: 11px;
-        color: rgba(255,255,255,0.65);
-        margin-top: 6px;
-    }
-    .control-section {
-        height: 62%;
-        padding: 40px 40px 30px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 44px;
-    }
-    .speaker-area {
-        width: 42%;
-        aspect-ratio: 1/1;
-        position: relative;
-        transform: translateY(-10px);
-    }
-    .speaker-hole {
-        position: absolute;
-        width: 8px;
-        height: 8px;
-        background: #141414;
-        border-radius: 50%;
-    }
-    .btn-area {
-        width: 42%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 32px;
-        transform: translateX(6px);
-    }
-    .volume-box {
-        position: relative;
-        width: 80px;
-        height: 80px;
-    }
-    .volume-knob {
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(145deg, #fff, #e0e0e0);
-        border-radius: 50%;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        position: relative;
-    }
-    .volume-knob::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 2.5px;
-        height: 20px;
-        background: #555;
-        transform-origin: center 40px;
-    }
-    .vol-label {
-        position: absolute;
-        font-size: 18px;
-        color: #444;
-        cursor: pointer;
-    }
-    .vol-minus { bottom: -24px; left: 12px; }
-    .vol-plus { bottom: -24px; right: 12px; }
-    .play-btns {
-        display: flex;
-        align-items: center;
-        gap: 26px;
-    }
-    .ctrl-btn {
-        background: transparent;
-        border: none;
-        font-size: 26px;
-        color: #444;
-        cursor: pointer;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0;
-    }
-    #playIcon {
-        font-size: 20px;
-        transform: translateY(1px);
-    }
-    .pause-icon {
-        display: inline-block;
-        width: 14px;
-        height: 16px;
-        position: relative;
-        transform: translateY(1px);
-    }
-    .pause-icon::before, .pause-icon::after {
-        content: '';
-        position: absolute;
-        width: 5px;
-        height: 16px;
-        background: #444;
-        border-radius: 1px;
-        top: 50%;
-        transform: translateY(-50%);
-    }
-    .pause-icon::before { left: 0; }
-    .pause-icon::after { right: 0; }
+  *{margin:0;padding:0;box-sizing:border-box;font-family:"MiSans","Microsoft YaHei",sans-serif;font-weight:700}
+  html,body{width:100%;height:100%;background:#e6e6e6;display:flex;justify-content:center;align-items:center;padding:10px}
+  .player-container{width:100%;max-width:560px;aspect-ratio:1/1.12;background:#fff;border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,0.25);display:flex;flex-direction:column;overflow:hidden}
+  .screen-section{height:38%;background:#E60012;padding:24px 28px;display:flex;flex-direction:column;justify-content:center}
+  .music-info{width:100%;color:#fff}
+  .music-name-wrapper{width:100%;overflow:hidden;margin-bottom:6px}
+  .music-name{font-size:30px;white-space:nowrap}
+  .music-name.marquee{display:inline-block;animation:textScroll 16s linear infinite}
+  @keyframes textScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+  .singer-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+  .singer-name{font-size:16px;opacity:.85}
+  .now-playing{font-size:11px;letter-spacing:1.5px;color:rgba(255,255,255,0.7);visibility:hidden;animation:glow 1.8s infinite alternate}
+  .now-playing.show{visibility:visible}
+  @keyframes glow{0%{opacity:.6}100%{opacity:1}}
+  .time-progress{width:100%}
+  .progress-wrap{width:100%;height:4px;background:rgba(255,255,255,0.25);border-radius:2px;overflow:hidden}
+  .progress-bar{height:100%;background:#fff;width:0%;transition:width .1s linear;position:relative}
+  .progress-thumb{position:absolute;right:-8px;top:50%;transform:translateY(-50%);width:10px;height:10px;background:#fff;border-radius:50%}
+  .time-row{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.65);margin-top:6px}
+  .control-section{height:62%;padding:40px 40px 30px;display:flex;justify-content:center;align-items:center;gap:44px}
+  .speaker-area{width:42%;aspect-ratio:1/1;position:relative;transform:translateY(-10px)}
+  .speaker-hole{position:absolute;width:8px;height:8px;background:#141414;border-radius:50%}
+  .btn-area{width:42%;display:flex;flex-direction:column;align-items:center;gap:32px;transform:translateX(6px)}
+  .volume-box{position:relative;width:80px;height:80px}
+  .volume-knob{width:100%;height:100%;background:linear-gradient(145deg,#fff,#e0e0e0);border-radius:50%;box-shadow:0 4px 10px rgba(0,0,0,0.1);position:relative}
+  .volume-knob::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:2.5px;height:20px;background:#555;transform-origin:center 40px}
+  .vol-label{position:absolute;font-size:18px;color:#444;cursor:pointer}
+  .vol-minus{bottom:-24px;left:12px}
+  .vol-plus{bottom:-24px;right:12px}
+  .play-btns{display:flex;align-items:center;gap:26px}
+  .ctrl-btn{background:transparent;border:none;font-size:26px;color:#444;cursor:pointer;width:40px;height:40px;display:flex;align-items:center;justify-content:center;padding:0}
+  #playIcon{font-size:20px;transform:translateY(1px)}
+  .pause-icon{display:inline-block;width:14px;height:16px;position:relative;transform:translateY(1px)}
+  .pause-icon::before,.pause-icon::after{content:'';position:absolute;width:5px;height:16px;background:#444;border-radius:1px;top:50%;transform:translateY(-50%)}
+  .pause-icon::before{left:0}
+  .pause-icon::after{right:0}
 </style>
+</head>
+<body>
 
 <div class="player-container">
-    <div class="screen-section">
-        <div class="music-info">
-            <div class="music-name-wrapper">
-                <div id="musicName" class="music-name"></div>
-            </div>
-            <div class="singer-row">
-                <div id="singerName" class="singer-name"></div>
-                <div id="nowPlaying" class="now-playing">NOW PLAYING</div>
-            </div>
-        </div>
-        <div class="time-progress">
-            <div class="progress-wrap">
-                <div id="progressBar" class="progress-bar">
-                    <div id="progressThumb" class="progress-thumb"></div>
-                </div>
-            </div>
-            <div class="time-row">
-                <div id="currentTime">00:00</div>
-                <div id="durationTime">00:00</div>
-            </div>
-        </div>
+  <div class="screen-section">
+    <div class="music-info">
+      <div class="music-name-wrapper"><div id="musicName" class="music-name"></div></div>
+      <div class="singer-row">
+        <div id="singerName" class="singer-name"></div>
+        <div id="nowPlaying" class="now-playing">NOW PLAYING</div>
+      </div>
     </div>
-    <div class="control-section">
-        <div class="speaker-area" id="speakerArea"></div>
-        <div class="btn-area">
-            <div class="volume-box">
-                <div id="volumeKnob" class="volume-knob"></div>
-                <div class="vol-label vol-minus" id="volMinus">−</div>
-                <div class="vol-label vol-plus" id="volPlus">+</div>
-            </div>
-            <div class="play-btns">
-                <button id="playBtn" class="ctrl-btn">
-                    <span id="playIcon">▶</span>
-                    <span id="pauseIcon" class="pause-icon" style="display:none;"></span>
-                </button>
-                <button id="nextBtn" class="ctrl-btn">⏭</button>
-            </div>
-        </div>
+    <div class="time-progress">
+      <div class="progress-wrap"><div id="progressBar" class="progress-bar"><div id="progressThumb" class="progress-thumb"></div></div></div>
+      <div class="time-row"><div id="currentTime">00:00</div><div id="durationTime">00:00</div></div>
     </div>
+  </div>
+  <div class="control-section">
+    <div class="speaker-area" id="speakerArea"></div>
+    <div class="btn-area">
+      <div class="volume-box">
+        <div id="volumeKnob" class="volume-knob"></div>
+        <div class="vol-label vol-minus" id="volMinus">−</div>
+        <div class="vol-label vol-plus" id="volPlus">+</div>
+      </div>
+      <div class="play-btns">
+        <button id="playBtn" class="ctrl-btn"><span id="playIcon">▶</span><span id="pauseIcon" class="pause-icon" style="display:none"></span></button>
+        <button id="nextBtn" class="ctrl-btn">⏭</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
+// ========== 息屏保活核心（唯一能解决卡死）==========
+let audioContext;
+function keepAlive() {
+  if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioContext.state === 'suspended') audioContext.resume();
+}
+
 const audio = new Audio();
 audio.preload = "auto";
+audio.crossOrigin = "anonymous";
 
 let playlist = [];
 let filteredPlaylist = [];
@@ -269,191 +93,176 @@ let isPlaying = false;
 let volume = 0.6;
 let playCount = 0;
 
-let playCheckTimer = null;    // 6秒检测计时器
-const PLAY_TIMEOUT = 6000;   // 6秒超时
+let trackTimer = null;
+let playCheckTimer = null;
+const PLAY_TIMEOUT = 6000;
 
 const promoTrack = {
-    name: "HellYell Radio - 欢迎收听HellYell音乐电台",
-    url: "https://radio.hellyell.com/hy.mp3"
+  name: "HellYell Radio - 欢迎收听HellYell音乐电台",
+  url: "https://radio.hellyell.com/hy.mp3"
 };
 
 function createCircleSpeaker() {
-    const container = document.getElementById('speakerArea');
-    const rings = 5;
-    const holesPerRing = [12, 18, 24, 30, 36];
-    for (let r = 0; r < rings; r++) {
-        const radius = 18 + r * 14;
-        const count = holesPerRing[r];
-        for (let i = 0; i < count; i++) {
-            const angle = (i / count) * Math.PI * 2;
-            const x = 50 + radius * Math.cos(angle);
-            const y = 50 + radius * Math.sin(angle);
-            const dot = document.createElement('div');
-            dot.className = 'speaker-hole';
-            dot.style.left = x + '%';
-            dot.style.top = y + '%';
-            container.appendChild(dot);
-        }
+  const c = document.getElementById('speakerArea');
+  const rings = 5;
+  const holes = [12,18,24,30,36];
+  for(let r=0;r<rings;r++){
+    const ra = 18 + r*14;
+    const cnt = holes[r];
+    for(let i=0;i<cnt;i++){
+      const ang = (i/cnt)*Math.PI*2;
+      const x = 50 + ra*Math.cos(ang);
+      const y = 50 + ra*Math.sin(ang);
+      const d = document.createElement('div');
+      d.className = 'speaker-hole';
+      d.style.left = x+'%';
+      d.style.top = y+'%';
+      c.appendChild(d);
     }
+  }
 }
 
-async function loadAllList() {
-    try {
-        const [hj, qc] = await Promise.all([
-            fetch('https://radio.hellyell.com/huaijiu-musiclist.json').then(r=>r.json()),
-            fetch('https://radio.hellyell.com/qiche-musiclist.json').then(r=>r.json())
-        ]);
-        playlist = [...hj, ...qc];
-        filteredPlaylist = playlist.filter(item => {
-            const s = item.name.split(' - ')[0];
-            return s !== 'HellYell怀旧电台' && s !== 'HellYell汽车电台';
-        });
-    } catch (e) {
-        filteredPlaylist = [{
-            name: "测试 - 测试歌曲",
-            url: "https://music.163.com/song/media/outer/url?id=1916319449.mp3"
-        }];
-    }
-    // 第一首直接播放 hy.mp3
-    loadTrack(promoTrack);
+function fmt(t){
+  const m = String(Math.floor(t/60)).padStart(2,'0');
+  const s = String(Math.floor(t%60)).padStart(2,'0');
+  return m+':'+s;
 }
 
-// 清理超时检测
-function clearPlayCheck() {
-    if (playCheckTimer) {
-        clearTimeout(playCheckTimer);
-        playCheckTimer = null;
-    }
+function clearAllTimer(){
+  if(trackTimer) clearTimeout(trackTimer);
+  if(playCheckTimer) clearTimeout(playCheckTimer);
+  trackTimer = playCheckTimer = null;
 }
 
-// 6秒没播放就切歌
-function startPlayCheck() {
-    clearPlayCheck();
-    playCheckTimer = setTimeout(() => {
-        if (isPlaying && audio.currentTime <= 0) {
-            console.log("播放超时，自动切歌");
-            playNext();
-        }
-    }, PLAY_TIMEOUT);
+function startPlayCheck(){
+  clearPlayCheckTimer();
+  playCheckTimer = setTimeout(()=>{
+    if(isPlaying && audio.currentTime <= 0){
+      console.log("播放超时，自动切歌");
+      next();
+    }
+  }, PLAY_TIMEOUT);
 }
 
-function loadTrack(track) {
-    clearPlayCheck();
-
-    const parts = track.name.split(' - ');
-    const singer = parts[0] || '';
-    const music = parts.slice(1).join(' - ') || track.name;
-
-    document.getElementById('singerName').innerText = singer;
-    const nameEl = document.getElementById('musicName');
-    const wrap = document.querySelector('.music-name-wrapper');
-    nameEl.innerText = music;
-    nameEl.classList.remove('marquee');
-    setTimeout(() => {
-        if (nameEl.scrollWidth > wrap.offsetWidth) {
-            nameEl.innerText = `${music}　${music}`;
-            nameEl.classList.add('marquee');
-        }
-    }, 100);
-
-    document.title = `${music}-${singer}`;
-    audio.src = track.url;
-    audio.volume = volume;
-    updateVolumeKnob();
-
-    if (isPlaying) {
-        audio.play().catch(() => {
-            playNext();
-        });
-        startPlayCheck();
-    }
+function clearPlayCheckTimer(){
+  if(playCheckTimer) clearTimeout(playCheckTimer);
+  playCheckTimer = null;
 }
 
-function playNext() {
-    clearPlayCheck();
-    playCount++;
-    if (playCount % 7 === 0) {
-        loadTrack(promoTrack);
-    } else {
-        const randTrack = filteredPlaylist[Math.floor(Math.random() * filteredPlaylist.length)];
-        loadTrack(randTrack);
+function loadTrack(track){
+  clearAllTimer();
+  const parts = track.name.split(' - ');
+  const singer = parts[0]||'';
+  const music = parts.slice(1).join(' - ')||track.name;
+  document.getElementById('singerName').innerText = singer;
+  const el = document.getElementById('musicName');
+  const wrap = document.querySelector('.music-name-wrapper');
+  el.innerText = music;
+  el.classList.remove('marquee');
+  setTimeout(()=>{
+    if(el.scrollWidth > wrap.offsetWidth){
+      el.innerText = music+'　'+music;
+      el.classList.add('marquee');
     }
+  },100);
+  document.title = music+'-'+singer;
+  audio.src = track.url;
+  audio.volume = volume;
+  updateVolume();
 }
 
-function togglePlay() {
-    if (isPlaying) {
-        clearPlayCheck();
-        audio.pause();
-        isPlaying = false;
-        document.getElementById('playIcon').style.display = 'inline';
-        document.getElementById('pauseIcon').style.display = 'none';
-        document.getElementById('nowPlaying').classList.remove('show');
-    } else {
-        isPlaying = true;
-        audio.play().catch(() => {
-            playNext();
-        });
-        startPlayCheck();
-        document.getElementById('playIcon').style.display = 'none';
-        document.getElementById('pauseIcon').style.display = 'inline-block';
-        document.getElementById('nowPlaying').classList.add('show');
-    }
+function pickNextTrack(){
+  playCount++;
+  if(playCount % 7 === 0){
+    return promoTrack;
+  }else{
+    return filteredPlaylist[Math.floor(Math.random()*filteredPlaylist.length)];
+  }
 }
 
-function next() {
-    playNext();
+function playTrack(track){
+  keepAlive();
+  loadTrack(track);
+  if(!isPlaying) return;
+  const p = audio.play();
+  if(p) p.catch(()=>{ next(); });
+  startPlayCheck();
 }
 
-audio.ontimeupdate = () => {
-    if (!audio.duration) return;
-    const per = (audio.currentTime / audio.duration) * 100;
-    document.getElementById('progressBar').style.width = per + '%';
-    document.getElementById('currentTime').innerText = fmt(audio.currentTime);
-    document.getElementById('durationTime').innerText = fmt(audio.duration);
+function next(){
+  const t = pickNextTrack();
+  playTrack(t);
+}
 
-    // 播放正常，取消超时检测
-    if (audio.currentTime > 0.1) {
-        clearPlayCheck();
-    }
+function togglePlay(){
+  keepAlive();
+  if(isPlaying){
+    audio.pause();
+    clearAllTimer();
+    isPlaying = false;
+    document.getElementById('playIcon').style.display = 'inline';
+    document.getElementById('pauseIcon').style.display = 'none';
+    document.getElementById('nowPlaying').classList.remove('show');
+  }else{
+    isPlaying = true;
+    audio.play().catch(()=>{ next(); });
+    startPlayCheck();
+    document.getElementById('playIcon').style.display = 'none';
+    document.getElementById('pauseIcon').style.display = 'inline-block';
+    document.getElementById('nowPlaying').classList.add('show');
+  }
+}
 
-    // 自动切歌
-    if (audio.currentTime > audio.duration - 0.5) {
-        playNext();
-    }
+audio.ontimeupdate = ()=>{
+  if(!audio.duration) return;
+  const p = (audio.currentTime/audio.duration)*100;
+  document.getElementById('progressBar').style.width = p+'%';
+  document.getElementById('currentTime').innerText = fmt(audio.currentTime);
+  document.getElementById('durationTime').innerText = fmt(audio.duration);
+  if(audio.currentTime > 0.2) clearPlayCheckTimer();
+  if(audio.duration > 0 && audio.currentTime >= audio.duration - 1.2){
+    next();
+  }
 };
 
-function fmt(t) {
-    const m = String(Math.floor(t / 60)).padStart(2, '0');
-    const s = String(Math.floor(t % 60)).padStart(2, '0');
-    return `${m}:${s}`;
+function updateVolume(){
+  const min = -150, max = 150;
+  const ang = min + volume*(max-min);
+  document.getElementById('volumeKnob').style.transform = `rotate(${ang}deg)`;
 }
 
-function updateVolumeKnob() {
-    const min = -150, max = 150;
-    const angle = min + volume * (max - min);
-    document.getElementById('volumeKnob').style.transform = `rotate(${angle}deg)`;
+async function init(){
+  createCircleSpeaker();
+  try {
+    const [hj,qc] = await Promise.all([
+      fetch('https://radio.hellyell.com/huaijiu-musiclist.json').then(r=>r.json()),
+      fetch('https://radio.hellyell.com/qiche-musiclist.json').then(r=>r.json())
+    ]);
+    playlist = [...hj,...qc];
+    filteredPlaylist = playlist.filter(item=>{
+      const s = item.name.split(' - ')[0];
+      return s !== 'HellYell怀旧电台' && s !== 'HellYell汽车电台';
+    });
+  } catch(e){
+    filteredPlaylist = [{name:"测试 - 测试曲",url:"https://music.163.com/song/media/outer/url?id=1916319449.mp3"}];
+  }
+  // 第一首必为 hy.mp3
+  playTrack(promoTrack);
+
+  document.getElementById('playBtn').onclick = togglePlay;
+  document.getElementById('nextBtn').onclick = next;
+  document.getElementById('volMinus').onclick = ()=>{
+    volume = Math.max(0, Math.round((volume-0.1)*10)/10);
+    audio.volume = volume; updateVolume();
+  };
+  document.getElementById('volPlus').onclick = ()=>{
+    volume = Math.min(1, Math.round((volume+0.1)*10)/10);
+    audio.volume = volume; updateVolume();
+  };
+  updateVolume();
 }
 
-function initVolume() {
-    document.getElementById('volMinus').onclick = () => {
-        volume = Math.max(0, Math.round((volume - 0.1)*10)/10);
-        audio.volume = volume;
-        updateVolumeKnob();
-    };
-    document.getElementById('volPlus').onclick = () => {
-        volume = Math.min(1, Math.round((volume + 0.1)*10)/10);
-        audio.volume = volume;
-        updateVolumeKnob();
-    };
-    updateVolumeKnob();
-}
-
-window.onload = () => {
-    createCircleSpeaker();
-    loadAllList();
-    initVolume();
-    document.getElementById('playBtn').onclick = togglePlay;
-    document.getElementById('nextBtn').onclick = next;
-};
+window.onload = init;
 </script>
+</body>
 </html>
