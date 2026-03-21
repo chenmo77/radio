@@ -113,15 +113,11 @@ audio.preload = "auto";
 
 let playlist = [];
 let filteredPlaylist = [];
-let isPlaying = true;  // 默认播放状态
+let isPlaying = true;
 let volume = 0.6;
 let playCount = 0;
-
-let playCheckTimer = null;
-let isSwitching = false;  // 防止重复切换
-let currentTrackUrl = null;  // 记录当前播放的URL
-
-const PLAY_TIMEOUT = 6000;
+let isLoading = false;  // 防止重复加载
+let currentTrackUrl = null;
 
 const promoTrack = {
   name: "HellYell Radio - 欢迎收听",
@@ -155,21 +151,7 @@ function fmt(t){
   return m+':'+s;
 }
 
-function clearPlayCheck(){
-  if(playCheckTimer) clearTimeout(playCheckTimer);
-  playCheckTimer = null;
-}
-
-function startPlayCheck(){
-  clearPlayCheck();
-  playCheckTimer = setTimeout(()=>{
-    if(isPlaying && audio.currentTime <= 0.1 && !isSwitching){
-      next();
-    }
-  }, PLAY_TIMEOUT);
-}
-
-// 更新界面文字（不改变播放状态）
+// 更新界面文字
 function updateDisplay(track){
   const parts = track.name.split(' - ');
   const singer = parts[0]||'';
@@ -199,60 +181,7 @@ function updateDisplay(track){
   document.title = `${music} - ${singer}`;
 }
 
-// 切换歌曲的核心函数
-function switchToTrack(track, autoPlay = true) {
-  if(isSwitching) return;
-  isSwitching = true;
-  
-  clearPlayCheck();
-  currentTrackUrl = track.url;
-  
-  // 更新界面
-  updateDisplay(track);
-  
-  // 保存当前播放状态
-  const shouldPlay = autoPlay && isPlaying;
-  
-  // 移除旧的事件监听
-  audio.onended = null;
-  audio.pause();
-  
-  // 设置新源
-  audio.src = track.url;
-  audio.volume = volume;
-  updateVolumeKnob();
-  
-  // 绑定 ended 事件
-  audio.onended = () => {
-    if(isPlaying && !isSwitching && currentTrackUrl === track.url){
-      next();
-    }
-  };
-  
-  // 开始播放
-  if(shouldPlay){
-    const playPromise = audio.play();
-    if(playPromise !== undefined){
-      playPromise.then(() => {
-        isSwitching = false;
-        startPlayCheck();
-      }).catch((e) => {
-        console.log('播放失败:', e);
-        isSwitching = false;
-        // 播放失败，尝试下一首
-        if(isPlaying){
-          setTimeout(() => next(), 500);
-        }
-      });
-    } else {
-      isSwitching = false;
-      startPlayCheck();
-    }
-  } else {
-    isSwitching = false;
-  }
-}
-
+// 获取下一首歌曲
 function getNextTrack(){
   playCount++;
   if(playCount > 1 && playCount % 7 === 0){
@@ -263,16 +192,64 @@ function getNextTrack(){
   }
 }
 
-function next(){
-  if(isSwitching) return;
-  const track = getNextTrack();
-  switchToTrack(track, true);
+// 切换歌曲
+function playTrack(track) {
+  if(isLoading) return;
+  if(currentTrackUrl === track.url) return;
+  
+  isLoading = true;
+  currentTrackUrl = track.url;
+  
+  // 更新界面
+  updateDisplay(track);
+  
+  // 清理旧事件
+  audio.onended = null;
+  audio.pause();
+  
+  // 设置新源
+  audio.src = track.url;
+  audio.volume = volume;
+  updateVolumeKnob();
+  
+  // 绑定 ended 事件
+  audio.onended = () => {
+    if(isPlaying && !isLoading){
+      playNext();
+    }
+  };
+  
+  // 开始播放
+  if(isPlaying){
+    const playPromise = audio.play();
+    if(playPromise !== undefined){
+      playPromise.then(() => {
+        isLoading = false;
+      }).catch((e) => {
+        console.log('播放失败:', e);
+        isLoading = false;
+        // 播放失败，跳过这首
+        if(isPlaying){
+          setTimeout(() => playNext(), 500);
+        }
+      });
+    } else {
+      isLoading = false;
+    }
+  } else {
+    isLoading = false;
+  }
+}
+
+function playNext() {
+  if(isLoading) return;
+  const nextTrack = getNextTrack();
+  playTrack(nextTrack);
 }
 
 function togglePlay(){
   if(isPlaying){
     audio.pause();
-    clearPlayCheck();
     isPlaying = false;
     document.getElementById('playIcon').style.display = 'inline';
     document.getElementById('pauseIcon').style.display = 'none';
@@ -285,18 +262,17 @@ function togglePlay(){
     
     // 重新绑定 ended 事件
     audio.onended = () => {
-      if(isPlaying && !isSwitching){
-        next();
+      if(isPlaying && !isLoading){
+        playNext();
       }
     };
     
     const playPromise = audio.play();
     if(playPromise !== undefined){
       playPromise.catch(() => {
-        if(isPlaying) next();
+        if(isPlaying) playNext();
       });
     }
-    startPlayCheck();
   }
 }
 
@@ -308,8 +284,6 @@ function updateProgress(){
     document.getElementById('currentTime').innerText = fmt(audio.currentTime);
     document.getElementById('durationTime').innerText = fmt(audio.duration);
   }
-  
-  if(audio.currentTime > 0.1) clearPlayCheck();
 }
 
 audio.addEventListener('timeupdate', updateProgress);
@@ -339,40 +313,43 @@ async function init(){
     filteredPlaylist=[{name:"测试 - 测试歌曲",url:"https://music.163.com/song/media/outer/url?id=1916319449.mp3"}];
   }
 
-  // 设置初始播放状态
+  // 设置初始状态
   isPlaying = true;
+  isLoading = false;
   document.getElementById('playIcon').style.display = 'none';
   document.getElementById('pauseIcon').style.display = 'inline-block';
   document.getElementById('nowPlaying').classList.add('show');
   
   // 开始播放欢迎曲
   playCount = 0;
-  switchToTrack(promoTrack, true);
+  playTrack(promoTrack);
 
-  document.getElementById('playBtn').onclick=togglePlay;
-  document.getElementById('nextBtn').onclick=next;
-  document.getElementById('volMinus').onclick=()=>{
-    volume=Math.max(0,Math.round((volume-0.1)*10)/10);
-    audio.volume=volume;
+  // 绑定按钮事件
+  document.getElementById('playBtn').onclick = togglePlay;
+  document.getElementById('nextBtn').onclick = () => {
+    if(!isLoading) playNext();
+  };
+  document.getElementById('volMinus').onclick = () => {
+    volume = Math.max(0, Math.round((volume-0.1)*10)/10);
+    audio.volume = volume;
     updateVolumeKnob();
   };
-  document.getElementById('volPlus').onclick=()=>{
-    volume=Math.min(1,Math.round((volume+0.1)*10)/10);
-    audio.volume=volume;
+  document.getElementById('volPlus').onclick = () => {
+    volume = Math.min(1, Math.round((volume+0.1)*10)/10);
+    audio.volume = volume;
     updateVolumeKnob();
   };
   updateVolumeKnob();
   
   // 页面可见性变化时检查状态
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && isPlaying && audio.paused && !isSwitching) {
+    if (!document.hidden && isPlaying && audio.paused && !isLoading) {
       audio.play().catch(() => {});
-      startPlayCheck();
     }
   });
 }
 
-window.onload=init;
+window.onload = init;
 </script>
 </body>
 </html>
