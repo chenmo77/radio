@@ -1,239 +1,221 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HellYell音乐电台</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "MiSans", "Microsoft YaHei", sans-serif;
-            font-weight: 700;
-        }
-
-        html, body {
-            width: 100%;
-            height: 100%;
-            background: #e6e6e6;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 10px;
-        }
-
-        .player-container {
-            width: 100%;
-            max-width: 560px;
-            aspect-ratio: 1 / 1.12;
-            background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.25);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .screen-section {
-            height: 38%;
-            background: #E60012;
-            padding: 24px 28px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .music-info {
-            width: 100%;
-            color: #fff;
-        }
-
-        .music-name-wrapper {
-            width: 100%;
-            overflow: hidden;
-            margin-bottom: 6px;
-        }
-        .music-name {
-            font-size: 30px;
-            white-space: nowrap;
-        }
-        .music-name.marquee {
-            display: inline-block;
-            animation: textScroll 16s linear infinite;
-        }
-        @keyframes textScroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-
-        .singer-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 22px;
-        }
-        .singer-name {
-            font-size: 16px;
-            opacity: 0.85;
-        }
-        .now-playing {
-            font-size: 11px;
-            letter-spacing: 1.5px;
-            color: rgba(255,255,255,0.7);
-            visibility: hidden;
-            animation: glow 1.8s infinite alternate;
-        }
-        .now-playing.show { visibility: visible; }
-        @keyframes glow { 0%{opacity:0.6;} 100%{opacity:1;} }
-
-        .time-progress {
-            width: 100%;
-        }
-        .progress-wrap {
-            width: 100%;
-            height: 4px;
-            background: rgba(255,255,255,0.25);
-            border-radius: 2px;
-            overflow: hidden;
-        }
-        .progress-bar {
-            height: 100%;
-            background: #fff;
-            width: 0%;
-            transition: width 0.1s linear;
-            position: relative;
-        }
-        .progress-thumb {
-            position: absolute;
-            right: -8px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 10px;
-            the10px;
-            background: #fff;
-            border-radius: 50%;
-        }
-        .time-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-            color: rgba(255,255,255,0.65);
-            margin-top: 6px;
-        }
-
-        .control-section {
-            height: 62%;
-            padding: 40px 40px 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 44px;
-        }
-
-        .speaker-area {
-            width: 42%;
-            aspect-ratio: 1/1;
-            position: relative;
-            transform: translateY(-10px);
-        }
-        .speaker-hole {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background: #141414;
-            border-radius: 50%;
-        }
-
-        .btn-area {
-            width: 42%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 32px;
-            transform: translateX(6px);
-        }
-
-        .volume-box {
-            position: relative;
-            width: 80px;
-            height: 80px;
-        }
-        .volume-knob {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(145deg, #fff, #e0e0e0);
-            border-radius: 50%;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            position: relative;
-        }
-        .volume-knob::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 2.5px;
-            height: 20px;
-            background: #555;
-            transform-origin: center 40px;
-        }
-        .vol-label {
-            position: absolute;
-            font-size: 18px;
-            color: #444;
-            cursor: pointer;
-        }
-        .vol-minus { bottom: -24px; left: 12px; }
-        .vol-plus { bottom: -24px; right: 12px; }
-
-        .play-btns {
-            display: flex;
-            align-items: center;
-            gap: 26px;
-        }
-
-        .ctrl-btn {
-            background: transparent;
-            border: none;
-            font-size: 26px;
-            color: #444;
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-        }
-
-        #playIcon {
-            font-size: 20px;
-            transform: translateY(1px);
-        }
-
-        .pause-icon {
-            display: inline-block;
-            width: 14px;
-            height: 16px;
-            position: relative;
-            transform: translateY(1px);
-        }
-        .pause-icon::before, .pause-icon::after {
-            content: '';
-            position: absolute;
-            width: 5px;
-            height: 16px;
-            background: #444;
-            border-radius: 1px;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-        .pause-icon::before { left: 0; }
-        .pause-icon::after { right: 0; }
-    </style>
-</head>
-<body>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HellYell音乐电台</title>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "MiSans", "Microsoft YaHei", sans-serif;
+        font-weight: 700;
+    }
+    html, body {
+        width: 100%;
+        height: 100%;
+        background: #e6e6e6;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+    }
+    .player-container {
+        width: 100%;
+        max-width: 560px;
+        aspect-ratio: 1 / 1.12;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .screen-section {
+        height: 38%;
+        background: #E60012;
+        padding: 24px 28px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .music-info {
+        width: 100%;
+        color: #fff;
+    }
+    .music-name-wrapper {
+        width: 100%;
+        overflow: hidden;
+        margin-bottom: 6px;
+    }
+    .music-name {
+        font-size: 30px;
+        white-space: nowrap;
+    }
+    .music-name.marquee {
+        display: inline-block;
+        animation: textScroll 16s linear infinite;
+    }
+    @keyframes textScroll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
+    .singer-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 22px;
+    }
+    .singer-name {
+        font-size: 16px;
+        opacity: 0.85;
+    }
+    .now-playing {
+        font-size: 11px;
+        letter-spacing: 1.5px;
+        color: rgba(255,255,255,0.7);
+        visibility: hidden;
+        animation: glow 1.8s infinite alternate;
+    }
+    .now-playing.show { visibility: visible; }
+    @keyframes glow { 0%{opacity:0.6;} 100%{opacity:1;} }
+    .time-progress {
+        width: 100%;
+    }
+    .progress-wrap {
+        width: 100%;
+        height: 4px;
+        background: rgba(255,255,255,0.25);
+        border-radius: 2px;
+        overflow: hidden;
+    }
+    .progress-bar {
+        height: 100%;
+        background: #fff;
+        width: 0%;
+        transition: width 0.1s linear;
+        position: relative;
+    }
+    .progress-thumb {
+        position: absolute;
+        right: -8px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 10px;
+        height: 10px;
+        background: #fff;
+        border-radius: 50%;
+    }
+    .time-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        color: rgba(255,255,255,0.65);
+        margin-top: 6px;
+    }
+    .control-section {
+        height: 62%;
+        padding: 40px 40px 30px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 44px;
+    }
+    .speaker-area {
+        width: 42%;
+        aspect-ratio: 1/1;
+        position: relative;
+        transform: translateY(-10px);
+    }
+    .speaker-hole {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background: #141414;
+        border-radius: 50%;
+    }
+    .btn-area {
+        width: 42%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 32px;
+        transform: translateX(6px);
+    }
+    .volume-box {
+        position: relative;
+        width: 80px;
+        height: 80px;
+    }
+    .volume-knob {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(145deg, #fff, #e0e0e0);
+        border-radius: 50%;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        position: relative;
+    }
+    .volume-knob::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 2.5px;
+        height: 20px;
+        background: #555;
+        transform-origin: center 40px;
+    }
+    .vol-label {
+        position: absolute;
+        font-size: 18px;
+        color: #444;
+        cursor: pointer;
+    }
+    .vol-minus { bottom: -24px; left: 12px; }
+    .vol-plus { bottom: -24px; right: 12px; }
+    .play-btns {
+        display: flex;
+        align-items: center;
+        gap: 26px;
+    }
+    .ctrl-btn {
+        background: transparent;
+        border: none;
+        font-size: 26px;
+        color: #444;
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+    }
+    #playIcon {
+        font-size: 20px;
+        transform: translateY(1px);
+    }
+    .pause-icon {
+        display: inline-block;
+        width: 14px;
+        height: 16px;
+        position: relative;
+        transform: translateY(1px);
+    }
+    .pause-icon::before, .pause-icon::after {
+        content: '';
+        position: absolute;
+        width: 5px;
+        height: 16px;
+        background: #444;
+        border-radius: 1px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    .pause-icon::before { left: 0; }
+    .pause-icon::after { right: 0; }
+</style>
 
 <div class="player-container">
     <div class="screen-section">
@@ -258,7 +240,6 @@
             </div>
         </div>
     </div>
-
     <div class="control-section">
         <div class="speaker-area" id="speakerArea"></div>
         <div class="btn-area">
@@ -286,13 +267,16 @@ let playlist = [];
 let filteredPlaylist = [];
 let isPlaying = false;
 let volume = 0.6;
+let playCount = 0;
+
+let playCheckTimer = null;    // 6秒检测计时器
+const PLAY_TIMEOUT = 6000;   // 6秒超时
 
 const promoTrack = {
     name: "HellYell Radio - 欢迎收听HellYell音乐电台",
     url: "https://radio.hellyell.com/hy.mp3"
 };
 
-// 喇叭
 function createCircleSpeaker() {
     const container = document.getElementById('speakerArea');
     const rings = 5;
@@ -313,7 +297,6 @@ function createCircleSpeaker() {
     }
 }
 
-// 加载歌单
 async function loadAllList() {
     try {
         const [hj, qc] = await Promise.all([
@@ -325,23 +308,42 @@ async function loadAllList() {
             const s = item.name.split(' - ')[0];
             return s !== 'HellYell怀旧电台' && s !== 'HellYell汽车电台';
         });
-        playRandom();
     } catch (e) {
         filteredPlaylist = [{
             name: "测试 - 测试歌曲",
             url: "https://music.163.com/song/media/outer/url?id=1916319449.mp3"
         }];
-        playRandom();
+    }
+    // 第一首直接播放 hy.mp3
+    loadTrack(promoTrack);
+}
+
+// 清理超时检测
+function clearPlayCheck() {
+    if (playCheckTimer) {
+        clearTimeout(playCheckTimer);
+        playCheckTimer = null;
     }
 }
 
-// 随机播放一首
-function playRandom() {
-    const track = filteredPlaylist.length
-        ? filteredPlaylist[Math.floor(Math.random() * filteredPlaylist.length)]
-        : promoTrack;
+// 6秒没播放就切歌
+function startPlayCheck() {
+    clearPlayCheck();
+    playCheckTimer = setTimeout(() => {
+        if (isPlaying && audio.currentTime <= 0) {
+            console.log("播放超时，自动切歌");
+            playNext();
+        }
+    }, PLAY_TIMEOUT);
+}
 
-    const [singer, music] = track.name.split(' - ');
+function loadTrack(track) {
+    clearPlayCheck();
+
+    const parts = track.name.split(' - ');
+    const singer = parts[0] || '';
+    const music = parts.slice(1).join(' - ') || track.name;
+
     document.getElementById('singerName').innerText = singer;
     const nameEl = document.getElementById('musicName');
     const wrap = document.querySelector('.music-name-wrapper');
@@ -353,16 +355,34 @@ function playRandom() {
             nameEl.classList.add('marquee');
         }
     }, 100);
+
     document.title = `${music}-${singer}`;
     audio.src = track.url;
     audio.volume = volume;
     updateVolumeKnob();
-    if (isPlaying) audio.play().catch(() => {});
+
+    if (isPlaying) {
+        audio.play().catch(() => {
+            playNext();
+        });
+        startPlayCheck();
+    }
 }
 
-// 播放/暂停
+function playNext() {
+    clearPlayCheck();
+    playCount++;
+    if (playCount % 7 === 0) {
+        loadTrack(promoTrack);
+    } else {
+        const randTrack = filteredPlaylist[Math.floor(Math.random() * filteredPlaylist.length)];
+        loadTrack(randTrack);
+    }
+}
+
 function togglePlay() {
     if (isPlaying) {
+        clearPlayCheck();
         audio.pause();
         isPlaying = false;
         document.getElementById('playIcon').style.display = 'inline';
@@ -370,29 +390,35 @@ function togglePlay() {
         document.getElementById('nowPlaying').classList.remove('show');
     } else {
         isPlaying = true;
-        audio.play().catch(() => {});
+        audio.play().catch(() => {
+            playNext();
+        });
+        startPlayCheck();
         document.getElementById('playIcon').style.display = 'none';
         document.getElementById('pauseIcon').style.display = 'inline-block';
         document.getElementById('nowPlaying').classList.add('show');
     }
 }
 
-// 手动下一首 = 随机
 function next() {
-    playRandom();
+    playNext();
 }
 
-// 进度 + 自动切歌（息屏也能跑）
-audio.ontimeupdate = function() {
+audio.ontimeupdate = () => {
     if (!audio.duration) return;
     const per = (audio.currentTime / audio.duration) * 100;
     document.getElementById('progressBar').style.width = per + '%';
     document.getElementById('currentTime').innerText = fmt(audio.currentTime);
     document.getElementById('durationTime').innerText = fmt(audio.duration);
 
-    // 最后 0.5 秒强制切随机歌曲
+    // 播放正常，取消超时检测
+    if (audio.currentTime > 0.1) {
+        clearPlayCheck();
+    }
+
+    // 自动切歌
     if (audio.currentTime > audio.duration - 0.5) {
-        playRandom();
+        playNext();
     }
 };
 
@@ -402,7 +428,6 @@ function fmt(t) {
     return `${m}:${s}`;
 }
 
-// 音量旋钮
 function updateVolumeKnob() {
     const min = -150, max = 150;
     const angle = min + volume * (max - min);
@@ -431,5 +456,4 @@ window.onload = () => {
     document.getElementById('nextBtn').onclick = next;
 };
 </script>
-</body>
 </html>
