@@ -26,7 +26,7 @@
   .progress-thumb{position:absolute;right:-8px;top:50%;transform:translateY(-50%);width:10px;height:10px;background:#fff;border-radius:50%}
   .time-row{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.65);margin-top:6px}
 
-  /* ========== 下半部分：表格布局 ========== */
+  /* ========== 下半部分：表格布局（精确比例） ========== */
   .control-section {
     height:62%;
     padding:30px 28px 32px 28px;
@@ -51,18 +51,71 @@
     width: 40%;
     vertical-align: middle;
     padding-left: 20px;
-    position: relative;
   }
 
-  /* 右侧控制区整体向左偏移 */
+  /* 右侧控制区内部：使用 flex 列布局，精确分配高度比例 */
   .controls-inner {
-    position: relative;
+    display: flex;
+    flex-direction: column;
     width: 100%;
-    aspect-ratio: 1 / 1;
+    height: 100%;
+    justify-content: space-between;
+  }
+
+  /* 上排按钮区域 (- 和 +) 高度20% */
+  .top-buttons {
+    height: 20%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  /* 中间旋钮区域 高度50% */
+  .center-knob {
+    height: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    transform: translateX(-8%);
+    width: 100%;
+  }
+
+  /* 下排按钮区域 (播放/暂停 和 下一首) 高度20% */
+  .bottom-buttons {
+    height: 20%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  /* 按钮公用样式 - 扁平金属质感，与音量旋钮一致 */
+  .action-btn {
+    width: 44px;
+    height: 44px;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(145deg,#fff,#e0e0e0);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    color: #444;
+    transition: none;
+    flex-shrink: 0;
+  }
+
+  /* 加减号字体稍大 */
+  .action-btn.minus, .action-btn.plus {
+    font-size: 32px;
+    font-weight: bold;
+  }
+
+  /* 下一首按钮字体稍小 */
+  .action-btn.next {
+    font-size: 26px;
   }
 
   /* 喇叭区域 - 5圈等间距环形分布 */
@@ -82,12 +135,11 @@
     pointer-events: none;
   }
 
-  /* 音量旋钮容器 */
+  /* 音量旋钮容器 - 宽度自适应，保持正方形 */
   .volume-box {
     width: 70%;
     aspect-ratio: 1 / 1;
     position: relative;
-    z-index: 2;
   }
 
   .volume-knob {
@@ -100,7 +152,6 @@
     cursor: pointer;
   }
 
-  /* 旋钮指针 */
   .volume-knob::after {
     content: '';
     position: absolute;
@@ -114,60 +165,7 @@
     transform-origin: center 42px;
   }
 
-  /* 四角按钮 - 与音量旋钮一致的扁平金属质感 */
-  .corner-btn {
-    position: absolute;
-    width: 44px;
-    height: 44px;
-    border: none;
-    font-size: 28px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: linear-gradient(145deg,#fff,#e0e0e0);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    color: #444;
-    transition: none;
-  }
-
-  /* 减号按钮 - 左上角 */
-  .btn-minus {
-    top: 0;
-    left: 0;
-    transform: translate(-30%, -30%);
-    font-size: 32px;
-    font-weight: bold;
-    line-height: 1;
-  }
-
-  /* 加号按钮 - 右上角 */
-  .btn-plus {
-    top: 0;
-    right: 0;
-    transform: translate(30%, -30%);
-    font-size: 32px;
-    font-weight: bold;
-    line-height: 1;
-  }
-
-  /* 播放/暂停按钮 - 左下角 */
-  .btn-play {
-    bottom: 0;
-    left: 0;
-    transform: translate(-30%, 30%);
-  }
-
-  /* 下一首按钮 - 右下角 */
-  .btn-next {
-    bottom: 0;
-    right: 0;
-    transform: translate(30%, 30%);
-    font-size: 26px;
-  }
-
-  /* 播放图标 */
+  /* 播放/暂停图标样式 */
   #playIconInner {
     font-size: 22px;
     line-height: 1;
@@ -176,7 +174,6 @@
     transform: translateX(2px);
   }
 
-  /* 暂停图标 - 两个竖线，宽度与播放按钮图标一致 */
   .pause-icon-inner {
     display: inline-block;
     width: 20px;
@@ -204,7 +201,7 @@
     right: 2px;
   }
 
-  /* 手机端适配 */
+  /* 手机端适配 - 按钮尺寸微调 */
   @media (max-width: 560px) {
     .control-section {
       padding: 20px 20px 24px 20px;
@@ -215,25 +212,16 @@
     .controls-cell {
       padding-left: 12px;
     }
-    .controls-inner {
-      transform: translateX(-6%);
-    }
-    .corner-btn {
+    .action-btn {
       width: 38px;
       height: 38px;
       font-size: 24px;
     }
-    .btn-minus, .btn-plus {
+    .action-btn.minus, .action-btn.plus {
       font-size: 28px;
     }
-    .btn-next {
+    .action-btn.next {
       font-size: 22px;
-    }
-    .btn-minus, .btn-plus {
-      transform: translate(-25%, -25%);
-    }
-    .btn-play, .btn-next {
-      transform: translate(-25%, 25%);
     }
     #playIconInner {
       font-size: 20px;
@@ -247,30 +235,27 @@
       width: 5px;
       height: 20px;
     }
+    .volume-knob::after {
+      width: 3px;
+      height: 20px;
+      transform-origin: center 36px;
+    }
   }
 
   @media (max-width: 480px) {
     .control-section {
       padding: 16px 16px 20px 16px;
     }
-    .controls-inner {
-      transform: translateX(-4%);
-    }
-    .corner-btn {
+    .action-btn {
       width: 34px;
       height: 34px;
       font-size: 22px;
     }
-    .btn-minus, .btn-plus {
+    .action-btn.minus, .action-btn.plus {
       font-size: 26px;
     }
-    .btn-next {
+    .action-btn.next {
       font-size: 20px;
-    }
-    .volume-knob::after {
-      width: 3px;
-      height: 20px;
-      transform-origin: center 36px;
     }
     #playIconInner {
       font-size: 18px;
@@ -311,16 +296,25 @@
       </div>
       <div class="controls-cell">
         <div class="controls-inner">
-          <div class="volume-box">
-            <div id="volumeKnob" class="volume-knob"></div>
+          <!-- 上排：- 和 + -->
+          <div class="top-buttons">
+            <button id="volMinusBtn" class="action-btn minus">−</button>
+            <button id="volPlusBtn" class="action-btn plus">+</button>
           </div>
-          <button id="volMinusBtn" class="corner-btn btn-minus">−</button>
-          <button id="volPlusBtn" class="corner-btn btn-plus">+</button>
-          <button id="playBtn" class="corner-btn btn-play">
-            <span id="playIconInner">▶</span>
-            <span id="pauseIconInner" class="pause-icon-inner" style="display:none"></span>
-          </button>
-          <button id="nextBtn" class="corner-btn btn-next">⏭</button>
+          <!-- 中间：音量旋钮 -->
+          <div class="center-knob">
+            <div class="volume-box">
+              <div id="volumeKnob" class="volume-knob"></div>
+            </div>
+          </div>
+          <!-- 下排：播放/暂停 和 下一首 -->
+          <div class="bottom-buttons">
+            <button id="playBtn" class="action-btn play">
+              <span id="playIconInner">▶</span>
+              <span id="pauseIconInner" class="pause-icon-inner" style="display:none"></span>
+            </button>
+            <button id="nextBtn" class="action-btn next">⏭</button>
+          </div>
         </div>
       </div>
     </div>
