@@ -26,7 +26,7 @@
   .progress-thumb{position:absolute;right:-8px;top:50%;transform:translateY(-50%);width:10px;height:10px;background:#fff;border-radius:50%}
   .time-row{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.65);margin-top:6px}
 
-  /* ========== 下半部分：表格布局（精确比例） ========== */
+  /* ========== 下半部分：表格布局 ========== */
   .control-section {
     height:62%;
     padding:30px 28px 32px 28px;
@@ -53,16 +53,16 @@
     padding-left: 20px;
   }
 
-  /* 右侧控制区内部：使用 flex 列布局，精确分配高度比例 */
+  /* 右侧控制区内部：高度与宽度保持一致（正方形区域） */
   .controls-inner {
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 100%;
+    aspect-ratio: 1 / 1;  /* 高度等于宽度，形成正方形 */
     justify-content: space-between;
   }
 
-  /* 上排按钮区域 (- 和 +) 高度20% */
+  /* 上排按钮区域 (- 和 +) 高度占比 20% */
   .top-buttons {
     height: 20%;
     display: flex;
@@ -71,7 +71,7 @@
     width: 100%;
   }
 
-  /* 中间旋钮区域 高度50% */
+  /* 中间旋钮区域 高度占比 50% */
   .center-knob {
     height: 50%;
     display: flex;
@@ -80,7 +80,7 @@
     width: 100%;
   }
 
-  /* 下排按钮区域 (播放/暂停 和 下一首) 高度20% */
+  /* 下排按钮区域 (播放/暂停 和 下一首) 高度占比 20% */
   .bottom-buttons {
     height: 20%;
     display: flex;
@@ -89,7 +89,7 @@
     width: 100%;
   }
 
-  /* 按钮公用样式 - 扁平金属质感，与音量旋钮一致 */
+  /* 按钮公用样式 - 扁平金属质感 */
   .action-btn {
     width: 44px;
     height: 44px;
@@ -152,12 +152,13 @@
     cursor: pointer;
   }
 
+  /* 旋钮指针 - 角度范围 -90° 到 +90° */
   .volume-knob::after {
     content: '';
     position: absolute;
     top: 0;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) rotate(0deg);
     width: 4px;
     height: 24px;
     background: #6a6a6a;
@@ -296,18 +297,15 @@
       </div>
       <div class="controls-cell">
         <div class="controls-inner">
-          <!-- 上排：- 和 + -->
           <div class="top-buttons">
             <button id="volMinusBtn" class="action-btn minus">−</button>
             <button id="volPlusBtn" class="action-btn plus">+</button>
           </div>
-          <!-- 中间：音量旋钮 -->
           <div class="center-knob">
             <div class="volume-box">
               <div id="volumeKnob" class="volume-knob"></div>
             </div>
           </div>
-          <!-- 下排：播放/暂停 和 下一首 -->
           <div class="bottom-buttons">
             <button id="playBtn" class="action-btn play">
               <span id="playIconInner">▶</span>
@@ -479,9 +477,13 @@ audio.ontimeupdate = () => {
 };
 
 function updateVolumeKnob() {
-  const min = -150, max = 150;
-  const angle = min + volume * (max - min);
-  document.getElementById('volumeKnob').style.transform = `rotate(${angle}deg)`;
+  const minAngle = -90;
+  const maxAngle = 90;
+  const angle = minAngle + volume * (maxAngle - minAngle);
+  const knob = document.getElementById('volumeKnob');
+  if (knob) {
+    knob.style.transform = `rotate(${angle}deg)`;
+  }
 }
 
 function setVolume(value) {
