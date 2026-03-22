@@ -57,41 +57,38 @@
     padding-left: 20px;
   }
 
-  /* 右侧控制区内部：使用 flex 列布局，精确分配高度比例 */
+  /* 右侧控制区内部：使用 flex 列布局，垂直居中 */
   .controls-inner {
     display: flex;
     flex-direction: column;
+    justify-content: center;  /* 垂直居中 */
     width: 100%;
     height: 100%;
   }
 
-  /* 四行高度比例：30% + 20% + 20% + 30% */
-  .spacer-top {
-    height: 30%;
+  /* 上排按钮和下排按钮作为一组，整体居中 */
+  .buttons-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     width: 100%;
   }
 
   .top-buttons {
-    height: 20%;
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
     gap: 30px;
+    margin-bottom: 25px;  /* 两行之间的间距 */
   }
 
   .bottom-buttons {
-    height: 20%;
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
     gap: 30px;
-  }
-
-  .spacer-bottom {
-    height: 30%;
-    width: 100%;
   }
 
   /* 按钮公用样式 - 扁平金属质感 */
@@ -232,6 +229,9 @@
     .top-buttons, .bottom-buttons {
       gap: 24px;
     }
+    .top-buttons {
+      margin-bottom: 18px;
+    }
     #playIconInner {
       font-size: 20px;
     }
@@ -267,6 +267,9 @@
     }
     .top-buttons, .bottom-buttons {
       gap: 20px;
+    }
+    .top-buttons {
+      margin-bottom: 14px;
     }
     #playIconInner {
       font-size: 18px;
@@ -311,25 +314,25 @@
       </div>
       <div class="controls-cell">
         <div class="controls-inner">
-          <div class="spacer-top"></div>
-          <div class="top-buttons">
-            <button id="volMinusBtn" class="action-btn minus">
-              <span class="volume-tip" id="minusTip"></span>
-              −
-            </button>
-            <button id="volPlusBtn" class="action-btn plus">
-              <span class="volume-tip" id="plusTip"></span>
-              +
-            </button>
+          <div class="buttons-group">
+            <div class="top-buttons">
+              <button id="volMinusBtn" class="action-btn minus">
+                <span class="volume-tip" id="minusTip"></span>
+                −
+              </button>
+              <button id="volPlusBtn" class="action-btn plus">
+                <span class="volume-tip" id="plusTip"></span>
+                +
+              </button>
+            </div>
+            <div class="bottom-buttons">
+              <button id="playBtn" class="action-btn play paused-state">
+                <span id="playIconInner">▶</span>
+                <span id="pauseIconInner" class="pause-icon-inner" style="display:none"></span>
+              </button>
+              <button id="nextBtn" class="action-btn next">⏭</button>
+            </div>
           </div>
-          <div class="bottom-buttons">
-            <button id="playBtn" class="action-btn play paused-state">
-              <span id="playIconInner">▶</span>
-              <span id="pauseIconInner" class="pause-icon-inner" style="display:none"></span>
-            </button>
-            <button id="nextBtn" class="action-btn next">⏭</button>
-          </div>
-          <div class="spacer-bottom"></div>
         </div>
       </div>
     </div>
@@ -470,21 +473,17 @@ function togglePlay() {
   const pauseIcon = document.getElementById('pauseIconInner');
   
   if (isPlaying) {
-    // 当前正在播放，点击后暂停
     audio.pause();
     clearPlayCheck();
     isPlaying = false;
-    // 显示播放图标（三角形），按钮变红色
     playIcon.style.display = 'inline';
     pauseIcon.style.display = 'none';
     document.getElementById('nowPlaying').classList.remove('show');
     playBtn.classList.add('paused-state');
   } else {
-    // 当前暂停，点击后开始播放
     isPlaying = true;
     audio.play().catch(() => { next(); });
     startPlayCheck();
-    // 显示暂停图标（两根竖线），按钮变灰色
     playIcon.style.display = 'none';
     pauseIcon.style.display = 'inline-block';
     document.getElementById('nowPlaying').classList.add('show');
