@@ -46,7 +46,7 @@
     margin-bottom: 8px;
   }
   .music-name {
-    font-size: 30px;
+    font-size: 34px;
     white-space: nowrap;
     display: inline-block;
     will-change: transform;
@@ -61,7 +61,7 @@
     align-items: center;
     margin-bottom: 22px;
     width: 100%;
-    min-height: 28px;
+    min-height: 32px;
   }
   
   .singer-name-wrapper {
@@ -72,7 +72,7 @@
     line-height: 1.4;
   }
   .singer-name {
-    font-size: 16px;
+    font-size: 18px;
     opacity: .85;
     white-space: nowrap;
     display: inline-block;
@@ -93,7 +93,7 @@
     align-items: center;
     gap: 6px;
     flex-shrink: 0;
-    height: 28px;
+    height: 32px;
     line-height: 1;
   }
   
@@ -318,11 +318,11 @@
     .pause-icon-inner::before, .pause-icon-inner::after { width: 5px; height: 20px; }
     .volume-tip { font-size: 14px; margin-bottom: 8px; }
     .playing-dot { width: 7px; height: 7px; }
-    .now-playing-wrapper { gap: 5px; height: 24px; }
-    .music-name { font-size: 24px; }
-    .singer-name { font-size: 14px; }
+    .now-playing-wrapper { gap: 5px; height: 28px; }
+    .music-name { font-size: 28px; }
+    .singer-name { font-size: 16px; }
     .singer-name-wrapper { margin-right: 8px; }
-    .singer-row { min-height: 24px; }
+    .singer-row { min-height: 28px; }
   }
 
   @media (max-width: 480px) {
@@ -337,11 +337,11 @@
     .pause-icon-inner::before, .pause-icon-inner::after { width: 4px; height: 18px; }
     .volume-tip { font-size: 13px; margin-bottom: 6px; }
     .playing-dot { width: 6px; height: 6px; }
-    .now-playing-wrapper { gap: 4px; height: 22px; }
-    .music-name { font-size: 20px; }
-    .singer-name { font-size: 12px; }
+    .now-playing-wrapper { gap: 4px; height: 26px; }
+    .music-name { font-size: 24px; }
+    .singer-name { font-size: 14px; }
     .singer-name-wrapper { margin-right: 6px; }
-    .singer-row { min-height: 22px; }
+    .singer-row { min-height: 26px; }
   }
 </style>
 </head>
@@ -350,12 +350,12 @@
 <div class="player-container">
   <div class="screen-section">
     <div class="music-info">
-      <div class="music-name-wrapper"><div id="musicName" class="music-name"></div></div>
+      <div class="music-name-wrapper"><div id="musicName" class="music-name">HellYell Radio</div></div>
       <div class="singer-row">
         <div class="singer-name-wrapper">
-          <div id="singerName" class="singer-name"></div>
+          <div id="singerName" class="singer-name">欢迎收听</div>
         </div>
-        <div id="nowPlayingWrapper" class="now-playing-wrapper">
+        <div id="nowPlayingWrapper" class="now-playing-wrapper paused">
           <div id="playingDot" class="playing-dot"></div>
           <div id="nowPlaying" class="now-playing">NOW PLAYING</div>
         </div>
@@ -405,13 +405,14 @@ audio.preload = "auto";
 
 let playlist = [];
 let filteredPlaylist = [];
-let isPlaying = true;  // 初始为 true，自动播放
+let isPlaying = false;      // 初始为 false，等待用户点击播放
 let volume = 0.6;
 let volumeValue = 6;
-let playCount = 0;      // 已播放的歌曲计数（不含 promo）
+let playCount = 0;
 
 let playCheckTimer = null;
-let isLoading = false;   // 防止重复加载
+let isLoading = false;
+let isFirstPlay = true;     // 标记是否是第一次播放
 const PLAY_TIMEOUT = 6000;
 
 const promoTrack = {
@@ -520,7 +521,7 @@ function setScrollingText(element, wrapper, originalText) {
   });
 }
 
-function loadTrack(track) {
+function loadTrack(track, autoPlay = true) {
   if (isLoading) return;
   isLoading = true;
   clearPlayCheck();
@@ -552,8 +553,8 @@ function loadTrack(track) {
   audio.src = track.url;
   audio.volume = volume;
   
-  // 如果正在播放，则自动开始播放
-  if (isPlaying) {
+  // 根据 autoPlay 决定是否自动播放
+  if (autoPlay && isPlaying) {
     audio.play()
       .then(() => {
         isLoading = false;
@@ -562,7 +563,6 @@ function loadTrack(track) {
       .catch((err) => {
         console.error('播放失败:', err);
         isLoading = false;
-        // 播放失败，尝试下一首
         setTimeout(() => next(), 1000);
       });
   } else {
@@ -577,14 +577,13 @@ function getNextTrack() {
     return promoTrack;
   }
   
-  // 从过滤后的播放列表中随机选择
   if (filteredPlaylist.length === 0) return promoTrack;
   const randomIndex = Math.floor(Math.random() * filteredPlaylist.length);
   return filteredPlaylist[randomIndex];
 }
 
-function playTrack(track) {
-  loadTrack(track);
+function playTrack(track, autoPlay = true) {
+  loadTrack(track, autoPlay);
 }
 
 function next() {
@@ -594,7 +593,7 @@ function next() {
   if (track !== promoTrack) {
     playCount++;
   }
-  playTrack(track);
+  playTrack(track, true);
   changeBodyBackground();
 }
 
@@ -604,6 +603,7 @@ function togglePlay() {
   const pauseIcon = document.getElementById('pauseIconInner');
   
   if (isPlaying) {
+    // 当前正在播放，点击后暂停
     audio.pause();
     clearPlayCheck();
     isPlaying = false;
@@ -611,15 +611,36 @@ function togglePlay() {
     pauseIcon.style.display = 'none';
     playBtn.classList.add('paused-state');
   } else {
+    // 当前暂停，点击后播放
     isPlaying = true;
+    
+    // 如果是第一次播放，先加载 promo 歌曲
+    if (isFirstPlay) {
+      isFirstPlay = false;
+      const nameEl = document.getElementById('musicName');
+      const singerEl = document.getElementById('singerName');
+      nameEl.innerHTML = '欢迎收听';
+      singerEl.innerHTML = 'HellYell Radio';
+      audio.src = promoTrack.url;
+      audio.volume = volume;
+    }
+    
     audio.play()
       .then(() => {
         startPlayCheck();
+        // 更新显示歌曲信息（如果是第一次播放，显示 promo 信息）
+        if (isFirstPlay === false && audio.src === promoTrack.url) {
+          const nameEl = document.getElementById('musicName');
+          const singerEl = document.getElementById('singerName');
+          setScrollingText(nameEl, nameEl.parentElement, '欢迎收听');
+          setScrollingText(singerEl, singerEl.parentElement, 'HellYell Radio');
+        }
       })
       .catch((err) => {
         console.error('恢复播放失败:', err);
         next();
       });
+    
     playIcon.style.display = 'none';
     pauseIcon.style.display = 'inline-block';
     playBtn.classList.remove('paused-state');
@@ -636,8 +657,7 @@ audio.ontimeupdate = () => {
   document.getElementById('durationTime').innerText = fmt(audio.duration);
 
   if (audio.currentTime > 0.2) clearPlayCheck();
-  if (audio.currentTime >= audio.duration - 0.5 && !isLoading) {
-    // 歌曲即将结束，切换到下一首
+  if (audio.currentTime >= audio.duration - 0.5 && !isLoading && isPlaying) {
     next();
   }
 };
@@ -675,7 +695,6 @@ async function init() {
       fetch('https://radio.hellyell.com/qiche-musiclist.json').then(r => r.json())
     ]);
     playlist = [...hj, ...qc];
-    // 过滤掉 HellYell怀旧电台 和 HellYell汽车电台 以及无效链接
     filteredPlaylist = playlist.filter(item => {
       const singer = item.name.split(' - ')[0];
       return singer !== 'HellYell怀旧电台' && 
@@ -688,26 +707,13 @@ async function init() {
     filteredPlaylist = [];
   }
 
-  // 初始化播放
+  // 初始化状态：显示欢迎文字，不播放，NOW PLAYING 隐藏
+  isPlaying = false;
+  isFirstPlay = true;
   playCount = 0;
-  isPlaying = true;
-  
-  // 先显示 promo 歌曲界面
-  const nameEl = document.getElementById('musicName');
-  const singerEl = document.getElementById('singerName');
-  nameEl.innerHTML = '欢迎收听';
-  singerEl.innerHTML = 'HellYell Radio';
-  
-  audio.src = promoTrack.url;
-  audio.volume = volume;
-  audio.play()
-    .then(() => {
-      startPlayCheck();
-    })
-    .catch(err => console.error('初始播放失败:', err));
   
   document.getElementById('playBtn').onclick = togglePlay;
-  document.getElementById('nextBtn').onclick = () => { if (!isLoading) next(); };
+  document.getElementById('nextBtn').onclick = () => { if (!isLoading && isPlaying) next(); };
   document.getElementById('volMinusBtn').onclick = () => setVolumeByValue(volumeValue - 1, 'minus');
   document.getElementById('volPlusBtn').onclick = () => setVolumeByValue(volumeValue + 1, 'plus');
   
