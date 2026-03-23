@@ -51,6 +51,7 @@
     display: inline-block;
     will-change: transform;
   }
+  /* 修正滚动动画 - 使用 -100% 配合双倍内容实现无缝 */
   .music-name.marquee {
     animation: marqueeScroll 16s linear infinite;
   }
@@ -83,9 +84,10 @@
     animation: marqueeScroll 12s linear infinite;
   }
   
+  /* 关键修复：使用 -100% 确保滚动到第二份文本开头时无缝衔接 */
   @keyframes marqueeScroll {
     0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+    100% { transform: translateX(-100%); }
   }
   
   .now-playing-wrapper {
@@ -408,8 +410,8 @@ let filteredPlaylist = [];
 let isPlaying = false;
 let volume = 0.6;
 let volumeValue = 6;
-let normalSongCount = 0;      // 记录已播放的普通歌曲数量（不含 promo）
-let consecutivePromo = false;  // 标记是否刚播放过 promo，避免连续播放
+let normalSongCount = 0;
+let consecutivePromo = false;
 
 let playCheckTimer = null;
 let isLoading = false;
@@ -507,14 +509,24 @@ function startPlayCheck() {
   }, PLAY_TIMEOUT);
 }
 
+// 修复滚动逻辑：使用双倍内容 + -100% 实现无缝滚动
 function setScrollingText(element, wrapper, originalText) {
+  // 移除动画类
   element.classList.remove('marquee');
+  
+  // 先设置原始文本
   element.innerHTML = originalText;
   
   requestAnimationFrame(() => {
-    if (element.scrollWidth > wrapper.clientWidth) {
+    const containerWidth = wrapper.clientWidth;
+    const textWidth = element.scrollWidth;
+    
+    if (textWidth > containerWidth) {
+      // 需要滚动：拼接两份文本，中间用全角空格隔开，使滚动到 -100% 时刚好显示第二份文本开头
       element.innerHTML = originalText + '　' + originalText;
+      // 强制重绘
       element.offsetHeight;
+      // 添加动画类
       element.classList.add('marquee');
     } else {
       element.innerHTML = originalText;
@@ -569,9 +581,7 @@ function loadTrack(track, autoPlay = true) {
   }
 }
 
-// 核心修复：随机播放逻辑
 function getNextTrack() {
-  // 如果刚播放过 promo，强制播放一首普通歌曲，避免连续 promo
   if (consecutivePromo) {
     consecutivePromo = false;
     if (filteredPlaylist.length === 0) return promoTrack;
@@ -579,14 +589,12 @@ function getNextTrack() {
     return filteredPlaylist[randomIndex];
   }
   
-  // 每播放 7 首普通歌曲后，播放一次 promo
   if (normalSongCount > 0 && normalSongCount % 7 === 0) {
     console.log(`已播放 ${normalSongCount} 首普通歌曲，播放 promo 歌曲`);
-    consecutivePromo = true;  // 标记刚播放了 promo
+    consecutivePromo = true;
     return promoTrack;
   }
   
-  // 正常随机播放普通歌曲
   if (filteredPlaylist.length === 0) return promoTrack;
   const randomIndex = Math.floor(Math.random() * filteredPlaylist.length);
   return filteredPlaylist[randomIndex];
@@ -600,7 +608,6 @@ function next() {
   if (isLoading) return;
   const track = getNextTrack();
   
-  // 计数逻辑：只有普通歌曲才增加计数，promo 不增加
   if (track !== promoTrack) {
     normalSongCount++;
     console.log(`播放普通歌曲 #${normalSongCount}`);
