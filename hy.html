@@ -405,14 +405,15 @@ audio.preload = "auto";
 
 let playlist = [];
 let filteredPlaylist = [];
-let isPlaying = false;      // 初始为 false，等待用户点击播放
+let isPlaying = false;
 let volume = 0.6;
 let volumeValue = 6;
-let playCount = 0;
+let normalSongCount = 0;      // 记录已播放的普通歌曲数量（不含 promo）
+let consecutivePromo = false;  // 标记是否刚播放过 promo，避免连续播放
 
 let playCheckTimer = null;
 let isLoading = false;
-let isFirstPlay = true;     // 标记是否是第一次播放
+let isFirstPlay = true;
 const PLAY_TIMEOUT = 6000;
 
 const promoTrack = {
@@ -548,12 +549,10 @@ function loadTrack(track, autoPlay = true) {
 
   document.title = `${music} - ${singer}`;
   
-  // 切换音频源
   audio.pause();
   audio.src = track.url;
   audio.volume = volume;
   
-  // 根据 autoPlay 决定是否自动播放
   if (autoPlay && isPlaying) {
     audio.play()
       .then(() => {
@@ -570,13 +569,24 @@ function loadTrack(track, autoPlay = true) {
   }
 }
 
+// 核心修复：随机播放逻辑
 function getNextTrack() {
+  // 如果刚播放过 promo，强制播放一首普通歌曲，避免连续 promo
+  if (consecutivePromo) {
+    consecutivePromo = false;
+    if (filteredPlaylist.length === 0) return promoTrack;
+    const randomIndex = Math.floor(Math.random() * filteredPlaylist.length);
+    return filteredPlaylist[randomIndex];
+  }
+  
   // 每播放 7 首普通歌曲后，播放一次 promo
-  if (playCount > 0 && playCount % 7 === 0) {
-    console.log('播放 promo 歌曲');
+  if (normalSongCount > 0 && normalSongCount % 7 === 0) {
+    console.log(`已播放 ${normalSongCount} 首普通歌曲，播放 promo 歌曲`);
+    consecutivePromo = true;  // 标记刚播放了 promo
     return promoTrack;
   }
   
+  // 正常随机播放普通歌曲
   if (filteredPlaylist.length === 0) return promoTrack;
   const randomIndex = Math.floor(Math.random() * filteredPlaylist.length);
   return filteredPlaylist[randomIndex];
@@ -589,10 +599,15 @@ function playTrack(track, autoPlay = true) {
 function next() {
   if (isLoading) return;
   const track = getNextTrack();
-  // 如果是普通歌曲（非 promo），增加计数
+  
+  // 计数逻辑：只有普通歌曲才增加计数，promo 不增加
   if (track !== promoTrack) {
-    playCount++;
+    normalSongCount++;
+    console.log(`播放普通歌曲 #${normalSongCount}`);
+  } else {
+    console.log('播放 promo 歌曲');
   }
+  
   playTrack(track, true);
   changeBodyBackground();
 }
@@ -603,7 +618,6 @@ function togglePlay() {
   const pauseIcon = document.getElementById('pauseIconInner');
   
   if (isPlaying) {
-    // 当前正在播放，点击后暂停
     audio.pause();
     clearPlayCheck();
     isPlaying = false;
@@ -611,10 +625,8 @@ function togglePlay() {
     pauseIcon.style.display = 'none';
     playBtn.classList.add('paused-state');
   } else {
-    // 当前暂停，点击后播放
     isPlaying = true;
     
-    // 如果是第一次播放，先加载 promo 歌曲
     if (isFirstPlay) {
       isFirstPlay = false;
       const nameEl = document.getElementById('musicName');
@@ -628,7 +640,6 @@ function togglePlay() {
     audio.play()
       .then(() => {
         startPlayCheck();
-        // 更新显示歌曲信息（如果是第一次播放，显示 promo 信息）
         if (isFirstPlay === false && audio.src === promoTrack.url) {
           const nameEl = document.getElementById('musicName');
           const singerEl = document.getElementById('singerName');
@@ -707,10 +718,10 @@ async function init() {
     filteredPlaylist = [];
   }
 
-  // 初始化状态：显示欢迎文字，不播放，NOW PLAYING 隐藏
   isPlaying = false;
   isFirstPlay = true;
-  playCount = 0;
+  normalSongCount = 0;
+  consecutivePromo = false;
   
   document.getElementById('playBtn').onclick = togglePlay;
   document.getElementById('nextBtn').onclick = () => { if (!isLoading && isPlaying) next(); };
