@@ -55,24 +55,26 @@
     will-change: transform;
   }
   .music-name.marquee {
-    animation: marqueeScroll 20s linear infinite;
+    animation: marqueeScroll 16s linear infinite;
   }
   
-  /* 歌手名行 - flex布局确保歌手名区域不盖到NOW PLAYING */
+  /* 歌手名行 - flex布局确保歌手名区域不盖到NOW PLAYING，且垂直对齐 */
   .singer-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 22px;
     width: 100%;
+    min-height: 28px; /* 固定最小高度，确保对齐 */
   }
   
-  /* 歌手名容器 - 可滚动区域，占满剩余空间 */
+  /* 歌手名容器 - 可滚动区域，占满剩余空间，与NOW PLAYING垂直对齐 */
   .singer-name-wrapper {
     flex: 1;
     overflow: hidden;
-    min-width: 0; /* 防止flex子项溢出 */
+    min-width: 0;
     margin-right: 12px;
+    line-height: 1.4;
   }
   .singer-name {
     font-size: 16px;
@@ -80,22 +82,26 @@
     white-space: nowrap;
     display: inline-block;
     will-change: transform;
+    line-height: 1.4;
   }
   .singer-name.marquee {
-    animation: marqueeScroll 15s linear infinite;
+    animation: marqueeScroll 12s linear infinite;
   }
   
+  /* 使用 translateX 百分比实现无缝滚动，确保不卡顿 */
   @keyframes marqueeScroll {
     0% { transform: translateX(0); }
     100% { transform: translateX(-50%); }
   }
   
-  /* NOW PLAYING 容器 - 固定宽度，不被挤压 */
+  /* NOW PLAYING 容器 - 固定宽度，与歌手名垂直居中对齐 */
   .now-playing-wrapper {
     display: flex;
     align-items: center;
     gap: 6px;
     flex-shrink: 0;
+    height: 28px; /* 固定高度与歌手名行一致 */
+    line-height: 1;
   }
   
   /* 闪烁圆点 */
@@ -124,6 +130,7 @@
     color:rgba(255,255,255,0.7);
     animation: glow 1.8s infinite alternate;
     white-space: nowrap;
+    line-height: 1;
   }
   
   /* 暂停时隐藏整个 NOW PLAYING 区域 */
@@ -369,6 +376,7 @@
     }
     .now-playing-wrapper {
       gap: 5px;
+      height: 24px;
     }
     .music-name {
       font-size: 24px;
@@ -378,6 +386,9 @@
     }
     .singer-name-wrapper {
       margin-right: 8px;
+    }
+    .singer-row {
+      min-height: 24px;
     }
   }
 
@@ -424,6 +435,7 @@
     }
     .now-playing-wrapper {
       gap: 4px;
+      height: 22px;
     }
     .music-name {
       font-size: 20px;
@@ -433,6 +445,9 @@
     }
     .singer-name-wrapper {
       margin-right: 6px;
+    }
+    .singer-row {
+      min-height: 22px;
     }
   }
 </style>
@@ -510,27 +525,15 @@ const promoTrack = {
   url: "https://radio.hellyell.com/hy.mp3"
 };
 
-// 优雅的网页背景配色方案（与红白机红色搭配）
+// 优雅的网页背景配色方案
 const bgColorPalette = [
-  '#F5F0E8',  // 暖米白
-  '#E8F0F5',  // 淡天蓝
-  '#F0F4E8',  // 淡草绿
-  '#F9F0E8',  // 淡杏色
-  '#E8EAF6',  // 淡薰衣草
-  '#FEF5E7',  // 淡奶油
-  '#E8F5E9',  // 淡薄荷
-  '#FCE4EC',  // 淡樱花粉
-  '#E3F2FD',  // 淡雾蓝
-  '#FFF3E0',  // 淡橘黄
-  '#F1F8E9',  // 淡青柠
-  '#FFFBEB',  // 淡香槟
-  '#ECFDF5',  // 淡翡翠
-  '#FEF9E6',  // 淡米黄
+  '#F5F0E8', '#E8F0F5', '#F0F4E8', '#F9F0E8', '#E8EAF6',
+  '#FEF5E7', '#E8F5E9', '#FCE4EC', '#E3F2FD', '#FFF3E0',
+  '#F1F8E9', '#FFFBEB', '#ECFDF5', '#FEF9E6'
 ];
 
 let currentBgIndex = 0;
 
-// 随机获取新背景色（不重复）
 function getRandomBgColor() {
   let newIndex;
   do {
@@ -540,20 +543,15 @@ function getRandomBgColor() {
   return bgColorPalette[newIndex];
 }
 
-// 切换整个网页背景色
 function changeBodyBackground() {
   const newColor = getRandomBgColor();
-  console.log('切换网页背景色:', newColor);
   document.body.style.backgroundColor = newColor;
 }
 
-// 控制 NOW PLAYING 区域的显示和动画
 function updateNowPlayingDisplay() {
   const wrapper = document.getElementById('nowPlayingWrapper');
   const dot = document.getElementById('playingDot');
-  
   if (!wrapper) return;
-  
   if (isPlaying) {
     wrapper.classList.remove('paused');
     if (dot) dot.classList.add('active');
@@ -571,7 +569,6 @@ function createSpeakerHoles() {
   
   const rings = 5;
   const holesPerRing = [12, 18, 24, 30, 36];
-  
   const startRadius = 12;
   const endRadius = 48;
   const step = (endRadius - startRadius) / (rings - 1);
@@ -579,7 +576,6 @@ function createSpeakerHoles() {
   for (let i = 0; i < rings; i++) {
     radii.push(startRadius + i * step);
   }
-  
   const centerX = 50, centerY = 50;
   
   for (let r = 0; r < rings; r++) {
@@ -619,6 +615,31 @@ function startPlayCheck() {
   }, PLAY_TIMEOUT);
 }
 
+// 核心：设置滚动文本，确保流畅无卡顿
+function setScrollingText(element, wrapper, originalText) {
+  // 移除现有动画类
+  element.classList.remove('marquee');
+  
+  // 先设置原始文本
+  element.innerHTML = originalText;
+  
+  // 使用 requestAnimationFrame 确保 DOM 渲染完成
+  requestAnimationFrame(() => {
+    const needScroll = element.scrollWidth > wrapper.clientWidth;
+    
+    if (needScroll) {
+      // 需要滚动：拼接两份文本，中间用全角空格隔开
+      element.innerHTML = originalText + '　' + originalText;
+      // 强制重绘
+      element.offsetHeight;
+      // 添加动画类
+      element.classList.add('marquee');
+    } else {
+      element.innerHTML = originalText;
+    }
+  });
+}
+
 function loadTrack(track) {
   clearPlayCheck();
   const parts = track.name.split(' - ');
@@ -627,42 +648,14 @@ function loadTrack(track) {
 
   const nameEl = document.getElementById('musicName');
   const singerEl = document.getElementById('singerName');
-  
-  // 获取容器宽度
   const nameWrapper = nameEl.parentElement;
   const singerWrapper = singerEl.parentElement;
   
-  // 设置原始文本
-  const originalMusic = music;
-  const originalSinger = singer;
-  
-  // 移除现有滚动类
-  nameEl.classList.remove('marquee');
-  singerEl.classList.remove('marquee');
-  
-  // 先设置原始文本，测量后再决定是否滚动
-  nameEl.innerHTML = originalMusic;
-  singerEl.innerHTML = originalSinger;
-  
-  // 使用 requestAnimationFrame 确保 DOM 渲染完成后再测量
-  requestAnimationFrame(() => {
-    // 歌曲名滚动判断
-    if (nameEl.scrollWidth > nameWrapper.clientWidth) {
-      nameEl.innerHTML = originalMusic + '　' + originalMusic;
-      nameEl.classList.add('marquee');
-    } else {
-      nameEl.innerHTML = originalMusic;
-    }
-    
-    // 歌手名滚动判断
-    if (singerEl.scrollWidth > singerWrapper.clientWidth) {
-      singerEl.innerHTML = originalSinger + '　' + originalSinger;
-      singerEl.classList.add('marquee');
-    } else {
-      singerEl.innerHTML = originalSinger;
-    }
-  });
+  // 设置滚动文本（使用新函数确保流畅）
+  setScrollingText(nameEl, nameWrapper, music);
+  setScrollingText(singerEl, singerWrapper, singer);
 
+  // 渐隐渐显效果
   nameEl.parentElement.style.opacity = '0';
   singerEl.style.opacity = '0';
 
@@ -746,18 +739,13 @@ function showVolumeTip(buttonId, message) {
 
 function setVolumeByValue(newVolumeValue, sourceBtn) {
   if (newVolumeValue < 1) {
-    if (volumeValue === 1) {
-      showVolumeTip(sourceBtn, '最小');
-    }
+    if (volumeValue === 1) showVolumeTip(sourceBtn, '最小');
     return;
   }
   if (newVolumeValue > 9) {
-    if (volumeValue === 9) {
-      showVolumeTip(sourceBtn, '最大');
-    }
+    if (volumeValue === 9) showVolumeTip(sourceBtn, '最大');
     return;
   }
-  
   volumeValue = newVolumeValue;
   volume = volumeValue / 10;
   audio.volume = volume;
@@ -797,9 +785,7 @@ async function init() {
   document.getElementById('volMinusBtn').onclick = () => setVolumeByValue(volumeValue - 1, 'minus');
   document.getElementById('volPlusBtn').onclick = () => setVolumeByValue(volumeValue + 1, 'plus');
   
-  setTimeout(() => {
-    changeBodyBackground();
-  }, 100);
+  setTimeout(() => changeBodyBackground(), 100);
 }
 
 window.onload = init;
