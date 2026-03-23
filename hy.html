@@ -63,7 +63,6 @@
     background-color: #fff;
     border-radius: 50%;
     opacity: 0;
-    transition: opacity 0.1s ease;
   }
   
   /* 播放时的闪烁动画 */
@@ -76,15 +75,19 @@
     50% { opacity: 0.3; }
   }
   
+  /* NOW PLAYING 文字 - 呼吸动画 */
   .now-playing{
     font-size:11px;
     letter-spacing:1.5px;
     color:rgba(255,255,255,0.7);
-    visibility:visible;
+    animation: glow 1.8s infinite alternate;
   }
-  .now-playing.show{
-    visibility:visible;
+  
+  /* 暂停时隐藏整个 NOW PLAYING 区域 */
+  .now-playing-wrapper.paused {
+    visibility: hidden;
   }
+  
   @keyframes glow{0%{opacity:.6}100%{opacity:1}}
   .time-progress{width:100%}
   .progress-wrap{width:100%;height:4px;background:rgba(255,255,255,0.25);border-radius:2px;overflow:hidden}
@@ -381,7 +384,7 @@
       <div class="music-name-wrapper"><div id="musicName" class="music-name"></div></div>
       <div class="singer-row">
         <div id="singerName" class="singer-name"></div>
-        <div class="now-playing-wrapper">
+        <div id="nowPlayingWrapper" class="now-playing-wrapper">
           <div id="playingDot" class="playing-dot"></div>
           <div id="nowPlaying" class="now-playing">NOW PLAYING</div>
         </div>
@@ -481,14 +484,19 @@ function changeBodyBackground() {
   document.body.style.backgroundColor = newColor;
 }
 
-// 控制闪烁圆点
-function updatePlayingDot() {
+// 控制 NOW PLAYING 区域的显示和动画
+function updateNowPlayingDisplay() {
+  const wrapper = document.getElementById('nowPlayingWrapper');
   const dot = document.getElementById('playingDot');
-  if (!dot) return;
+  
+  if (!wrapper) return;
+  
   if (isPlaying) {
-    dot.classList.add('active');
+    wrapper.classList.remove('paused');
+    if (dot) dot.classList.add('active');
   } else {
-    dot.classList.remove('active');
+    wrapper.classList.add('paused');
+    if (dot) dot.classList.remove('active');
   }
 }
 
@@ -614,20 +622,18 @@ function togglePlay() {
     isPlaying = false;
     playIcon.style.display = 'inline';
     pauseIcon.style.display = 'none';
-    document.getElementById('nowPlaying').classList.remove('show');
     playBtn.classList.add('paused-state');
-    // 停止闪烁圆点
-    updatePlayingDot();
+    // 暂停时隐藏 NOW PLAYING 区域
+    updateNowPlayingDisplay();
   } else {
     isPlaying = true;
     audio.play().catch(() => { next(); });
     startPlayCheck();
     playIcon.style.display = 'none';
     pauseIcon.style.display = 'inline-block';
-    document.getElementById('nowPlaying').classList.add('show');
     playBtn.classList.remove('paused-state');
-    // 开始闪烁圆点
-    updatePlayingDot();
+    // 播放时显示 NOW PLAYING 区域并启动动画
+    updateNowPlayingDisplay();
     // 开始播放时也变换一次网页背景色
     changeBodyBackground();
   }
