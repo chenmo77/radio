@@ -51,9 +51,9 @@
     display: inline-block;
     will-change: transform;
   }
-  /* 修正滚动动画 - 使用 -100% 配合双倍内容实现无缝 */
+  /* 无限循环滚动 - 使用 -50% 配合三倍内容 */
   .music-name.marquee {
-    animation: marqueeScroll 16s linear infinite;
+    animation: marqueeScroll 20s linear infinite;
   }
   
   .singer-row {
@@ -81,13 +81,13 @@
     line-height: 1.4;
   }
   .singer-name.marquee {
-    animation: marqueeScroll 12s linear infinite;
+    animation: marqueeScroll 15s linear infinite;
   }
   
-  /* 关键修复：使用 -100% 确保滚动到第二份文本开头时无缝衔接 */
+  /* 使用 -50% 配合三倍内容实现无限循环无缝滚动 */
   @keyframes marqueeScroll {
     0% { transform: translateX(0); }
-    100% { transform: translateX(-100%); }
+    100% { transform: translateX(-50%); }
   }
   
   .now-playing-wrapper {
@@ -509,24 +509,22 @@ function startPlayCheck() {
   }, PLAY_TIMEOUT);
 }
 
-// 修复滚动逻辑：使用双倍内容 + -100% 实现无缝滚动
+// 无限循环滚动 - 使用三份内容实现真正无限滚动
 function setScrollingText(element, wrapper, originalText) {
-  // 移除动画类
   element.classList.remove('marquee');
   
-  // 先设置原始文本
+  // 先设置原始文本测量宽度
   element.innerHTML = originalText;
   
   requestAnimationFrame(() => {
     const containerWidth = wrapper.clientWidth;
-    const textWidth = element.scrollWidth;
+    const singleWidth = element.scrollWidth;
     
-    if (textWidth > containerWidth) {
-      // 需要滚动：拼接两份文本，中间用全角空格隔开，使滚动到 -100% 时刚好显示第二份文本开头
-      element.innerHTML = originalText + '　' + originalText;
-      // 强制重绘
+    if (singleWidth > containerWidth) {
+      // 需要滚动：拼接三份文本，中间用全角空格隔开
+      // 三份文本确保滚动到 -50% 时第二份完整显示，无限循环
+      element.innerHTML = originalText + '　' + originalText + '　' + originalText;
       element.offsetHeight;
-      // 添加动画类
       element.classList.add('marquee');
     } else {
       element.innerHTML = originalText;
