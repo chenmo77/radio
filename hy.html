@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>HellYell音乐电台</title>
 <style>
-  /* 所有样式保持不变 */
   *{margin:0;padding:0;box-sizing:border-box;font-family:"MiSans","Microsoft YaHei",sans-serif;font-weight:700}
   
   html, body {
@@ -54,6 +53,9 @@
     position: relative;
     will-change: transform;
   }
+  .music-name.marquee {
+    animation: marqueeScroll 16s linear infinite;
+  }
   
   .singer-row {
     display: flex;
@@ -80,6 +82,14 @@
     position: relative;
     will-change: transform;
     line-height: 1.4;
+  }
+  .singer-name.marquee {
+    animation: marqueeScroll 12s linear infinite;
+  }
+  
+  @keyframes marqueeScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
   }
   
   .now-playing-wrapper {
@@ -410,62 +420,27 @@
 </div>
 
 <script>
+// ========== 核心变量 ==========
 const audio = new Audio();
 audio.preload = "auto";
 
-let playlist = [];
-let filteredPlaylist = [];
-let isPlaying = false;
-let volume = 0.6;
-let volumeValue = 6;
-let normalSongCount = 0;
-let consecutivePromo = false;
+let allSongs = [];           // 普通歌曲列表
+let currentSong = null;      // 当前播放的歌曲
+let isPlaying = false;       // 是否正在播放
+let normalCount = 0;         // 当前轮次已播放的普通歌曲数量（0-6，每7首重置）
+let hasStarted = false;      // 是否已开始播放
+let isSwitching = false;     // 防止重复切换
+let loadTimer = null;        // 加载超时定时器
 
-let loadTimeoutTimer = null;
-let isLoading = false;
-let isFirstPlay = true;
-const LOAD_TIMEOUT = 6000;
-
-const promoTrack = {
+const promoSong = {
   name: "HellYell Radio - 欢迎收听",
   url: "https://radio.hellyell.com/hy.mp3"
 };
 
-const bgColorPalette = [
-  '#F5F0E8', '#E8F0F5', '#F0F4E8', '#F9F0E8', '#E8EAF6',
-  '#FEF5E7', '#E8F5E9', '#FCE4EC', '#E3F2FD', '#FFF3E0',
-  '#F1F8E9', '#FFFBEB', '#ECFDF5', '#FEF9E6'
-];
+// 音量相关
+let volume = 0.6;
 
-let currentBgIndex = 0;
-let marqueeAnimations = {};
-
-function getRandomBgColor() {
-  let newIndex;
-  do {
-    newIndex = Math.floor(Math.random() * bgColorPalette.length);
-  } while (newIndex === currentBgIndex && bgColorPalette.length > 1);
-  currentBgIndex = newIndex;
-  return bgColorPalette[newIndex];
-}
-
-function changeBodyBackground() {
-  document.body.style.backgroundColor = getRandomBgColor();
-}
-
-function updateNowPlayingDisplay() {
-  const wrapper = document.getElementById('nowPlayingWrapper');
-  const dot = document.getElementById('playingDot');
-  if (!wrapper) return;
-  if (isPlaying) {
-    wrapper.classList.remove('paused');
-    if (dot) dot.classList.add('active');
-  } else {
-    wrapper.classList.add('paused');
-    if (dot) dot.classList.remove('active');
-  }
-}
-
+// ========== 喇叭孔 ==========
 function createSpeakerHoles() {
   const container = document.getElementById('speakerArea');
   if (!container) return;
@@ -496,33 +471,8 @@ function createSpeakerHoles() {
   }
 }
 
-function fmt(t) {
-  if (isNaN(t)) return '00:00';
-  const m = String(Math.floor(t / 60)).padStart(2, '0');
-  const s = String(Math.floor(t % 60)).padStart(2, '0');
-  return m + ':' + s;
-}
-
-function clearLoadTimeout() {
-  if (loadTimeoutTimer) {
-    clearTimeout(loadTimeoutTimer);
-    loadTimeoutTimer = null;
-  }
-}
-
-function startLoadTimeout() {
-  clearLoadTimeout();
-  loadTimeoutTimer = setTimeout(() => {
-    if (isPlaying && !isLoading) {
-      if (audio.currentTime <= 0.1) {
-        console.log('歌曲加载超时，自动切换到下一首');
-        // 重要：先重置 isLoading 再调用 next，避免 next 中被阻塞
-        isLoading = false;
-        next();
-      }
-    }
-  }, LOAD_TIMEOUT);
-}
+// ========== 滚动文字 ==========
+let marqueeAnimations = {};
 
 function stopMarquee(element) {
   if (marqueeAnimations[element.id]) {
@@ -530,6 +480,7 @@ function stopMarquee(element) {
     delete marqueeAnimations[element.id];
   }
   element.style.transform = 'translateX(0)';
+  element.classList.remove('marquee');
 }
 
 function startMarquee(element, wrapper, originalText, speed = 50) {
@@ -546,9 +497,9 @@ function startMarquee(element, wrapper, originalText, speed = 50) {
     return;
   }
   
+  element.classList.add('marquee');
   let position = 0;
   let lastTimestamp = 0;
-  const pixelsPerSecond = speed;
   
   function animate(timestamp) {
     if (!lastTimestamp) {
@@ -556,319 +507,301 @@ function startMarquee(element, wrapper, originalText, speed = 50) {
       marqueeAnimations[element.id] = requestAnimationFrame(animate);
       return;
     }
-    
     const delta = Math.min(100, timestamp - lastTimestamp);
-    const distance = (pixelsPerSecond * delta) / 1000;
-    position += distance;
-    
-    if (position >= singleWidth) {
-      position -= singleWidth;
-    }
-    
+    position += (speed * delta) / 1000;
+    if (position >= singleWidth) position -= singleWidth;
     element.style.transform = `translateX(-${position}px)`;
-    
     lastTimestamp = timestamp;
     marqueeAnimations[element.id] = requestAnimationFrame(animate);
   }
-  
   marqueeAnimations[element.id] = requestAnimationFrame(animate);
 }
 
-function setScrollingText(element, wrapper, originalText) {
+function setScrollingText(element, wrapper, text) {
   stopMarquee(element);
-  element.innerHTML = originalText;
-  
+  element.innerHTML = text;
   requestAnimationFrame(() => {
-    const containerWidth = wrapper.clientWidth;
-    const textWidth = element.scrollWidth;
-    
-    if (textWidth > containerWidth) {
-      startMarquee(element, wrapper, originalText, 50);
-    } else {
-      element.innerHTML = originalText;
+    if (element.scrollWidth > wrapper.clientWidth) {
+      startMarquee(element, wrapper, text, 50);
     }
   });
 }
 
-function loadTrack(track, autoPlay = true) {
-  // 防止重复加载
-  if (isLoading && autoPlay) return;
-  
-  isLoading = true;
-  clearLoadTimeout();
-  
-  const parts = track.name.split(' - ');
+// ========== 更新UI ==========
+function updateUI(song) {
+  const parts = song.name.split(' - ');
   const singer = parts[0] || '';
-  const music = parts.slice(1).join(' - ') || track.name;
-
+  const music = parts.slice(1).join(' - ') || song.name;
+  
   const nameEl = document.getElementById('musicName');
   const singerEl = document.getElementById('singerName');
-  const nameWrapper = nameEl.parentElement;
-  const singerWrapper = singerEl.parentElement;
   
-  setScrollingText(nameEl, nameWrapper, music);
-  setScrollingText(singerEl, singerWrapper, singer);
-
-  nameEl.parentElement.style.opacity = '0';
-  singerEl.style.opacity = '0';
-
-  setTimeout(() => {
-    nameEl.parentElement.style.opacity = '1';
-    singerEl.style.opacity = '1';
-  }, 250);
-
+  setScrollingText(nameEl, nameEl.parentElement, music);
+  setScrollingText(singerEl, singerEl.parentElement, singer);
+  
   document.title = `${music} - ${singer}`;
+}
+
+// ========== 获取下一首歌曲 ==========
+function getNextSong() {
+  // 每7首普通歌曲后，播放一次promo
+  if (normalCount === 7) {
+    normalCount = 0;
+    console.log('播放 promo 歌曲');
+    return promoSong;
+  }
+  
+  // 随机获取普通歌曲
+  if (allSongs.length === 0) return promoSong;
+  const randomIndex = Math.floor(Math.random() * allSongs.length);
+  return allSongs[randomIndex];
+}
+
+// ========== 清除超时 ==========
+function clearLoadTimer() {
+  if (loadTimer) {
+    clearTimeout(loadTimer);
+    loadTimer = null;
+  }
+}
+
+// ========== 播放指定歌曲 ==========
+function playSong(song, autoPlay = true) {
+  if (isSwitching) return;
+  isSwitching = true;
+  clearLoadTimer();
+  
+  currentSong = song;
+  updateUI(song);
   
   // 停止当前播放，设置新源
   audio.pause();
-  audio.src = track.url;
+  audio.src = song.url;
   audio.volume = volume;
   
-  // 关键：添加 error 事件监听，防止卡死
-  const errorHandler = () => {
-    console.error('音频错误:', track.name);
-    audio.removeEventListener('error', errorHandler);
-    if (isLoading && isPlaying) {
-      isLoading = false;
-      clearLoadTimeout();
-      next();
-    }
-  };
-  audio.addEventListener('error', errorHandler, { once: true });
-  
-  // 启动超时检测
-  startLoadTimeout();
-  
   if (autoPlay && isPlaying) {
+    // 启动6秒超时检测
+    loadTimer = setTimeout(() => {
+      if (isPlaying && !isSwitching) {
+        console.log('加载超时，切换到下一首');
+        nextSong();
+      }
+    }, 6000);
+    
     audio.play()
       .then(() => {
-        audio.removeEventListener('error', errorHandler);
-        clearLoadTimeout();
-        isLoading = false;
+        clearLoadTimer();
+        isSwitching = false;
       })
       .catch((err) => {
-        console.error('播放失败:', track.name, err);
-        audio.removeEventListener('error', errorHandler);
-        clearLoadTimeout();
-        isLoading = false;
-        // 播放失败，立即切换到下一首
-        next();
+        console.error('播放失败:', song.name, err);
+        clearLoadTimer();
+        isSwitching = false;
+        setTimeout(() => nextSong(), 500);
       });
   } else {
-    isLoading = false;
+    isSwitching = false;
   }
 }
 
-function getNextTrack() {
-  if (consecutivePromo) {
-    consecutivePromo = false;
-    if (filteredPlaylist.length === 0) return promoTrack;
-    const randomIndex = Math.floor(Math.random() * filteredPlaylist.length);
-    return filteredPlaylist[randomIndex];
+// ========== 下一首 ==========
+function nextSong() {
+  if (isSwitching) return;
+  clearLoadTimer();
+  
+  // 获取下一首
+  const next = getNextSong();
+  
+  // 更新计数（只有普通歌曲才增加计数，promo不增加）
+  if (next !== promoSong) {
+    normalCount++;
+    console.log(`播放普通歌曲，当前轮次已播: ${normalCount}/7`);
   }
   
-  if (normalSongCount > 0 && normalSongCount % 7 === 0) {
-    console.log(`已播放 ${normalSongCount} 首普通歌曲，播放 promo 歌曲`);
-    consecutivePromo = true;
-    return promoTrack;
-  }
-  
-  if (filteredPlaylist.length === 0) return promoTrack;
-  const randomIndex = Math.floor(Math.random() * filteredPlaylist.length);
-  return filteredPlaylist[randomIndex];
+  playSong(next, isPlaying);
 }
 
-function playTrack(track, autoPlay = true) {
-  loadTrack(track, autoPlay);
-}
-
-function next() {
-  // 关键：先清理所有可能阻塞的状态
-  clearLoadTimeout();
-  isLoading = false;
-  
-  const track = getNextTrack();
-  
-  if (track !== promoTrack) {
-    normalSongCount++;
-    console.log(`播放普通歌曲 #${normalSongCount}`);
-  } else {
-    console.log('播放 promo 歌曲');
-  }
-  
-  loadTrack(track, isPlaying);
-  changeBodyBackground();
-}
-
+// ========== 播放/暂停 ==========
 function togglePlay() {
   const playBtn = document.getElementById('playBtn');
   const playIcon = document.getElementById('playIconInner');
   const pauseIcon = document.getElementById('pauseIconInner');
+  const wrapper = document.getElementById('nowPlayingWrapper');
+  const dot = document.getElementById('playingDot');
   
   if (isPlaying) {
+    // 暂停
     audio.pause();
-    clearLoadTimeout();
+    clearLoadTimer();
     isPlaying = false;
     playIcon.style.display = 'flex';
     pauseIcon.style.display = 'none';
     playBtn.classList.add('paused-state');
-    const nameEl = document.getElementById('musicName');
-    const singerEl = document.getElementById('singerName');
-    stopMarquee(nameEl);
-    stopMarquee(singerEl);
+    wrapper.classList.add('paused');
+    if (dot) dot.classList.remove('active');
   } else {
+    // 播放
     isPlaying = true;
-    
-    if (isFirstPlay) {
-      isFirstPlay = false;
-      const nameEl = document.getElementById('musicName');
-      const singerEl = document.getElementById('singerName');
-      nameEl.innerHTML = '欢迎收听';
-      singerEl.innerHTML = 'HellYell Radio';
-      audio.src = promoTrack.url;
-      audio.volume = volume;
-      
-      startLoadTimeout();
-      
-      audio.play()
-        .then(() => {
-          clearLoadTimeout();
-          const nameWrapper = nameEl.parentElement;
-          const singerWrapper = singerEl.parentElement;
-          setScrollingText(nameEl, nameWrapper, '欢迎收听');
-          setScrollingText(singerEl, singerWrapper, 'HellYell Radio');
-        })
-        .catch((err) => {
-          console.error('播放失败:', err);
-          clearLoadTimeout();
-          next();
-        });
-    } else {
-      // 如果当前没有正在播放的音频源，需要先加载
-      if (!audio.src || audio.src === '') {
-        next();
-      } else {
-        startLoadTimeout();
-        
-        audio.play()
-          .then(() => {
-            clearLoadTimeout();
-            const nameEl = document.getElementById('musicName');
-            const singerEl = document.getElementById('singerName');
-            const nameWrapper = nameEl.parentElement;
-            const singerWrapper = singerEl.parentElement;
-            const currentMusic = nameEl.innerHTML.split('　')[0];
-            const currentSinger = singerEl.innerHTML.split('　')[0];
-            if (currentMusic && currentMusic !== '欢迎收听') {
-              setScrollingText(nameEl, nameWrapper, currentMusic);
-              setScrollingText(singerEl, singerWrapper, currentSinger);
-            }
-          })
-          .catch((err) => {
-            console.error('恢复播放失败:', err);
-            clearLoadTimeout();
-            next();
-          });
-      }
-    }
-    
     playIcon.style.display = 'none';
     pauseIcon.style.display = 'flex';
     playBtn.classList.remove('paused-state');
-    changeBodyBackground();
+    wrapper.classList.remove('paused');
+    if (dot) dot.classList.add('active');
+    
+    if (!hasStarted) {
+      // 首次播放：播放 hy.mp3
+      hasStarted = true;
+      normalCount = 0;
+      console.log('首次播放，播放 promo 歌曲');
+      playSong(promoSong, true);
+    } else if (currentSong) {
+      // 已有当前歌曲，恢复播放
+      clearLoadTimer();
+      loadTimer = setTimeout(() => {
+        if (isPlaying && !isSwitching) {
+          console.log('恢复播放超时，切换到下一首');
+          nextSong();
+        }
+      }, 6000);
+      
+      audio.play()
+        .then(() => clearLoadTimer())
+        .catch((err) => {
+          console.error('恢复播放失败:', err);
+          clearLoadTimer();
+          nextSong();
+        });
+    } else {
+      // 没有当前歌曲，重新开始
+      playSong(promoSong, true);
+    }
   }
-  updateNowPlayingDisplay();
 }
 
-audio.ontimeupdate = () => {
-  if (!audio.duration) return;
-  const per = (audio.currentTime / audio.duration) * 100;
-  document.getElementById('progressBar').style.width = per + '%';
-  document.getElementById('currentTime').innerText = fmt(audio.currentTime);
-  document.getElementById('durationTime').innerText = fmt(audio.duration);
+// ========== 音量控制 ==========
+function updateVolumeKnob() {
+  const min = -150, max = 150;
+  const angle = min + volume * (max - min);
+  const knob = document.getElementById('volumeKnob');
+  if (knob) knob.style.transform = `rotate(${angle}deg)`;
+}
 
-  if (audio.currentTime > 0.2) {
-    clearLoadTimeout();
-  }
-  
-  if (audio.currentTime >= audio.duration - 0.5 && !isLoading && isPlaying) {
-    next();
-  }
-};
-
-function showVolumeTip(buttonId, message) {
-  const tip = document.getElementById(buttonId === 'minus' ? 'minusTip' : 'plusTip');
+function showVolumeTip(value, type) {
+  const tip = document.getElementById(type === 'minus' ? 'minusTip' : 'plusTip');
   if (!tip) return;
-  tip.textContent = message;
+  tip.textContent = value;
   tip.classList.add('show');
   setTimeout(() => tip.classList.remove('show'), 600);
 }
 
-function setVolumeByValue(newVolumeValue, sourceBtn) {
-  if (newVolumeValue < 1) {
-    if (volumeValue === 1) showVolumeTip(sourceBtn, '最小');
+function volumeUp() {
+  let newVol = volume + 0.1;
+  if (newVol > 1) {
+    if (volume === 1) showVolumeTip('最大', 'plus');
     return;
   }
-  if (newVolumeValue > 9) {
-    if (volumeValue === 9) showVolumeTip(sourceBtn, '最大');
-    return;
-  }
-  volumeValue = newVolumeValue;
-  volume = volumeValue / 10;
+  volume = newVol;
   audio.volume = volume;
-  showVolumeTip(sourceBtn, volumeValue);
+  updateVolumeKnob();
+  showVolumeTip(Math.round(volume * 9), 'plus');
 }
 
+function volumeDown() {
+  let newVol = volume - 0.1;
+  if (newVol < 0) {
+    if (volume === 0) showVolumeTip('最小', 'minus');
+    return;
+  }
+  volume = newVol;
+  audio.volume = volume;
+  updateVolumeKnob();
+  showVolumeTip(Math.round(volume * 9), 'minus');
+}
+
+// ========== 音频事件 ==========
+audio.addEventListener('ended', () => {
+  if (!isSwitching && isPlaying) {
+    console.log('歌曲播放结束');
+    nextSong();
+  }
+});
+
+audio.addEventListener('timeupdate', () => {
+  if (!audio.duration) return;
+  const per = (audio.currentTime / audio.duration) * 100;
+  document.getElementById('progressBar').style.width = per + '%';
+  document.getElementById('currentTime').innerText = formatTime(audio.currentTime);
+  document.getElementById('durationTime').innerText = formatTime(audio.duration);
+  
+  // 开始播放后清除超时
+  if (audio.currentTime > 0.2) {
+    clearLoadTimer();
+  }
+});
+
+audio.addEventListener('error', () => {
+  console.error('音频错误');
+  if (!isSwitching && isPlaying) {
+    clearLoadTimer();
+    nextSong();
+  }
+});
+
+function formatTime(t) {
+  if (isNaN(t)) return '00:00';
+  const m = Math.floor(t / 60);
+  const s = Math.floor(t % 60);
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+// ========== 背景色变换 ==========
+const bgColors = ['#F5F0E8', '#E8F0F5', '#F0F4E8', '#F9F0E8', '#E8EAF6', '#FEF5E7', '#E8F5E9', '#FCE4EC', '#E3F2FD', '#FFF3E0'];
+let bgIndex = 0;
+setInterval(() => {
+  bgIndex = (bgIndex + 1) % bgColors.length;
+  document.body.style.backgroundColor = bgColors[bgIndex];
+}, 15000);
+
+// ========== 初始化 ==========
 async function init() {
   createSpeakerHoles();
-  window.addEventListener('resize', () => {
-    const nameEl = document.getElementById('musicName');
-    const singerEl = document.getElementById('singerName');
-    const nameWrapper = nameEl.parentElement;
-    const singerWrapper = singerEl.parentElement;
-    const currentMusic = nameEl.innerHTML;
-    const currentSinger = singerEl.innerHTML;
-    if (currentMusic && currentMusic !== '欢迎收听') {
-      setScrollingText(nameEl, nameWrapper, currentMusic);
-      setScrollingText(singerEl, singerWrapper, currentSinger);
-    }
-  });
+  window.addEventListener('resize', () => createSpeakerHoles());
   
   try {
     const [hj, qc] = await Promise.all([
       fetch('https://radio.hellyell.com/huaijiu-musiclist.json').then(r => r.json()),
       fetch('https://radio.hellyell.com/qiche-musiclist.json').then(r => r.json())
     ]);
-    playlist = [...hj, ...qc];
-    filteredPlaylist = playlist.filter(item => {
+    const all = [...hj, ...qc];
+    allSongs = all.filter(item => {
       const singer = item.name.split(' - ')[0];
       return singer !== 'HellYell怀旧电台' && 
              singer !== 'HellYell汽车电台' && 
              item.url && item.url.startsWith('http');
     });
-    console.log(`加载了 ${filteredPlaylist.length} 首有效歌曲`);
+    console.log(`加载了 ${allSongs.length} 首有效歌曲`);
   } catch (e) {
     console.error('加载歌曲列表失败:', e);
-    filteredPlaylist = [];
+    allSongs = [];
   }
-
-  isPlaying = false;
-  isFirstPlay = true;
-  normalSongCount = 0;
-  consecutivePromo = false;
   
+  // 初始状态
+  hasStarted = false;
+  isPlaying = false;
+  currentSong = null;
+  normalCount = 0;
+  
+  // 绑定事件
   document.getElementById('playBtn').onclick = togglePlay;
   document.getElementById('nextBtn').onclick = () => {
-    // 关键：点击下一首时强制重置所有状态
-    clearLoadTimeout();
-    isLoading = false;
-    next();
+    if (!isSwitching) nextSong();
   };
-  document.getElementById('volMinusBtn').onclick = () => setVolumeByValue(volumeValue - 1, 'minus');
-  document.getElementById('volPlusBtn').onclick = () => setVolumeByValue(volumeValue + 1, 'plus');
+  document.getElementById('volMinusBtn').onclick = volumeDown;
+  document.getElementById('volPlusBtn').onclick = volumeUp;
   
-  updateNowPlayingDisplay();
-  setTimeout(() => changeBodyBackground(), 100);
+  updateVolumeKnob();
+  audio.volume = volume;
+  document.body.style.backgroundColor = bgColors[0];
 }
 
 window.onload = init;
