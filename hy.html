@@ -42,18 +42,48 @@
   .screen-section{height:38%;background:#E60012;padding:24px 28px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2}
   .music-info{width:100%;color:#fff}
 
-  .music-name-wrapper, .singer-name {transition: opacity 0.5s ease;opacity:1}
-  .music-name{font-size:30px;white-space:nowrap}
-  .music-name.marquee{display:inline-block;animation:textScroll 16s linear infinite}
-  @keyframes textScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+  /* 歌曲名容器 - 始终一行，超出滚动 */
+  .music-name-wrapper {
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .music-name {
+    font-size: 30px;
+    white-space: nowrap;
+    display: inline-block;
+  }
+  /* 歌曲名滚动动画 */
+  .music-name.marquee {
+    animation: marqueeScroll 16s linear infinite;
+  }
+  
+  /* 歌手名容器 - 始终一行，超出滚动 */
+  .singer-name {
+    font-size: 16px;
+    opacity: .85;
+    white-space: nowrap;
+    display: inline-block;
+    max-width: calc(100% - 100px); /* 为右侧 NOW PLAYING 区域留出空间 */
+  }
+  /* 歌手名滚动动画 */
+  .singer-name.marquee {
+    animation: marqueeScroll 12s linear infinite;
+  }
+  
+  @keyframes marqueeScroll {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+  }
+  
   .singer-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
-  .singer-name{font-size:16px;opacity:.85}
   
   /* NOW PLAYING 容器，包含闪烁圆点和文字 */
   .now-playing-wrapper {
     display: flex;
     align-items: center;
     gap: 6px;
+    flex-shrink: 0;
   }
   
   /* 闪烁圆点 */
@@ -81,6 +111,7 @@
     letter-spacing:1.5px;
     color:rgba(255,255,255,0.7);
     animation: glow 1.8s infinite alternate;
+    white-space: nowrap;
   }
   
   /* 暂停时隐藏整个 NOW PLAYING 区域 */
@@ -327,6 +358,13 @@
     .now-playing-wrapper {
       gap: 5px;
     }
+    .music-name {
+      font-size: 24px;
+    }
+    .singer-name {
+      font-size: 14px;
+      max-width: calc(100% - 85px);
+    }
   }
 
   @media (max-width: 480px) {
@@ -372,6 +410,13 @@
     }
     .now-playing-wrapper {
       gap: 4px;
+    }
+    .music-name {
+      font-size: 20px;
+    }
+    .singer-name {
+      font-size: 12px;
+      max-width: calc(100% - 75px);
     }
   }
 </style>
@@ -565,22 +610,49 @@ function loadTrack(track) {
   const nameEl = document.getElementById('musicName');
   const singerEl = document.getElementById('singerName');
 
+  // 获取容器宽度
+  const nameContainer = nameEl.parentElement;
+  const singerContainer = singerEl.parentElement;
+  
+  // 清空并重新设置内容
+  nameEl.innerHTML = '';
+  singerEl.innerHTML = '';
+  
+  // 设置歌曲名
+  nameEl.innerText = music;
+  // 设置歌手名
+  singerEl.innerText = singer;
+  
+  // 移除现有滚动类
+  nameEl.classList.remove('marquee');
+  singerEl.classList.remove('marquee');
+  
+  // 检查是否需要滚动（超出容器宽度）
+  setTimeout(() => {
+    // 歌曲名滚动判断
+    if (nameEl.scrollWidth > nameContainer.clientWidth) {
+      // 需要滚动，拼接重复文本实现无缝滚动
+      nameEl.innerHTML = music + '  ' + music;
+      nameEl.classList.add('marquee');
+    } else {
+      nameEl.innerHTML = music;
+    }
+    
+    // 歌手名滚动判断
+    if (singerEl.scrollWidth > singerContainer.clientWidth) {
+      singerEl.innerHTML = singer + '  ' + singer;
+      singerEl.classList.add('marquee');
+    } else {
+      singerEl.innerHTML = singer;
+    }
+  }, 10);
+
   nameEl.parentElement.style.opacity = '0';
   singerEl.style.opacity = '0';
 
   setTimeout(() => {
-    nameEl.innerText = music;
-    singerEl.innerText = singer;
-    nameEl.classList.remove('marquee');
-
     nameEl.parentElement.style.opacity = '1';
     singerEl.style.opacity = '1';
-
-    setTimeout(() => {
-      if (nameEl.scrollWidth > nameEl.parentElement.offsetWidth) {
-        nameEl.classList.add('marquee');
-      }
-    }, 100);
   }, 250);
 
   document.title = `${music} - ${singer}`;
