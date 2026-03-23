@@ -42,13 +42,41 @@
   .screen-section{height:38%;background:#E60012;padding:24px 28px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2}
   .music-info{width:100%;color:#fff}
 
-  .music-name-wrapper, .singer-name {transition: opacity 0.5s ease;opacity:1}
-  .music-name{font-size:30px;white-space:nowrap}
-  .music-name.marquee{display:inline-block;animation:textScroll 16s linear infinite}
-  @keyframes textScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+  /* 歌曲名容器 - 始终一行，超出滚动 */
+  .music-name-wrapper {
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .music-name {
+    font-size: 30px;
+    white-space: nowrap;
+    display: inline-block;
+  }
+  /* 歌曲名滚动动画 */
+  .music-name.marquee {
+    animation: marqueeScroll 16s linear infinite;
+  }
+  
+  /* 歌手名容器 - 始终一行，超出滚动 */
+  .singer-name {
+    font-size: 16px;
+    opacity: .85;
+    white-space: nowrap;
+    display: inline-block;
+    max-width: calc(100% - 100px); /* 为右侧 NOW PLAYING 区域留出空间 */
+  }
+  /* 歌手名滚动动画 */
+  .singer-name.marquee {
+    animation: marqueeScroll 12s linear infinite;
+  }
+  
+  @keyframes marqueeScroll {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+  }
+  
   .singer-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
-  .singer-name{font-size:16px;opacity:.85;white-space:nowrap;display:inline-block;max-width:calc(100% - 100px)}
-  .singer-name.marquee{display:inline-block;animation:textScroll 12s linear infinite}
   
   /* NOW PLAYING 容器，包含闪烁圆点和文字 */
   .now-playing-wrapper {
@@ -594,19 +622,26 @@ function loadTrack(track) {
   nameEl.classList.remove('marquee');
   singerEl.classList.remove('marquee');
   
-  // 检查是否需要滚动（超出容器宽度）
-  // 先设置文本，测量后再决定
+  // 先设置原始文本，测量后再决定是否滚动
   nameEl.innerHTML = originalMusic;
   singerEl.innerHTML = originalSinger;
   
   setTimeout(() => {
-    // 歌曲名滚动判断 - 始终滚动，中间用中文全角空格隔开
-    nameEl.innerHTML = originalMusic + '　' + originalMusic;
-    nameEl.classList.add('marquee');
+    // 歌曲名滚动判断 - 只有超出才滚动
+    if (nameEl.scrollWidth > nameContainer.clientWidth) {
+      nameEl.innerHTML = originalMusic + '　' + originalMusic;
+      nameEl.classList.add('marquee');
+    } else {
+      nameEl.innerHTML = originalMusic;
+    }
     
-    // 歌手名滚动判断 - 始终滚动，中间用中文全角空格隔开
-    singerEl.innerHTML = originalSinger + '　' + originalSinger;
-    singerEl.classList.add('marquee');
+    // 歌手名滚动判断 - 只有超出才滚动
+    if (singerEl.scrollWidth > singerContainer.clientWidth) {
+      singerEl.innerHTML = originalSinger + '　' + originalSinger;
+      singerEl.classList.add('marquee');
+    } else {
+      singerEl.innerHTML = originalSinger;
+    }
   }, 10);
 
   nameEl.parentElement.style.opacity = '0';
