@@ -7,7 +7,6 @@
 <style>
   *{margin:0;padding:0;box-sizing:border-box;font-family:"MiSans","Microsoft YaHei",sans-serif;font-weight:700}
   
-  /* 修复滚动条问题 */
   html, body {
     width: 100%;
     height: 100%;
@@ -26,7 +25,6 @@
     overflow: hidden;
   }
   
-  /* 红白机主体 - 始终白色不变 */
   .player-container {
     width: 100%;
     max-width: 560px;
@@ -42,7 +40,6 @@
   .screen-section{height:38%;background:#E60012;padding:24px 28px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2}
   .music-info{width:100%;color:#fff}
 
-  /* 歌曲名容器 */
   .music-name-wrapper {
     width: 100%;
     overflow: hidden;
@@ -58,17 +55,15 @@
     animation: marqueeScroll 16s linear infinite;
   }
   
-  /* 歌手名行 - flex布局确保歌手名区域不盖到NOW PLAYING，且垂直对齐 */
   .singer-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 22px;
     width: 100%;
-    min-height: 28px; /* 固定最小高度，确保对齐 */
+    min-height: 28px;
   }
   
-  /* 歌手名容器 - 可滚动区域，占满剩余空间，与NOW PLAYING垂直对齐 */
   .singer-name-wrapper {
     flex: 1;
     overflow: hidden;
@@ -88,23 +83,20 @@
     animation: marqueeScroll 12s linear infinite;
   }
   
-  /* 使用 translateX 百分比实现无缝滚动，确保不卡顿 */
   @keyframes marqueeScroll {
     0% { transform: translateX(0); }
     100% { transform: translateX(-50%); }
   }
   
-  /* NOW PLAYING 容器 - 固定宽度，与歌手名垂直居中对齐 */
   .now-playing-wrapper {
     display: flex;
     align-items: center;
     gap: 6px;
     flex-shrink: 0;
-    height: 28px; /* 固定高度与歌手名行一致 */
+    height: 28px;
     line-height: 1;
   }
   
-  /* 闪烁圆点 */
   .playing-dot {
     width: 8px;
     height: 8px;
@@ -113,7 +105,6 @@
     opacity: 0;
   }
   
-  /* 播放时的闪烁动画 */
   .playing-dot.active {
     animation: blink 0.8s step-start infinite;
   }
@@ -123,7 +114,6 @@
     50% { opacity: 0.3; }
   }
   
-  /* NOW PLAYING 文字 - 呼吸动画 */
   .now-playing{
     font-size:11px;
     letter-spacing:1.5px;
@@ -133,7 +123,6 @@
     line-height: 1;
   }
   
-  /* 暂停时隐藏整个 NOW PLAYING 区域 */
   .now-playing-wrapper.paused {
     visibility: hidden;
   }
@@ -149,7 +138,6 @@
     font-weight: 500;
   }
 
-  /* ========== 下半部分：表格布局 ========== */
   .control-section {
     height:62%;
     padding:30px 28px 32px 28px;
@@ -179,7 +167,6 @@
     padding-left: 20px;
   }
 
-  /* 右侧控制区内部：使用 flex 列布局，垂直居中 */
   .controls-inner {
     display: flex;
     flex-direction: column;
@@ -188,7 +175,6 @@
     height: 100%;
   }
 
-  /* 上排按钮和下排按钮作为一组，整体居中 */
   .buttons-group {
     display: flex;
     flex-direction: column;
@@ -213,7 +199,6 @@
     gap: 30px;
   }
 
-  /* 按钮公用样式 - 扁平金属质感 */
   .action-btn {
     width: 44px;
     height: 44px;
@@ -232,25 +217,21 @@
     position: relative;
   }
 
-  /* 加减号字体稍大 */
   .action-btn.minus, .action-btn.plus {
     font-size: 32px;
     font-weight: bold;
   }
 
-  /* 下一首按钮字体稍小 */
   .action-btn.next {
     font-size: 26px;
   }
 
-  /* 播放按钮 - 暂停状态（显示三角形）时为红色 */
   .action-btn.play.paused-state {
     background: #E60012;
     color: #fff;
     box-shadow: 0 4px 12px rgba(230,0,18,0.3);
   }
 
-  /* 音量数值提示 - 与歌手名样式一致 */
   .volume-tip {
     position: absolute;
     bottom: 100%;
@@ -273,7 +254,6 @@
     opacity: 1;
   }
 
-  /* 喇叭区域 - 5圈等间距环形分布 */
   .speaker-area {
     width: 100%;
     aspect-ratio: 1 / 1;
@@ -290,7 +270,6 @@
     pointer-events: none;
   }
 
-  /* 播放图标（三角形） */
   #playIconInner {
     font-size: 22px;
     line-height: 1;
@@ -298,7 +277,6 @@
     transform: translateX(2px);
   }
 
-  /* 暂停图标（两个竖线） */
   .pause-icon-inner {
     display: inline-block;
     width: 20px;
@@ -326,129 +304,44 @@
     right: 2px;
   }
 
-  /* 手机端适配 */
   @media (max-width: 560px) {
-    .control-section {
-      padding: 20px 20px 24px 20px;
-    }
-    .speaker-cell {
-      padding-right: 12px;
-    }
-    .controls-cell {
-      padding-left: 12px;
-    }
-    .action-btn {
-      width: 38px;
-      height: 38px;
-      font-size: 24px;
-    }
-    .action-btn.minus, .action-btn.plus {
-      font-size: 28px;
-    }
-    .action-btn.next {
-      font-size: 22px;
-    }
-    .top-buttons, .bottom-buttons {
-      gap: 24px;
-    }
-    .top-buttons {
-      margin-bottom: 18px;
-    }
-    #playIconInner {
-      font-size: 20px;
-    }
-    .pause-icon-inner {
-      width: 18px;
-      height: 20px;
-    }
-    .pause-icon-inner::before,
-    .pause-icon-inner::after {
-      width: 5px;
-      height: 20px;
-    }
-    .volume-tip {
-      font-size: 14px;
-      margin-bottom: 8px;
-    }
-    .playing-dot {
-      width: 7px;
-      height: 7px;
-    }
-    .now-playing-wrapper {
-      gap: 5px;
-      height: 24px;
-    }
-    .music-name {
-      font-size: 24px;
-    }
-    .singer-name {
-      font-size: 14px;
-    }
-    .singer-name-wrapper {
-      margin-right: 8px;
-    }
-    .singer-row {
-      min-height: 24px;
-    }
+    .control-section { padding: 20px 20px 24px 20px; }
+    .speaker-cell { padding-right: 12px; }
+    .controls-cell { padding-left: 12px; }
+    .action-btn { width: 38px; height: 38px; font-size: 24px; }
+    .action-btn.minus, .action-btn.plus { font-size: 28px; }
+    .action-btn.next { font-size: 22px; }
+    .top-buttons, .bottom-buttons { gap: 24px; }
+    .top-buttons { margin-bottom: 18px; }
+    #playIconInner { font-size: 20px; }
+    .pause-icon-inner { width: 18px; height: 20px; }
+    .pause-icon-inner::before, .pause-icon-inner::after { width: 5px; height: 20px; }
+    .volume-tip { font-size: 14px; margin-bottom: 8px; }
+    .playing-dot { width: 7px; height: 7px; }
+    .now-playing-wrapper { gap: 5px; height: 24px; }
+    .music-name { font-size: 24px; }
+    .singer-name { font-size: 14px; }
+    .singer-name-wrapper { margin-right: 8px; }
+    .singer-row { min-height: 24px; }
   }
 
   @media (max-width: 480px) {
-    .control-section {
-      padding: 16px 16px 20px 16px;
-    }
-    .action-btn {
-      width: 34px;
-      height: 34px;
-      font-size: 22px;
-    }
-    .action-btn.minus, .action-btn.plus {
-      font-size: 26px;
-    }
-    .action-btn.next {
-      font-size: 20px;
-    }
-    .top-buttons, .bottom-buttons {
-      gap: 20px;
-    }
-    .top-buttons {
-      margin-bottom: 14px;
-    }
-    #playIconInner {
-      font-size: 18px;
-    }
-    .pause-icon-inner {
-      width: 16px;
-      height: 18px;
-    }
-    .pause-icon-inner::before,
-    .pause-icon-inner::after {
-      width: 4px;
-      height: 18px;
-    }
-    .volume-tip {
-      font-size: 13px;
-      margin-bottom: 6px;
-    }
-    .playing-dot {
-      width: 6px;
-      height: 6px;
-    }
-    .now-playing-wrapper {
-      gap: 4px;
-      height: 22px;
-    }
-    .music-name {
-      font-size: 20px;
-    }
-    .singer-name {
-      font-size: 12px;
-    }
-    .singer-name-wrapper {
-      margin-right: 6px;
-    }
-    .singer-row {
-      min-height: 22px;
-    }
+    .control-section { padding: 16px 16px 20px 16px; }
+    .action-btn { width: 34px; height: 34px; font-size: 22px; }
+    .action-btn.minus, .action-btn.plus { font-size: 26px; }
+    .action-btn.next { font-size: 20px; }
+    .top-buttons, .bottom-buttons { gap: 20px; }
+    .top-buttons { margin-bottom: 14px; }
+    #playIconInner { font-size: 18px; }
+    .pause-icon-inner { width: 16px; height: 18px; }
+    .pause-icon-inner::before, .pause-icon-inner::after { width: 4px; height: 18px; }
+    .volume-tip { font-size: 13px; margin-bottom: 6px; }
+    .playing-dot { width: 6px; height: 6px; }
+    .now-playing-wrapper { gap: 4px; height: 22px; }
+    .music-name { font-size: 20px; }
+    .singer-name { font-size: 12px; }
+    .singer-name-wrapper { margin-right: 6px; }
+    .singer-row { min-height: 22px; }
   }
 </style>
 </head>
@@ -512,12 +405,13 @@ audio.preload = "auto";
 
 let playlist = [];
 let filteredPlaylist = [];
-let isPlaying = false;
+let isPlaying = true;  // 初始为 true，自动播放
 let volume = 0.6;
 let volumeValue = 6;
-let playCount = 0;
+let playCount = 0;      // 已播放的歌曲计数（不含 promo）
 
 let playCheckTimer = null;
+let isLoading = false;   // 防止重复加载
 const PLAY_TIMEOUT = 6000;
 
 const promoTrack = {
@@ -525,7 +419,6 @@ const promoTrack = {
   url: "https://radio.hellyell.com/hy.mp3"
 };
 
-// 优雅的网页背景配色方案
 const bgColorPalette = [
   '#F5F0E8', '#E8F0F5', '#F0F4E8', '#F9F0E8', '#E8EAF6',
   '#FEF5E7', '#E8F5E9', '#FCE4EC', '#E3F2FD', '#FFF3E0',
@@ -544,8 +437,7 @@ function getRandomBgColor() {
 }
 
 function changeBodyBackground() {
-  const newColor = getRandomBgColor();
-  document.body.style.backgroundColor = newColor;
+  document.body.style.backgroundColor = getRandomBgColor();
 }
 
 function updateNowPlayingDisplay() {
@@ -561,7 +453,6 @@ function updateNowPlayingDisplay() {
   }
 }
 
-// 5圈等间距环形喇叭孔
 function createSpeakerHoles() {
   const container = document.getElementById('speakerArea');
   if (!container) return;
@@ -573,9 +464,7 @@ function createSpeakerHoles() {
   const endRadius = 48;
   const step = (endRadius - startRadius) / (rings - 1);
   const radii = [];
-  for (let i = 0; i < rings; i++) {
-    radii.push(startRadius + i * step);
-  }
+  for (let i = 0; i < rings; i++) radii.push(startRadius + i * step);
   const centerX = 50, centerY = 50;
   
   for (let r = 0; r < rings; r++) {
@@ -609,30 +498,21 @@ function clearPlayCheck() {
 function startPlayCheck() {
   clearPlayCheck();
   playCheckTimer = setTimeout(() => {
-    if (isPlaying && audio.currentTime <= 0) {
+    if (isPlaying && audio.currentTime <= 0.1 && !isLoading) {
+      console.log('播放超时，切换下一首');
       next();
     }
   }, PLAY_TIMEOUT);
 }
 
-// 核心：设置滚动文本，确保流畅无卡顿
 function setScrollingText(element, wrapper, originalText) {
-  // 移除现有动画类
   element.classList.remove('marquee');
-  
-  // 先设置原始文本
   element.innerHTML = originalText;
   
-  // 使用 requestAnimationFrame 确保 DOM 渲染完成
   requestAnimationFrame(() => {
-    const needScroll = element.scrollWidth > wrapper.clientWidth;
-    
-    if (needScroll) {
-      // 需要滚动：拼接两份文本，中间用全角空格隔开
+    if (element.scrollWidth > wrapper.clientWidth) {
       element.innerHTML = originalText + '　' + originalText;
-      // 强制重绘
       element.offsetHeight;
-      // 添加动画类
       element.classList.add('marquee');
     } else {
       element.innerHTML = originalText;
@@ -641,7 +521,10 @@ function setScrollingText(element, wrapper, originalText) {
 }
 
 function loadTrack(track) {
+  if (isLoading) return;
+  isLoading = true;
   clearPlayCheck();
+  
   const parts = track.name.split(' - ');
   const singer = parts[0] || '';
   const music = parts.slice(1).join(' - ') || track.name;
@@ -651,11 +534,9 @@ function loadTrack(track) {
   const nameWrapper = nameEl.parentElement;
   const singerWrapper = singerEl.parentElement;
   
-  // 设置滚动文本（使用新函数确保流畅）
   setScrollingText(nameEl, nameWrapper, music);
   setScrollingText(singerEl, singerWrapper, singer);
 
-  // 渐隐渐显效果
   nameEl.parentElement.style.opacity = '0';
   singerEl.style.opacity = '0';
 
@@ -665,28 +546,54 @@ function loadTrack(track) {
   }, 250);
 
   document.title = `${music} - ${singer}`;
+  
+  // 切换音频源
+  audio.pause();
   audio.src = track.url;
   audio.volume = volume;
+  
+  // 如果正在播放，则自动开始播放
+  if (isPlaying) {
+    audio.play()
+      .then(() => {
+        isLoading = false;
+        startPlayCheck();
+      })
+      .catch((err) => {
+        console.error('播放失败:', err);
+        isLoading = false;
+        // 播放失败，尝试下一首
+        setTimeout(() => next(), 1000);
+      });
+  } else {
+    isLoading = false;
+  }
 }
 
 function getNextTrack() {
-  playCount++;
-  if (playCount > 1 && playCount % 7 === 0) {
+  // 每播放 7 首普通歌曲后，播放一次 promo
+  if (playCount > 0 && playCount % 7 === 0) {
+    console.log('播放 promo 歌曲');
     return promoTrack;
-  } else {
-    return filteredPlaylist[Math.floor(Math.random() * filteredPlaylist.length)];
   }
+  
+  // 从过滤后的播放列表中随机选择
+  if (filteredPlaylist.length === 0) return promoTrack;
+  const randomIndex = Math.floor(Math.random() * filteredPlaylist.length);
+  return filteredPlaylist[randomIndex];
 }
 
 function playTrack(track) {
   loadTrack(track);
-  if (!isPlaying) return;
-  audio.play().catch(() => { next(); });
-  startPlayCheck();
 }
 
 function next() {
+  if (isLoading) return;
   const track = getNextTrack();
+  // 如果是普通歌曲（非 promo），增加计数
+  if (track !== promoTrack) {
+    playCount++;
+  }
   playTrack(track);
   changeBodyBackground();
 }
@@ -703,17 +610,22 @@ function togglePlay() {
     playIcon.style.display = 'inline';
     pauseIcon.style.display = 'none';
     playBtn.classList.add('paused-state');
-    updateNowPlayingDisplay();
   } else {
     isPlaying = true;
-    audio.play().catch(() => { next(); });
-    startPlayCheck();
+    audio.play()
+      .then(() => {
+        startPlayCheck();
+      })
+      .catch((err) => {
+        console.error('恢复播放失败:', err);
+        next();
+      });
     playIcon.style.display = 'none';
     pauseIcon.style.display = 'inline-block';
     playBtn.classList.remove('paused-state');
-    updateNowPlayingDisplay();
     changeBodyBackground();
   }
+  updateNowPlayingDisplay();
 }
 
 audio.ontimeupdate = () => {
@@ -724,7 +636,10 @@ audio.ontimeupdate = () => {
   document.getElementById('durationTime').innerText = fmt(audio.duration);
 
   if (audio.currentTime > 0.2) clearPlayCheck();
-  if (audio.currentTime >= audio.duration - 1) next();
+  if (audio.currentTime >= audio.duration - 0.5 && !isLoading) {
+    // 歌曲即将结束，切换到下一首
+    next();
+  }
 };
 
 function showVolumeTip(buttonId, message) {
@@ -732,9 +647,7 @@ function showVolumeTip(buttonId, message) {
   if (!tip) return;
   tip.textContent = message;
   tip.classList.add('show');
-  setTimeout(() => {
-    tip.classList.remove('show');
-  }, 600);
+  setTimeout(() => tip.classList.remove('show'), 600);
 }
 
 function setVolumeByValue(newVolumeValue, sourceBtn) {
@@ -753,8 +666,8 @@ function setVolumeByValue(newVolumeValue, sourceBtn) {
 }
 
 async function init() {
-  setTimeout(() => createSpeakerHoles(), 50);
-  window.addEventListener('resize', () => setTimeout(() => createSpeakerHoles(), 100));
+  createSpeakerHoles();
+  window.addEventListener('resize', () => createSpeakerHoles());
   
   try {
     const [hj, qc] = await Promise.all([
@@ -762,29 +675,43 @@ async function init() {
       fetch('https://radio.hellyell.com/qiche-musiclist.json').then(r => r.json())
     ]);
     playlist = [...hj, ...qc];
+    // 过滤掉 HellYell怀旧电台 和 HellYell汽车电台 以及无效链接
     filteredPlaylist = playlist.filter(item => {
-      const s = item.name.split(' - ')[0];
-      return s !== 'HellYell怀旧电台' && s !== 'HellYell汽车电台';
+      const singer = item.name.split(' - ')[0];
+      return singer !== 'HellYell怀旧电台' && 
+             singer !== 'HellYell汽车电台' && 
+             item.url && item.url.startsWith('http');
     });
+    console.log(`加载了 ${filteredPlaylist.length} 首有效歌曲`);
   } catch (e) {
-    filteredPlaylist = [{ name: "测试 - 测试歌曲", url: "https://music.163.com/song/media/outer/url?id=1916319449.mp3" }];
+    console.error('加载歌曲列表失败:', e);
+    filteredPlaylist = [];
   }
 
+  // 初始化播放
   playCount = 0;
-  playTrack(promoTrack);
-  
   isPlaying = true;
-  togglePlay();
-
-  volumeValue = 6;
-  volume = 0.6;
+  
+  // 先显示 promo 歌曲界面
+  const nameEl = document.getElementById('musicName');
+  const singerEl = document.getElementById('singerName');
+  nameEl.innerHTML = '欢迎收听';
+  singerEl.innerHTML = 'HellYell Radio';
+  
+  audio.src = promoTrack.url;
   audio.volume = volume;
+  audio.play()
+    .then(() => {
+      startPlayCheck();
+    })
+    .catch(err => console.error('初始播放失败:', err));
   
   document.getElementById('playBtn').onclick = togglePlay;
-  document.getElementById('nextBtn').onclick = next;
+  document.getElementById('nextBtn').onclick = () => { if (!isLoading) next(); };
   document.getElementById('volMinusBtn').onclick = () => setVolumeByValue(volumeValue - 1, 'minus');
   document.getElementById('volPlusBtn').onclick = () => setVolumeByValue(volumeValue + 1, 'plus');
   
+  updateNowPlayingDisplay();
   setTimeout(() => changeBodyBackground(), 100);
 }
 
