@@ -48,8 +48,43 @@
   @keyframes textScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
   .singer-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
   .singer-name{font-size:16px;opacity:.85}
-  .now-playing{font-size:11px;letter-spacing:1.5px;color:rgba(255,255,255,0.7);visibility:hidden;animation:glow 1.8s infinite alternate}
-  .now-playing.show{visibility:visible}
+  
+  /* NOW PLAYING 容器，包含闪烁圆点和文字 */
+  .now-playing-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  /* 闪烁圆点 */
+  .playing-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #fff;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.1s ease;
+  }
+  
+  /* 播放时的闪烁动画 */
+  .playing-dot.active {
+    animation: blink 0.8s step-start infinite;
+  }
+  
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  
+  .now-playing{
+    font-size:11px;
+    letter-spacing:1.5px;
+    color:rgba(255,255,255,0.7);
+    visibility:visible;
+  }
+  .now-playing.show{
+    visibility:visible;
+  }
   @keyframes glow{0%{opacity:.6}100%{opacity:1}}
   .time-progress{width:100%}
   .progress-wrap{width:100%;height:4px;background:rgba(255,255,255,0.25);border-radius:2px;overflow:hidden}
@@ -282,6 +317,13 @@
       font-size: 14px;
       margin-bottom: 8px;
     }
+    .playing-dot {
+      width: 7px;
+      height: 7px;
+    }
+    .now-playing-wrapper {
+      gap: 5px;
+    }
   }
 
   @media (max-width: 480px) {
@@ -321,6 +363,13 @@
       font-size: 13px;
       margin-bottom: 6px;
     }
+    .playing-dot {
+      width: 6px;
+      height: 6px;
+    }
+    .now-playing-wrapper {
+      gap: 4px;
+    }
   }
 </style>
 </head>
@@ -332,7 +381,10 @@
       <div class="music-name-wrapper"><div id="musicName" class="music-name"></div></div>
       <div class="singer-row">
         <div id="singerName" class="singer-name"></div>
-        <div id="nowPlaying" class="now-playing">NOW PLAYING</div>
+        <div class="now-playing-wrapper">
+          <div id="playingDot" class="playing-dot"></div>
+          <div id="nowPlaying" class="now-playing">NOW PLAYING</div>
+        </div>
       </div>
     </div>
     <div class="time-progress">
@@ -427,6 +479,17 @@ function changeBodyBackground() {
   const newColor = getRandomBgColor();
   console.log('切换网页背景色:', newColor);
   document.body.style.backgroundColor = newColor;
+}
+
+// 控制闪烁圆点
+function updatePlayingDot() {
+  const dot = document.getElementById('playingDot');
+  if (!dot) return;
+  if (isPlaying) {
+    dot.classList.add('active');
+  } else {
+    dot.classList.remove('active');
+  }
 }
 
 // 5圈等间距环形喇叭孔
@@ -553,6 +616,8 @@ function togglePlay() {
     pauseIcon.style.display = 'none';
     document.getElementById('nowPlaying').classList.remove('show');
     playBtn.classList.add('paused-state');
+    // 停止闪烁圆点
+    updatePlayingDot();
   } else {
     isPlaying = true;
     audio.play().catch(() => { next(); });
@@ -561,6 +626,8 @@ function togglePlay() {
     pauseIcon.style.display = 'inline-block';
     document.getElementById('nowPlaying').classList.add('show');
     playBtn.classList.remove('paused-state');
+    // 开始闪烁圆点
+    updatePlayingDot();
     // 开始播放时也变换一次网页背景色
     changeBodyBackground();
   }
