@@ -424,20 +424,19 @@
 const audio = new Audio();
 audio.preload = "auto";
 
-let allSongs = [];           // 普通歌曲列表
-let currentSong = null;      // 当前播放的歌曲
-let isPlaying = false;       // 是否正在播放
-let normalCount = 0;         // 当前轮次已播放的普通歌曲数量（0-6，每7首重置）
-let hasStarted = false;      // 是否已开始播放
-let isSwitching = false;     // 防止重复切换
-let loadTimer = null;        // 加载超时定时器
+let allSongs = [];
+let currentSong = null;
+let isPlaying = false;
+let normalCount = 0;
+let hasStarted = false;
+let isSwitching = false;
+let loadTimer = null;
 
 const promoSong = {
   name: "HellYell Radio - 欢迎收听",
   url: "https://radio.hellyell.com/hy.mp3"
 };
 
-// 音量相关
 let volume = 0.6;
 
 // ========== 喇叭孔 ==========
@@ -517,41 +516,63 @@ function startMarquee(element, wrapper, originalText, speed = 50) {
   marqueeAnimations[element.id] = requestAnimationFrame(animate);
 }
 
-function setScrollingText(element, wrapper, text) {
-  stopMarquee(element);
-  element.innerHTML = text;
-  requestAnimationFrame(() => {
-    if (element.scrollWidth > wrapper.clientWidth) {
-      startMarquee(element, wrapper, text, 50);
-    }
-  });
+function setScrollingText(element, wrapper, text, isFirstSet = false) {
+  if (isFirstSet) {
+    element.innerHTML = text;
+    requestAnimationFrame(() => {
+      if (element.scrollWidth > wrapper.clientWidth) {
+        startMarquee(element, wrapper, text, 50);
+      }
+    });
+  } else {
+    stopMarquee(element);
+    element.innerHTML = text;
+    requestAnimationFrame(() => {
+      if (element.scrollWidth > wrapper.clientWidth) {
+        startMarquee(element, wrapper, text, 50);
+      }
+    });
+  }
 }
 
-// ========== 更新UI ==========
+// ========== 更新UI（带渐隐渐显动画）==========
 function updateUI(song) {
   const parts = song.name.split(' - ');
   const singer = parts[0] || '';
   const music = parts.slice(1).join(' - ') || song.name;
   
-  const nameEl = document.getElementById('musicName');
-  const singerEl = document.getElementById('singerName');
+  const nameWrapper = document.getElementById('musicName');
+  const singerWrapper = document.getElementById('singerName');
+  const nameContainer = nameWrapper.parentElement;
+  const singerContainer = singerWrapper.parentElement;
   
-  setScrollingText(nameEl, nameEl.parentElement, music);
-  setScrollingText(singerEl, singerEl.parentElement, singer);
+  // 渐隐
+  nameContainer.style.transition = 'opacity 0.3s ease';
+  singerContainer.style.transition = 'opacity 0.3s ease';
+  nameContainer.style.opacity = '0';
+  singerContainer.style.opacity = '0';
+  
+  setTimeout(() => {
+    // 更新文字
+    setScrollingText(nameWrapper, nameContainer, music);
+    setScrollingText(singerWrapper, singerContainer, singer);
+    
+    // 渐显
+    nameContainer.style.opacity = '1';
+    singerContainer.style.opacity = '1';
+  }, 300);
   
   document.title = `${music} - ${singer}`;
 }
 
 // ========== 获取下一首歌曲 ==========
 function getNextSong() {
-  // 每7首普通歌曲后，播放一次promo
   if (normalCount === 7) {
     normalCount = 0;
     console.log('播放 promo 歌曲');
     return promoSong;
   }
   
-  // 随机获取普通歌曲
   if (allSongs.length === 0) return promoSong;
   const randomIndex = Math.floor(Math.random() * allSongs.length);
   return allSongs[randomIndex];
@@ -574,13 +595,11 @@ function playSong(song, autoPlay = true) {
   currentSong = song;
   updateUI(song);
   
-  // 停止当前播放，设置新源
   audio.pause();
   audio.src = song.url;
   audio.volume = volume;
   
   if (autoPlay && isPlaying) {
-    // 启动6秒超时检测
     loadTimer = setTimeout(() => {
       if (isPlaying && !isSwitching) {
         console.log('加载超时，切换到下一首');
@@ -609,10 +628,8 @@ function nextSong() {
   if (isSwitching) return;
   clearLoadTimer();
   
-  // 获取下一首
   const next = getNextSong();
   
-  // 更新计数（只有普通歌曲才增加计数，promo不增加）
   if (next !== promoSong) {
     normalCount++;
     console.log(`播放普通歌曲，当前轮次已播: ${normalCount}/7`);
@@ -630,7 +647,6 @@ function togglePlay() {
   const dot = document.getElementById('playingDot');
   
   if (isPlaying) {
-    // 暂停
     audio.pause();
     clearLoadTimer();
     isPlaying = false;
@@ -640,7 +656,6 @@ function togglePlay() {
     wrapper.classList.add('paused');
     if (dot) dot.classList.remove('active');
   } else {
-    // 播放
     isPlaying = true;
     playIcon.style.display = 'none';
     pauseIcon.style.display = 'flex';
@@ -649,13 +664,11 @@ function togglePlay() {
     if (dot) dot.classList.add('active');
     
     if (!hasStarted) {
-      // 首次播放：播放 hy.mp3
       hasStarted = true;
       normalCount = 0;
       console.log('首次播放，播放 promo 歌曲');
       playSong(promoSong, true);
     } else if (currentSong) {
-      // 已有当前歌曲，恢复播放
       clearLoadTimer();
       loadTimer = setTimeout(() => {
         if (isPlaying && !isSwitching) {
@@ -672,7 +685,6 @@ function togglePlay() {
           nextSong();
         });
     } else {
-      // 没有当前歌曲，重新开始
       playSong(promoSong, true);
     }
   }
@@ -733,7 +745,6 @@ audio.addEventListener('timeupdate', () => {
   document.getElementById('currentTime').innerText = formatTime(audio.currentTime);
   document.getElementById('durationTime').innerText = formatTime(audio.duration);
   
-  // 开始播放后清除超时
   if (audio.currentTime > 0.2) {
     clearLoadTimer();
   }
@@ -785,13 +796,25 @@ async function init() {
     allSongs = [];
   }
   
-  // 初始状态
+  // 初始设置（无渐隐，直接显示）
+  const nameEl = document.getElementById('musicName');
+  const singerEl = document.getElementById('singerName');
+  const nameContainer = nameEl.parentElement;
+  const singerContainer = singerEl.parentElement;
+  
+  nameContainer.style.transition = 'opacity 0.3s ease';
+  singerContainer.style.transition = 'opacity 0.3s ease';
+  nameContainer.style.opacity = '1';
+  singerContainer.style.opacity = '1';
+  
+  setScrollingText(nameEl, nameContainer, '欢迎收听', true);
+  setScrollingText(singerEl, singerContainer, 'HellYell Radio', true);
+  
   hasStarted = false;
   isPlaying = false;
   currentSong = null;
   normalCount = 0;
   
-  // 绑定事件
   document.getElementById('playBtn').onclick = togglePlay;
   document.getElementById('nextBtn').onclick = () => {
     if (!isSwitching) nextSong();
