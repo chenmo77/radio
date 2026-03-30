@@ -21,7 +21,7 @@
     justify-content: center;
     align-items: center;
     padding: 10px;
-    transition: background-color 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+    transition: background-color 0.3s ease;
     overflow: hidden;
   }
   
@@ -36,8 +36,66 @@
     flex-direction: column;
     overflow: hidden;
     position: relative;
+    transition: background-color 0.3s ease;
   }
-  .screen-section{height:38%;background:#E60012;padding:24px 28px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2}
+  
+  /* 深色模式样式 */
+  body.dark-mode {
+    background: #1a1a1a;
+  }
+  
+  body.dark-mode .player-container {
+    background: #2a2a2a;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+  
+  body.dark-mode .screen-section {
+    background: #8B0000;
+  }
+  
+  body.dark-mode .control-section {
+    background-color: #2a2a2a;
+  }
+  
+  body.dark-mode .action-btn {
+    background: linear-gradient(145deg,#4a4a4a,#3a3a3a);
+    color: #ccc;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  
+  body.dark-mode .action-btn.play.paused-state {
+    background: #cc0000;
+    color: #fff;
+  }
+  
+  body.dark-mode .volume-knob {
+    background: linear-gradient(145deg,#4a4a4a,#3a3a3a);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  
+  body.dark-mode .volume-tip {
+    color: #ccc;
+  }
+  
+  body.dark-mode .now-playing {
+    color: rgba(255,255,255,0.7);
+  }
+  
+  body.dark-mode .time-row span {
+    color: rgba(255,255,255,0.65);
+  }
+  
+  body.dark-mode .speaker-hole {
+    background: #555;
+  }
+  
+  /* 深色模式下暂停按钮竖线颜色修复 */
+  body.dark-mode .pause-icon-inner::before,
+  body.dark-mode .pause-icon-inner::after {
+    background: #ccc;
+  }
+  
+  .screen-section{height:38%;background:#E60012;padding:24px 28px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2;transition:background-color 0.3s ease;}
   .music-info{width:100%;color:#fff}
 
   .music-name-wrapper {
@@ -90,6 +148,35 @@
   @keyframes marqueeScroll {
     0% { transform: translateX(0); }
     100% { transform: translateX(-50%); }
+  }
+  
+  /* NOW PLAYING 区域 - 主题切换按钮（无背景） */
+  .now-playing-header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  
+  .theme-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.8);
+    transition: opacity 0.2s ease;
+  }
+  
+  .theme-btn:hover {
+    opacity: 0.7;
+  }
+  
+  body.dark-mode .theme-btn {
+    color: rgba(255,255,255,0.8);
   }
   
   .now-playing-wrapper {
@@ -151,6 +238,7 @@
     position: relative;
     z-index: 2;
     background-color: #fff;
+    transition: background-color 0.3s ease;
   }
 
   .control-row {
@@ -215,7 +303,7 @@
     background: linear-gradient(145deg,#fff,#e0e0e0);
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     color: #444;
-    transition: none;
+    transition: background-color 0.3s ease;
     flex-shrink: 0;
     position: relative;
   }
@@ -285,6 +373,7 @@
     background: #141414;
     border-radius: 50%;
     pointer-events: none;
+    transition: background-color 0.3s ease;
   }
 
   #playIconInner {
@@ -314,6 +403,7 @@
     border-radius: 2px;
     top: 50%;
     transform: translateY(-50%);
+    transition: background-color 0.3s ease;
   }
 
   .pause-icon-inner::before {
@@ -343,6 +433,7 @@
     .singer-name { font-size: 16px; }
     .singer-name-wrapper { margin-right: 8px; }
     .singer-row { min-height: 28px; }
+    .theme-btn { font-size: 18px; }
   }
 
   @media (max-width: 480px) {
@@ -362,6 +453,7 @@
     .singer-name { font-size: 14px; }
     .singer-name-wrapper { margin-right: 6px; }
     .singer-row { min-height: 26px; }
+    .theme-btn { font-size: 16px; }
   }
 </style>
 </head>
@@ -375,6 +467,12 @@
         <div class="singer-name-wrapper">
           <div id="singerName" class="singer-name">HellYell Radio</div>
         </div>
+        <div class="now-playing-header">
+          <button class="theme-btn" id="themeToggleBtn" title="深色模式">◐</button>
+        </div>
+      </div>
+      <div class="singer-row" style="margin-top: -12px;">
+        <div></div>
         <div id="nowPlayingWrapper" class="now-playing-wrapper paused">
           <div id="playingDot" class="playing-dot"></div>
           <div id="nowPlaying" class="now-playing">NOW PLAYING</div>
@@ -420,6 +518,42 @@
 </div>
 
 <script>
+// ========== 主题切换 ==========
+const themeToggleBtn = document.getElementById('themeToggleBtn');
+
+function setTheme(theme) {
+  if (theme === 'dark') {
+    document.body.classList.add('dark-mode');
+    themeToggleBtn.innerHTML = '◑';
+    themeToggleBtn.title = '浅色模式';
+    localStorage.setItem('radioTheme', 'dark');
+  } else {
+    document.body.classList.remove('dark-mode');
+    themeToggleBtn.innerHTML = '◐';
+    themeToggleBtn.title = '深色模式';
+    localStorage.setItem('radioTheme', 'light');
+  }
+}
+
+function toggleTheme() {
+  const isDark = document.body.classList.contains('dark-mode');
+  if (isDark) {
+    setTheme('light');
+  } else {
+    setTheme('dark');
+  }
+}
+
+// 获取保存的主题
+const savedTheme = localStorage.getItem('radioTheme');
+if (savedTheme === 'dark') {
+  setTheme('dark');
+} else {
+  setTheme('light');
+}
+
+themeToggleBtn.addEventListener('click', toggleTheme);
+
 // ========== 核心变量 ==========
 const audio = new Audio();
 audio.preload = "auto";
@@ -546,18 +680,14 @@ function updateUI(song) {
   const nameContainer = nameWrapper.parentElement;
   const singerContainer = singerWrapper.parentElement;
   
-  // 渐隐
   nameContainer.style.transition = 'opacity 0.3s ease';
   singerContainer.style.transition = 'opacity 0.3s ease';
   nameContainer.style.opacity = '0';
   singerContainer.style.opacity = '0';
   
   setTimeout(() => {
-    // 更新文字
     setScrollingText(nameWrapper, nameContainer, music);
     setScrollingText(singerWrapper, singerContainer, singer);
-    
-    // 渐显
     nameContainer.style.opacity = '1';
     singerContainer.style.opacity = '1';
   }, 300);
@@ -765,14 +895,6 @@ function formatTime(t) {
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
-// ========== 背景色变换 ==========
-const bgColors = ['#F5F0E8', '#E8F0F5', '#F0F4E8', '#F9F0E8', '#E8EAF6', '#FEF5E7', '#E8F5E9', '#FCE4EC', '#E3F2FD', '#FFF3E0'];
-let bgIndex = 0;
-setInterval(() => {
-  bgIndex = (bgIndex + 1) % bgColors.length;
-  document.body.style.backgroundColor = bgColors[bgIndex];
-}, 15000);
-
 // ========== 初始化 ==========
 async function init() {
   createSpeakerHoles();
@@ -796,7 +918,7 @@ async function init() {
     allSongs = [];
   }
   
-  // 初始设置（无渐隐，直接显示）
+  // 初始设置
   const nameEl = document.getElementById('musicName');
   const singerEl = document.getElementById('singerName');
   const nameContainer = nameEl.parentElement;
@@ -824,7 +946,6 @@ async function init() {
   
   updateVolumeKnob();
   audio.volume = volume;
-  document.body.style.backgroundColor = bgColors[0];
 }
 
 window.onload = init;
