@@ -95,14 +95,33 @@
     background: #ccc;
   }
   
-  .screen-section{height:38%;background:#E60012;padding:24px 28px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2;transition:background-color 0.3s ease;}
-  .music-info{width:100%;color:#fff}
-
+  /* 红色区域 - 表格布局 */
+  .screen-section {
+    height: 38%;
+    background: #E60012;
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+    transition: background-color 0.3s ease;
+  }
+  
+  .screen-row {
+    display: table-row;
+  }
+  
+  .screen-cell {
+    display: table-cell;
+    padding: 0 28px;
+  }
+  
+  /* 第1行：歌曲名 */
+  .song-name-cell {
+    padding-top: 24px;
+    padding-bottom: 8px;
+  }
   .music-name-wrapper {
     width: 100%;
     overflow: hidden;
-    margin-bottom: 8px;
-    position: relative;
   }
   .music-name {
     font-size: 34px;
@@ -110,84 +129,91 @@
     display: inline-block;
     position: relative;
     will-change: transform;
+    color: #fff;
   }
   .music-name.marquee {
     animation: marqueeScroll 16s linear infinite;
   }
   
-  .singer-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 22px;
-    width: 100%;
-    min-height: 32px;
+  /* 第2行：歌手名（左）+ 深浅色切换按钮（右） */
+  .info-cell {
+    padding-bottom: 8px;
   }
-  
-  .singer-name-wrapper {
-    flex: 1;
+  .info-table {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+  .info-row {
+    display: table-row;
+  }
+  .singer-cell {
+    display: table-cell;
+    width: auto;
     overflow: hidden;
-    min-width: 0;
-    margin-right: 12px;
-    line-height: 1.4;
-    position: relative;
+    vertical-align: middle;
+  }
+  .theme-cell-inline {
+    display: table-cell;
+    width: 1px;
+    white-space: nowrap;
+    padding-left: 12px;
+    vertical-align: middle;
+  }
+  .theme-btn-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+  }
+  .singer-name-wrapper {
+    overflow: hidden;
+    width: 100%;
   }
   .singer-name {
-    font-size: 18px;
+    font-size: 20px;
     opacity: .85;
     white-space: nowrap;
     display: inline-block;
     position: relative;
     will-change: transform;
     line-height: 1.4;
+    color: #fff;
   }
   .singer-name.marquee {
     animation: marqueeScroll 12s linear infinite;
   }
-  
-  @keyframes marqueeScroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
-  
-  /* NOW PLAYING 区域 - 主题切换按钮（无背景） */
-  .now-playing-header {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-  
   .theme-btn {
     background: transparent;
     border: none;
     cursor: pointer;
     font-size: 20px;
     padding: 4px;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     color: rgba(255,255,255,0.8);
     transition: opacity 0.2s ease;
   }
-  
   .theme-btn:hover {
     opacity: 0.7;
   }
-  
   body.dark-mode .theme-btn {
     color: rgba(255,255,255,0.8);
   }
   
+  /* 第3行：圆点和 NOW PLAYING - 靠右对齐 */
+  .nowplaying-cell {
+    padding-bottom: 12px;
+  }
   .now-playing-wrapper {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 6px;
-    flex-shrink: 0;
     height: 32px;
     line-height: 1;
+    width: 100%;
   }
-  
   .playing-dot {
     width: 8px;
     height: 8px;
@@ -195,16 +221,13 @@
     border-radius: 50%;
     opacity: 0;
   }
-  
   .playing-dot.active {
     animation: blink 0.8s step-start infinite;
   }
-  
   @keyframes blink {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.3; }
   }
-  
   .now-playing{
     font-size:11px;
     letter-spacing:1.5px;
@@ -213,22 +236,59 @@
     white-space: nowrap;
     line-height: 1;
   }
-  
   .now-playing-wrapper.paused {
     visibility: hidden;
   }
-  
   @keyframes glow{0%{opacity:.6}100%{opacity:1}}
-  .time-progress{width:100%}
-  .progress-wrap{width:100%;height:4px;background:rgba(255,255,255,0.25);border-radius:2px;overflow:hidden}
-  .progress-bar{height:100%;background:#fff;width:0%;transition:width .1s linear;position:relative}
-  .progress-thumb{position:absolute;right:-8px;top:50%;transform:translateY(-50%);width:10px;height:10px;background:#fff;border-radius:50%}
-  .time-row{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.65);margin-top:6px}
+  
+  /* 第4行：进度条 */
+  .progress-cell {
+    padding-bottom: 24px;
+  }
+  .time-progress {
+    width: 100%;
+  }
+  .progress-wrap {
+    width: 100%;
+    height: 4px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    background: #fff;
+    width: 0%;
+    transition: width .1s linear;
+    position: relative;
+  }
+  .progress-thumb {
+    position: absolute;
+    right: -8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    background: #fff;
+    border-radius: 50%;
+  }
+  .time-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: rgba(255,255,255,0.65);
+    margin-top: 6px;
+  }
   .time-row span {
     font-family: 'Courier New', monospace;
     font-weight: 500;
   }
-
+  
+  @keyframes marqueeScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  
   .control-section {
     height:62%;
     padding:30px 28px 32px 28px;
@@ -414,74 +474,229 @@
     right: 2px;
   }
 
+  /* 手机端适配 */
   @media (max-width: 560px) {
-    .control-section { padding: 20px 20px 24px 20px; }
-    .speaker-cell { padding-right: 12px; }
-    .controls-cell { padding-left: 12px; }
-    .action-btn { width: 38px; height: 38px; }
-    .action-btn.minus, .action-btn.plus { font-size: 28px; }
-    .action-btn.next { font-size: 22px; }
-    .top-buttons, .bottom-buttons { gap: 24px; }
-    .top-buttons { margin-bottom: 18px; }
-    #playIconInner { font-size: 20px; }
-    .pause-icon-inner { width: 18px; height: 20px; }
-    .pause-icon-inner::before, .pause-icon-inner::after { width: 5px; height: 20px; }
-    .volume-tip { font-size: 14px; margin-bottom: 8px; }
-    .playing-dot { width: 7px; height: 7px; }
-    .now-playing-wrapper { gap: 5px; height: 28px; }
-    .music-name { font-size: 28px; }
-    .singer-name { font-size: 16px; }
-    .singer-name-wrapper { margin-right: 8px; }
-    .singer-row { min-height: 28px; }
-    .theme-btn { font-size: 18px; }
+    .screen-cell {
+      padding: 0 20px;
+    }
+    .song-name-cell {
+      padding-top: 16px;
+      padding-bottom: 6px;
+    }
+    .music-name {
+      font-size: 28px;
+    }
+    .info-cell {
+      padding-bottom: 6px;
+    }
+    .singer-name {
+      font-size: 18px;
+    }
+    .theme-btn {
+      font-size: 18px;
+    }
+    .nowplaying-cell {
+      padding-bottom: 8px;
+    }
+    .now-playing-wrapper {
+      height: 28px;
+    }
+    .now-playing {
+      font-size: 10px;
+    }
+    .playing-dot {
+      width: 7px;
+      height: 7px;
+    }
+    .progress-cell {
+      padding-bottom: 16px;
+    }
+    .time-row {
+      font-size: 10px;
+      margin-top: 4px;
+    }
+    
+    .control-section {
+      padding: 20px 20px 24px 20px;
+    }
+    .speaker-cell {
+      padding-right: 12px;
+    }
+    .controls-cell {
+      padding-left: 12px;
+    }
+    .action-btn {
+      width: 38px;
+      height: 38px;
+    }
+    .action-btn.minus, .action-btn.plus {
+      font-size: 28px;
+    }
+    .action-btn.next {
+      font-size: 22px;
+    }
+    .top-buttons, .bottom-buttons {
+      gap: 24px;
+    }
+    .top-buttons {
+      margin-bottom: 18px;
+    }
+    #playIconInner {
+      font-size: 20px;
+    }
+    .pause-icon-inner {
+      width: 18px;
+      height: 20px;
+    }
+    .pause-icon-inner::before, .pause-icon-inner::after {
+      width: 5px;
+      height: 20px;
+    }
+    .volume-tip {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    .now-playing-wrapper {
+      gap: 5px;
+    }
+    .singer-name-wrapper {
+      margin-right: 8px;
+    }
   }
 
   @media (max-width: 480px) {
-    .control-section { padding: 16px 16px 20px 16px; }
-    .action-btn { width: 34px; height: 34px; }
-    .action-btn.minus, .action-btn.plus { font-size: 26px; }
-    .action-btn.next { font-size: 20px; }
-    .top-buttons, .bottom-buttons { gap: 20px; }
-    .top-buttons { margin-bottom: 14px; }
-    #playIconInner { font-size: 18px; }
-    .pause-icon-inner { width: 16px; height: 18px; }
-    .pause-icon-inner::before, .pause-icon-inner::after { width: 4px; height: 18px; }
-    .volume-tip { font-size: 13px; margin-bottom: 6px; }
-    .playing-dot { width: 6px; height: 6px; }
-    .now-playing-wrapper { gap: 4px; height: 26px; }
-    .music-name { font-size: 24px; }
-    .singer-name { font-size: 14px; }
-    .singer-name-wrapper { margin-right: 6px; }
-    .singer-row { min-height: 26px; }
-    .theme-btn { font-size: 16px; }
+    .screen-cell {
+      padding: 0 16px;
+    }
+    .song-name-cell {
+      padding-top: 14px;
+      padding-bottom: 5px;
+    }
+    .music-name {
+      font-size: 24px;
+    }
+    .info-cell {
+      padding-bottom: 5px;
+    }
+    .singer-name {
+      font-size: 16px;
+    }
+    .theme-btn {
+      font-size: 16px;
+    }
+    .nowplaying-cell {
+      padding-bottom: 6px;
+    }
+    .now-playing-wrapper {
+      height: 26px;
+    }
+    .now-playing {
+      font-size: 9px;
+    }
+    .playing-dot {
+      width: 6px;
+      height: 6px;
+    }
+    .progress-cell {
+      padding-bottom: 14px;
+    }
+    .time-row {
+      font-size: 9px;
+      margin-top: 3px;
+    }
+    
+    .control-section {
+      padding: 16px 16px 20px 16px;
+    }
+    .action-btn {
+      width: 34px;
+      height: 34px;
+    }
+    .action-btn.minus, .action-btn.plus {
+      font-size: 26px;
+    }
+    .action-btn.next {
+      font-size: 20px;
+    }
+    .top-buttons, .bottom-buttons {
+      gap: 20px;
+    }
+    .top-buttons {
+      margin-bottom: 14px;
+    }
+    #playIconInner {
+      font-size: 18px;
+    }
+    .pause-icon-inner {
+      width: 16px;
+      height: 18px;
+    }
+    .pause-icon-inner::before, .pause-icon-inner::after {
+      width: 4px;
+      height: 18px;
+    }
+    .volume-tip {
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+    .now-playing-wrapper {
+      gap: 4px;
+    }
+    .singer-name-wrapper {
+      margin-right: 6px;
+    }
   }
 </style>
 </head>
 <body>
 
 <div class="player-container">
+  <!-- 红色区域 - 表格布局 -->
   <div class="screen-section">
-    <div class="music-info">
-      <div class="music-name-wrapper"><div id="musicName" class="music-name">欢迎收听</div></div>
-      <div class="singer-row">
-        <div class="singer-name-wrapper">
-          <div id="singerName" class="singer-name">HellYell Radio</div>
-        </div>
-        <div class="now-playing-header">
-          <button class="theme-btn" id="themeToggleBtn" title="深色模式">◐</button>
+    <!-- 第1行：歌曲名 -->
+    <div class="screen-row">
+      <div class="screen-cell song-name-cell">
+        <div class="music-name-wrapper">
+          <div id="musicName" class="music-name">欢迎收听</div>
         </div>
       </div>
-      <div class="singer-row" style="margin-top: -12px;">
-        <div></div>
+    </div>
+    <!-- 第2行：歌手名（左）+ 深浅色切换按钮（右） -->
+    <div class="screen-row">
+      <div class="screen-cell info-cell">
+        <div class="info-table">
+          <div class="info-row">
+            <div class="singer-cell">
+              <div class="singer-name-wrapper">
+                <div id="singerName" class="singer-name">HellYell Radio</div>
+              </div>
+            </div>
+            <div class="theme-cell-inline">
+              <div class="theme-btn-wrapper">
+                <button class="theme-btn" id="themeToggleBtn" title="深色模式">◐</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 第3行：圆点和 NOW PLAYING - 靠右对齐 -->
+    <div class="screen-row">
+      <div class="screen-cell nowplaying-cell">
         <div id="nowPlayingWrapper" class="now-playing-wrapper paused">
           <div id="playingDot" class="playing-dot"></div>
           <div id="nowPlaying" class="now-playing">NOW PLAYING</div>
         </div>
       </div>
     </div>
-    <div class="time-progress">
-      <div class="progress-wrap"><div id="progressBar" class="progress-bar"><div id="progressThumb" class="progress-thumb"></div></div></div>
-      <div class="time-row"><div id="currentTime">00:00</div><div id="durationTime">00:00</div></div>
+    <!-- 第4行：进度条 -->
+    <div class="screen-row">
+      <div class="screen-cell progress-cell">
+        <div class="time-progress">
+          <div class="progress-wrap"><div id="progressBar" class="progress-bar"><div id="progressThumb" class="progress-thumb"></div></div></div>
+          <div class="time-row"><div id="currentTime">00:00</div><div id="durationTime">00:00</div></div>
+        </div>
+      </div>
     </div>
   </div>
 
