@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>HellYell音乐电台</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:"MiSans","Microsoft YaHei",sans-serif;font-weight:700}
+  
+  html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+  
+  /* 浅色模式默认样式 */
+  body {
+    background: #e6e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    transition: background-color 0.3s ease;
+    overflow: hidden;
+  }
+  
+  /* 深色模式样式 */
+  body.dark-mode {
+    background: #1a1a1a;
+  }
+  
+  body.dark-mode .cassette {
+    background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+    border: 1px solid #3a3a3a;
+  }
+  
+  body.dark-mode .label-container {
+    background: linear-gradient(145deg, #1f1f1f, #151515);
+    box-shadow: inset 0 0 0 1px #3a3a3a;
+  }
+  
+  body.dark-mode .tape-song {
+    color: #e0e0e0;
+  }
+  
+  body.dark-mode .tape-artist {
+    color: #a0a0a0;
+  }
+  
+  body.dark-mode .progress-bar-bg {
+    background: rgba(0,0,0,0.6);
+  }
+  
+  body.dark-mode .time-row span {
+    color: rgba(255,255,255,0.5);
+  }
+  
+  body.dark-mode .buttons-section {
+    background: linear-gradient(145deg, #2a2a2a, #1f1f1f);
+  }
+  
+  body.dark-mode .square-btn {
+    background: linear-gradient(145deg, #4a4a4a, #2f2f2f);
+    box-shadow: 0 6px 0 #151515;
+    color: #ccc;
+  }
+  
+  body.dark-mode .square-btn.play-btn {
+    background: linear-gradient(145deg, #4a4a4a, #2f2f2f);
+    color: #ccc;
+  }
+  
+  body.dark-mode .square-btn.play-btn.paused-state {
+    background: linear-gradient(145deg, #cc0000, #990000);
+    box-shadow: 0 6px 0 #550000;
+    color: #fff;
+  }
+  
+  body.dark-mode .square-btn.theme-btn {
+    color: #ccc;
+  }
+  
+  /* 主容器 - 表格布局占满全屏 */
+  .app {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* 上部分：磁带区域 85% */
+  .tape-section {
+    flex: 8.5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: inherit;
+    padding: 20px;
+  }
+  
+  /* 磁带容器 */
+  .tape-container {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+    position: relative;
+  }
+  
+  /* 真实磁带比例 */
+  .cassette {
+    background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+    border-radius: 16px;
+    padding: 25px 30px 30px 30px;
+    box-shadow: 0 20px 35px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.8);
+    position: relative;
+    border: 1px solid #c0c0c0;
+    transition: background 0.3s ease;
+  }
+  
+  /* 磁带保护角 */
+  .cassette-corner {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background: #c0c0c0;
+    border-radius: 3px;
+  }
+  body.dark-mode .cassette-corner {
+    background: #3a3a3a;
+  }
+  .corner-tl { top: 10px; left: 10px; }
+  .corner-tr { top: 10px; right: 10px; }
+  .corner-bl { bottom: 10px; left: 10px; }
+  .corner-br { bottom: 10px; right: 10px; }
+  
+  /* 磁带中间区域 */
+  .tape-middle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    margin: 20px 0 25px 0;
+  }
+  
+  /* 齿轮容器 */
+  .wheel-container {
+    flex-shrink: 0;
+    position: relative;
+  }
+  
+  /* 精致齿轮 - 所有齿轮元素围绕共同圆心转动 */
+  .wheel {
+    width: 90px;
+    height: 90px;
+    background: radial-gradient(circle at 35% 35%, #9a9a9a, #6a6a6a);
+    border-radius: 50%;
+    box-shadow: 0 5px 12px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.4);
+    position: relative;
+  }
+  
+  body.dark-mode .wheel {
+    background: radial-gradient(circle at 35% 35%, #6a6a6a, #4a4a4a);
+  }
+  
+  /* 齿轮旋转动画 - 匀速，更慢 */
+  .wheel.spinning {
+    animation: spinWheel 0.5s linear infinite;
+  }
+  
+  @keyframes spinWheel {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  /* 齿轮内圈 */
+  .wheel::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 42px;
+    height: 42px;
+    background: radial-gradient(circle, #b0b0b0, #7a7a7a);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.2), 0 1px 0 rgba(255,255,255,0.4);
+  }
+  
+  body.dark-mode .wheel::before {
+    background: radial-gradient(circle, #7a7a7a, #5a5a5a);
+  }
+  
+  /* 齿轮中心轴 */
+  .wheel::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    background: radial-gradient(circle, #e8e8e8, #c0c0c0);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.1), 0 1px 0 rgba(255,255,255,0.6);
+  }
+  
+  body.dark-mode .wheel::after {
+    background: radial-gradient(circle, #c0c0c0, #9a9a9a);
+  }
+  
+  /* 齿轮齿 - 围绕齿轮中心均匀分布，随齿轮一起转动 */
+  .tooth {
+    position: absolute;
+    width: 14px;
+    height: 22px;
+    background: linear-gradient(135deg, #7a7a7a, #5a5a5a);
+    border-radius: 3px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    /* 关键：让齿围绕齿轮中心旋转 */
+    transform-origin: center center;
+  }
+  
+  body.dark-mode .tooth {
+    background: linear-gradient(135deg, #5a5a5a, #3a3a3a);
+  }
+  
+  /* 文字区域 */
+  .label-container {
+    flex: 1;
+    background: linear-gradient(145deg, #f0f0f0, #e0e0e0);
+    border-radius: 14px;
+    padding: 20px 15px;
+    text-align: center;
+    box-shadow: inset 0 0 0 1px #c0c0c0, 0 5px 12px rgba(0,0,0,0.1);
+    min-width: 0;
+    overflow: hidden;
+    transition: background 0.3s ease;
+  }
+  
+  .song-container {
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .tape-song {
+    font-size: 26px;
+    font-weight: 700;
+    color: #333;
+    text-shadow: 0 1px 1px rgba(255,255,255,0.5);
+    white-space: nowrap;
+    display: inline-block;
+    font-family: "MiSans", "Microsoft YaHei", sans-serif;
+  }
+  
+  .artist-container {
+    width: 100%;
+    overflow: hidden;
+  }
+  .tape-artist {
+    font-size: 20px;
+    font-weight: 500;
+    color: #666;
+    white-space: nowrap;
+    display: inline-block;
+    font-family: "MiSans", "Microsoft YaHei", sans-serif;
+  }
+  
+  .tape-song.marquee, .tape-artist.marquee {
+    animation: marqueeScroll 16s linear infinite;
+  }
+  
+  @keyframes marqueeScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  
+  /* 进度条区域 */
+  .progress-area {
+    margin: 5px 0 0 0;
+    padding: 0 5px;
+  }
+  
+  .progress-bar-bg {
+    width: 100%;
+    height: 6px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 3px;
+    cursor: pointer;
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    width: 0%;
+    height: 100%;
+    background: #E60012;
+    border-radius: 3px;
+  }
+  
+  .time-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: 11px;
+    color: rgba(0,0,0,0.5);
+    font-family: 'Courier New', monospace;
+  }
+  
+  .tape-footer {
+    margin-top: 15px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #c0c0c0, transparent);
+  }
+  
+  body.dark-mode .tape-footer {
+    background: linear-gradient(90deg, transparent, #4a4a4a, transparent);
+  }
+  
+  /* 下部分：按钮区域 - 高度15% */
+  .buttons-section {
+    flex: 1.5;
+    background: linear-gradient(145deg, #f0f0f0, #e0e0e0);
+    transition: background 0.3s ease;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+  }
+  
+  .button-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    gap: 15px;
+    position: relative;
+  }
+  
+  /* 方形按钮 - 高度占满整个按钮区域 */
+  .square-btn {
+    flex: 1;
+    height: 100%;
+    min-height: 70px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: bold;
+    background: linear-gradient(145deg, #e0e0e0, #c0c0c0);
+    box-shadow: 0 6px 0 #a0a0a0, 0 5px 15px rgba(0,0,0,0.1);
+    color: #444;
+    transition: all 0.05s linear;
+    position: relative;
+    font-family: "MiSans", "Microsoft YaHei", sans-serif;
+  }
+  
+  .square-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #a0a0a0;
+  }
+  
+  /* 播放按钮默认灰色 - 播放状态（显示双竖线）时灰色 */
+  .square-btn.play-btn {
+    background: linear-gradient(145deg, #e0e0e0, #c0c0c0);
+    color: #444;
+  }
+  
+  /* 暂停状态时（显示三角形）- 红色按钮，白色图标 */
+  .square-btn.play-btn.paused-state {
+    background: linear-gradient(145deg, #E60012, #b0000e);
+    box-shadow: 0 6px 0 #6a0008;
+    color: #fff;
+  }
+  
+  .square-btn.theme-btn {
+    font-size: 30px;
+  }
+  
+  /* 提示气泡 */
+  .tip-bubble {
+    position: fixed;
+    background: rgba(0,0,0,0.85);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-size: 24px;
+    font-weight: bold;
+    font-family: "MiSans", monospace;
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  
+  .tip-bubble.show {
+    opacity: 1;
+  }
+  
+  /* 手机端适配 */
+  @media (max-width: 560px) {
+    .tape-section {
+      padding: 15px;
+    }
+    .cassette {
+      padding: 18px 20px 22px 20px;
+    }
+    .wheel {
+      width: 60px;
+      height: 60px;
+    }
+    .wheel::before {
+      width: 28px;
+      height: 28px;
+    }
+    .wheel::after {
+      width: 12px;
+      height: 12px;
+    }
+    .tooth {
+      width: 10px;
+      height: 16px;
+    }
+    .label-container {
+      padding: 12px 10px;
+    }
+    .tape-song {
+      font-size: 18px;
+    }
+    .tape-artist {
+      font-size: 14px;
+    }
+    .square-btn {
+      font-size: 24px;
+      min-height: 55px;
+    }
+    .square-btn.theme-btn {
+      font-size: 22px;
+    }
+    .button-bar {
+      gap: 10px;
+    }
+    .tip-bubble {
+      font-size: 18px;
+      padding: 6px 12px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .wheel {
+      width: 50px;
+      height: 50px;
+    }
+    .wheel::before {
+      width: 24px;
+      height: 24px;
+    }
+    .tooth {
+      width: 8px;
+      height: 14px;
+    }
+    .label-container {
+      padding: 10px 8px;
+    }
+    .tape-song {
+      font-size: 15px;
+    }
+    .tape-artist {
+      font-size: 12px;
+    }
+    .square-btn {
+      font-size: 20px;
+      min-height: 48px;
+    }
+    .square-btn.theme-btn {
+      font-size: 18px;
+    }
+    .button-bar {
+      gap: 8px;
+    }
+    .tip-bubble {
+      font-size: 16px;
+      padding: 5px 10px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- 磁带区域 -->
+  <div class="tape-section">
+    <div class="tape-container">
+      <div class="cassette">
+        <div class="cassette-corner corner-tl"></div>
+        <div class="cassette-corner corner-tr"></div>
+        <div class="cassette-corner corner-bl"></div>
+        <div class="cassette-corner corner-br"></div>
+        
+        <div class="tape-middle">
+          <!-- 左齿轮 -->
+          <div class="wheel-container">
+            <div class="wheel" id="leftWheel">
+              <div class="tooth"></div><div class="tooth"></div><div class="tooth"></div>
+              <div class="tooth"></div><div class="tooth"></div><div class="tooth"></div>
+              <div class="tooth"></div><div class="tooth"></div>
+            </div>
+          </div>
+          <!-- 文字区域 -->
+          <div class="label-container">
+            <div class="song-container">
+              <div class="tape-song" id="tapeSong">欢迎收听</div>
+            </div>
+            <div class="artist-container">
+              <div class="tape-artist" id="tapeArtist">HellYell Radio</div>
+            </div>
+          </div>
+          <!-- 右齿轮 -->
+          <div class="wheel-container">
+            <div class="wheel" id="rightWheel">
+              <div class="tooth"></div><div class="tooth"></div><div class="tooth"></div>
+              <div class="tooth"></div><div class="tooth"></div><div class="tooth"></div>
+              <div class="tooth"></div><div class="tooth"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="progress-area">
+          <div class="progress-bar-bg" id="progressBg">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <div class="time-row">
+            <span id="currentTime">00:00</span>
+            <span id="durationTime">00:00</span>
+          </div>
+        </div>
+        <div class="tape-footer"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 按钮区域 -->
+  <div class="buttons-section">
+    <div class="button-bar">
+      <button class="square-btn" id="volMinusBtn">−</button>
+      <button class="square-btn theme-btn" id="themeToggleBtn">◐</button>
+      <button class="square-btn play-btn paused-state" id="playBtn">
+        <span id="playIcon">▶</span>
+        <span id="pauseIcon" style="display:none;">⏸</span>
+      </button>
+      <button class="square-btn" id="nextBtn">⏭</button>
+      <button class="square-btn" id="volPlusBtn">+</button>
+    </div>
+  </div>
+</div>
+
+<div class="tip-bubble" id="tipBubble"></div>
+
+<script>
+// ========== 齿轮齿位置初始化 ==========
+function initWheelTeeth() {
+  const wheels = document.querySelectorAll('.wheel');
+  wheels.forEach(wheel => {
+    const teeth = wheel.querySelectorAll('.tooth');
+    const radius = wheel.clientWidth / 2;
+    const angles = [0, 45, 90, 135, 180, 225, 270, 315];
+    teeth.forEach((tooth, i) => {
+      const angleRad = angles[i] * Math.PI / 180;
+      const x = radius * Math.cos(angleRad);
+      const y = radius * Math.sin(angleRad);
+      const rotateAngle = angles[i];
+      // 关键：设置齿的位置，使其围绕齿轮中心
+      tooth.style.left = '50%';
+      tooth.style.top = '50%';
+      tooth.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) rotate(${rotateAngle}deg)`;
+    });
+  });
+}
+
+// ========== 主题切换 ==========
+const themeToggleBtn = document.getElementById('themeToggleBtn');
+
+function setTheme(theme) {
+  if (theme === 'dark') {
+    document.body.classList.add('dark-mode');
+    themeToggleBtn.innerHTML = '◑';
+    localStorage.setItem('radioTheme', 'dark');
+  } else {
+    document.body.classList.remove('dark-mode');
+    themeToggleBtn.innerHTML = '◐';
+    localStorage.setItem('radioTheme', 'light');
+  }
+}
+
+function toggleTheme() {
+  const isDark = document.body.classList.contains('dark-mode');
+  if (isDark) {
+    setTheme('light');
+    showTip('浅色', themeToggleBtn);
+  } else {
+    setTheme('dark');
+    showTip('深色', themeToggleBtn);
+  }
+}
+
+// 获取保存的主题
+const savedTheme = localStorage.getItem('radioTheme');
+if (savedTheme === 'dark') {
+  setTheme('dark');
+} else {
+  setTheme('light');
+}
+
+themeToggleBtn.addEventListener('click', toggleTheme);
+
+// ========== 核心变量 ==========
+const audio = new Audio();
+audio.preload = "auto";
+
+let allSongs = [];
+let currentSong = null;
+let isPlaying = false;
+let normalCount = 0;
+let hasStarted = false;
+let isSwitching = false;
+let loadTimer = null;
+let volume = 0.6;
+let volumeValue = 6;
+
+const promoSong = {
+  name: "HellYell Radio - 欢迎收听",
+  url: "https://radio.hellyell.com/hy.mp3"
+};
+
+// 齿轮转动控制
+const leftWheel = document.getElementById('leftWheel');
+const rightWheel = document.getElementById('rightWheel');
+
+function updateWheelSpin() {
+  if (isPlaying) {
+    leftWheel.classList.add('spinning');
+    rightWheel.classList.add('spinning');
+  } else {
+    leftWheel.classList.remove('spinning');
+    rightWheel.classList.remove('spinning');
+  }
+}
+
+// ========== 滚动文字 ==========
+let marqueeAnimations = {};
+
+function stopMarquee(element) {
+  if (marqueeAnimations[element.id]) {
+    cancelAnimationFrame(marqueeAnimations[element.id]);
+    delete marqueeAnimations[element.id];
+  }
+  element.style.transform = 'translateX(0)';
+  element.classList.remove('marquee');
+}
+
+function startMarquee(element, wrapper, originalText, speed = 50) {
+  stopMarquee(element);
+  element.innerHTML = originalText + originalText;
+  element.offsetHeight;
+  
+  const containerWidth = wrapper.clientWidth;
+  const textWidth = element.scrollWidth;
+  const singleWidth = textWidth / 2;
+  
+  if (singleWidth <= containerWidth) {
+    element.innerHTML = originalText;
+    return;
+  }
+  
+  element.classList.add('marquee');
+  let position = 0;
+  let lastTimestamp = 0;
+  
+  function animate(timestamp) {
+    if (!lastTimestamp) {
+      lastTimestamp = timestamp;
+      marqueeAnimations[element.id] = requestAnimationFrame(animate);
+      return;
+    }
+    const delta = Math.min(100, timestamp - lastTimestamp);
+    position += (speed * delta) / 1000;
+    if (position >= singleWidth) position -= singleWidth;
+    element.style.transform = `translateX(-${position}px)`;
+    lastTimestamp = timestamp;
+    marqueeAnimations[element.id] = requestAnimationFrame(animate);
+  }
+  marqueeAnimations[element.id] = requestAnimationFrame(animate);
+}
+
+function setScrollingText(element, wrapper, text, isFirstSet = false) {
+  if (isFirstSet) {
+    element.innerHTML = text;
+    requestAnimationFrame(() => {
+      if (element.scrollWidth > wrapper.clientWidth) {
+        startMarquee(element, wrapper, text, 50);
+      }
+    });
+  } else {
+    stopMarquee(element);
+    element.innerHTML = text;
+    requestAnimationFrame(() => {
+      if (element.scrollWidth > wrapper.clientWidth) {
+        startMarquee(element, wrapper, text, 50);
+      }
+    });
+  }
+}
+
+// ========== 更新UI ==========
+function updateUI(song) {
+  const parts = song.name.split(' - ');
+  const singer = parts[0] || '';
+  const music = parts.slice(1).join(' - ') || song.name;
+  
+  const songEl = document.getElementById('tapeSong');
+  const artistEl = document.getElementById('tapeArtist');
+  const songWrapper = songEl.parentElement;
+  const artistWrapper = artistEl.parentElement;
+  
+  songWrapper.style.transition = 'opacity 0.3s ease';
+  artistWrapper.style.transition = 'opacity 0.3s ease';
+  songWrapper.style.opacity = '0';
+  artistWrapper.style.opacity = '0';
+  
+  setTimeout(() => {
+    setScrollingText(songEl, songWrapper, music);
+    setScrollingText(artistEl, artistWrapper, singer);
+    songWrapper.style.opacity = '1';
+    artistWrapper.style.opacity = '1';
+  }, 300);
+  
+  document.title = `${music} - ${singer}`;
+}
+
+// ========== 进度条 ==========
+function updateProgress() {
+  if (audio.duration && !isNaN(audio.duration)) {
+    const percent = (audio.currentTime / audio.duration) * 100;
+    document.getElementById('progressFill').style.width = percent + '%';
+    document.getElementById('currentTime').innerText = formatTime(audio.currentTime);
+    document.getElementById('durationTime').innerText = formatTime(audio.duration);
+  }
+}
+
+function formatTime(t) {
+  if (isNaN(t)) return '00:00';
+  const m = Math.floor(t / 60);
+  const s = Math.floor(t % 60);
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+document.getElementById('progressBg').addEventListener('click', (e) => {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const percent = Math.min(1, Math.max(0, x / rect.width));
+  if (audio.duration) {
+    audio.currentTime = percent * audio.duration;
+  }
+});
+
+// ========== 获取下一首歌曲 ==========
+function getNextSong() {
+  if (normalCount === 7) {
+    normalCount = 0;
+    return promoSong;
+  }
+  if (allSongs.length === 0) return promoSong;
+  const randomIndex = Math.floor(Math.random() * allSongs.length);
+  return allSongs[randomIndex];
+}
+
+function clearLoadTimer() {
+  if (loadTimer) {
+    clearTimeout(loadTimer);
+    loadTimer = null;
+  }
+}
+
+function playSong(song, autoPlay = true) {
+  if (isSwitching) return;
+  isSwitching = true;
+  clearLoadTimer();
+  
+  currentSong = song;
+  updateUI(song);
+  
+  audio.pause();
+  audio.src = song.url;
+  audio.volume = volume;
+  
+  if (autoPlay && isPlaying) {
+    loadTimer = setTimeout(() => {
+      if (isPlaying && !isSwitching) {
+        nextSong();
+      }
+    }, 6000);
+    
+    audio.play()
+      .then(() => {
+        clearLoadTimer();
+        isSwitching = false;
+        updateWheelSpin();
+      })
+      .catch((err) => {
+        console.error('播放失败:', song.name, err);
+        clearLoadTimer();
+        isSwitching = false;
+        setTimeout(() => nextSong(), 500);
+      });
+  } else {
+    isSwitching = false;
+    updateWheelSpin();
+  }
+}
+
+function nextSong() {
+  if (isSwitching) return;
+  clearLoadTimer();
+  
+  const next = getNextSong();
+  
+  if (next !== promoSong) {
+    normalCount++;
+    console.log(`播放普通歌曲，当前轮次已播: ${normalCount}/7`);
+  }
+  
+  playSong(next, isPlaying);
+}
+
+function togglePlay() {
+  const playBtn = document.getElementById('playBtn');
+  const playIcon = document.getElementById('playIcon');
+  const pauseIcon = document.getElementById('pauseIcon');
+  
+  if (isPlaying) {
+    // 当前播放中，点击后暂停 -> 显示三角形，按钮变红色
+    audio.pause();
+    clearLoadTimer();
+    isPlaying = false;
+    playIcon.style.display = 'inline';
+    pauseIcon.style.display = 'none';
+    playBtn.classList.add('paused-state');
+    updateWheelSpin();
+  } else {
+    // 当前暂停，点击后播放 -> 显示双竖线，按钮变灰色
+    isPlaying = true;
+    playIcon.style.display = 'none';
+    pauseIcon.style.display = 'inline';
+    playBtn.classList.remove('paused-state');
+    updateWheelSpin();
+    
+    if (!hasStarted) {
+      hasStarted = true;
+      normalCount = 0;
+      playSong(promoSong, true);
+    } else if (currentSong) {
+      clearLoadTimer();
+      loadTimer = setTimeout(() => {
+        if (isPlaying && !isSwitching) {
+          nextSong();
+        }
+      }, 6000);
+      
+      audio.play()
+        .then(() => {
+          clearLoadTimer();
+          updateWheelSpin();
+        })
+        .catch((err) => {
+          console.error('恢复播放失败:', err);
+          clearLoadTimer();
+          nextSong();
+        });
+    } else {
+      playSong(promoSong, true);
+    }
+  }
+}
+
+// ========== 提示气泡 ==========
+const tipBubble = document.getElementById('tipBubble');
+
+function showTip(message, targetBtn) {
+  if (!targetBtn) return;
+  const rect = targetBtn.getBoundingClientRect();
+  tipBubble.style.left = rect.left + rect.width / 2 + 'px';
+  tipBubble.style.top = rect.top - 50 + 'px';
+  tipBubble.style.transform = 'translateX(-50%)';
+  tipBubble.textContent = message;
+  tipBubble.classList.add('show');
+  setTimeout(() => tipBubble.classList.remove('show'), 600);
+}
+
+// ========== 音量控制 ==========
+function volumeUp() {
+  let newVol = volume + 0.1;
+  if (newVol > 1) {
+    if (volume >= 0.9) {
+      showTip('最大', document.getElementById('volPlusBtn'));
+    }
+    return;
+  }
+  volume = newVol;
+  audio.volume = volume;
+  volumeValue = Math.round(volume * 10);
+  if (volumeValue >= 10) {
+    showTip('最大', document.getElementById('volPlusBtn'));
+  } else {
+    showTip(volumeValue.toString(), document.getElementById('volPlusBtn'));
+  }
+}
+
+function volumeDown() {
+  let newVol = volume - 0.1;
+  if (newVol < 0) {
+    if (volume <= 0.1) {
+      showTip('最小', document.getElementById('volMinusBtn'));
+    }
+    return;
+  }
+  volume = newVol;
+  audio.volume = volume;
+  volumeValue = Math.round(volume * 10);
+  if (volumeValue <= 0) {
+    showTip('最小', document.getElementById('volMinusBtn'));
+  } else {
+    showTip(volumeValue.toString(), document.getElementById('volMinusBtn'));
+  }
+}
+
+// ========== 音频事件 ==========
+audio.addEventListener('ended', () => {
+  if (!isSwitching && isPlaying) {
+    nextSong();
+  }
+});
+
+audio.addEventListener('timeupdate', () => {
+  updateProgress();
+  if (audio.currentTime > 0.2) {
+    clearLoadTimer();
+  }
+});
+
+audio.addEventListener('error', () => {
+  console.error('音频错误');
+  if (!isSwitching && isPlaying) {
+    clearLoadTimer();
+    nextSong();
+  }
+});
+
+// ========== 初始化 ==========
+async function init() {
+  try {
+    const [hj, qc] = await Promise.all([
+      fetch('https://radio.hellyell.com/huaijiu-musiclist.json').then(r => r.json()),
+      fetch('https://radio.hellyell.com/qiche-musiclist.json').then(r => r.json())
+    ]);
+    const all = [...hj, ...qc];
+    allSongs = all.filter(item => {
+      const singer = item.name.split(' - ')[0];
+      return singer !== 'HellYell怀旧电台' && 
+             singer !== 'HellYell汽车电台' && 
+             item.url && item.url.startsWith('http');
+    });
+    console.log(`加载了 ${allSongs.length} 首有效歌曲`);
+  } catch (e) {
+    console.error('加载歌曲列表失败:', e);
+    allSongs = [];
+  }
+  
+  const songEl = document.getElementById('tapeSong');
+  const artistEl = document.getElementById('tapeArtist');
+  const songWrapper = songEl.parentElement;
+  const artistWrapper = artistEl.parentElement;
+  
+  songWrapper.style.opacity = '1';
+  artistWrapper.style.opacity = '1';
+  
+  setScrollingText(songEl, songWrapper, '欢迎收听', true);
+  setScrollingText(artistEl, artistWrapper, 'HellYell Radio', true);
+  
+  hasStarted = false;
+  isPlaying = false;
+  currentSong = null;
+  normalCount = 0;
+  
+  document.getElementById('playBtn').onclick = togglePlay;
+  document.getElementById('nextBtn').onclick = () => {
+    if (!isSwitching) nextSong();
+  };
+  document.getElementById('volMinusBtn').onclick = volumeDown;
+  document.getElementById('volPlusBtn').onclick = volumeUp;
+  
+  audio.volume = volume;
+  
+  setTimeout(() => {
+    initWheelTeeth();
+  }, 100);
+  window.addEventListener('resize', () => setTimeout(initWheelTeeth, 100));
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
