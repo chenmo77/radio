@@ -363,6 +363,24 @@
     appearance: none;
   }
   
+  /* 彻底移除暂停图标的任何背景 */
+  .square-btn span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+    background: transparent;
+  }
+  
+  /* 暂停图标样式 - 纯双竖线，无任何背景 */
+  #pauseIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+    background: transparent;
+  }
+  
   .square-btn:active {
     transform: translateY(4px);
     box-shadow: 0 2px 0 #a0a0a0;
