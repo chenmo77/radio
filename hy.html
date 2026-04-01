@@ -164,9 +164,9 @@
     background: radial-gradient(circle at 35% 35%, #6a6a6a, #4a4a4a);
   }
   
-  /* 齿轮旋转动画 - 匀速，更慢 */
+  /* 齿轮旋转动画 - 速度调整为1.6s */
   .wheel.spinning {
-    animation: spinWheel 0.5s linear infinite;
+    animation: spinWheel 1.6s linear infinite;
   }
   
   @keyframes spinWheel {
@@ -336,7 +336,7 @@
     position: relative;
   }
   
-  /* 方形按钮 - 高度占满整个按钮区域 */
+  /* 方形按钮 - 高度占满整个按钮区域，去除手机端点击黄底 */
   .square-btn {
     flex: 1;
     height: 100%;
@@ -355,6 +355,8 @@
     transition: all 0.05s linear;
     position: relative;
     font-family: "MiSans", "Microsoft YaHei", sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
   }
   
   .square-btn:active {
@@ -607,12 +609,12 @@ function toggleTheme() {
   }
 }
 
-// 获取保存的主题
+// 获取保存的主题，默认为浅色
 const savedTheme = localStorage.getItem('radioTheme');
 if (savedTheme === 'dark') {
   setTheme('dark');
 } else {
-  setTheme('light');
+  setTheme('light');  // 确保首次进入为浅色模式
 }
 
 themeToggleBtn.addEventListener('click', toggleTheme);
