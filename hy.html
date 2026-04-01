@@ -340,7 +340,7 @@
   }
   
   /* 方形按钮 - 去除手机端点击黄底 */
-  .square-btn {
+.square-btn {
     flex: 1;
     height: 65px;
     border-radius: 20px;
@@ -361,7 +361,19 @@
     outline: none;
     -webkit-appearance: none;
     appearance: none;
-  }
+}
+
+/* 关键修复：确保按钮内所有元素都没有高亮背景，特别是暂停图标 */
+.square-btn *,
+.square-btn span,
+.square-btn #playIcon,
+.square-btn #pauseIcon,
+.square-btn .pause-icon-inner,
+.square-btn .pause-icon-inner::before,
+.square-btn .pause-icon-inner::after {
+    -webkit-tap-highlight-color: transparent !important;
+    background: transparent !important;
+}
   
   /* 彻底移除暂停图标的任何背景 */
   .square-btn span {
