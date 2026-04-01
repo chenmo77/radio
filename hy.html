@@ -82,22 +82,25 @@
     color: #ccc;
   }
   
-  /* 主容器 - 表格布局占满全屏 */
+  /* 主容器 - 使用flex确保按钮始终可见 */
   .app {
     display: flex;
     flex-direction: column;
     width: 100%;
     height: 100%;
+    min-height: 0;
   }
   
-  /* 上部分：磁带区域 85% */
+  /* 上部分：磁带区域 - 使用flex-shrink确保可被压缩 */
   .tape-section {
-    flex: 8.5;
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     background: inherit;
     padding: 20px;
+    min-height: 0;
+    overflow: auto;
   }
   
   /* 磁带容器 */
@@ -164,7 +167,7 @@
     background: radial-gradient(circle at 35% 35%, #6a6a6a, #4a4a4a);
   }
   
-  /* 齿轮旋转动画 - 速度调整为1.6s */
+  /* 齿轮旋转动画 - 速度1.6s */
   .wheel.spinning {
     animation: spinWheel 1.6s linear infinite;
   }
@@ -218,7 +221,6 @@
     background: linear-gradient(135deg, #7a7a7a, #5a5a5a);
     border-radius: 3px;
     box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    /* 关键：让齿围绕齿轮中心旋转 */
     transform-origin: center center;
   }
   
@@ -317,14 +319,15 @@
     background: linear-gradient(90deg, transparent, #4a4a4a, transparent);
   }
   
-  /* 下部分：按钮区域 - 高度15% */
+  /* 下部分：按钮区域 - 固定高度，确保始终可见 */
   .buttons-section {
-    flex: 1.5;
+    flex-shrink: 0;
     background: linear-gradient(145deg, #f0f0f0, #e0e0e0);
     transition: background 0.3s ease;
     display: flex;
     align-items: center;
-    padding: 0 15px;
+    padding: 12px 15px;
+    min-height: 80px;
   }
   
   .button-bar {
@@ -336,11 +339,10 @@
     position: relative;
   }
   
-  /* 方形按钮 - 高度占满整个按钮区域，去除手机端点击黄底 */
+  /* 方形按钮 - 去除手机端点击黄底 */
   .square-btn {
     flex: 1;
-    height: 100%;
-    min-height: 70px;
+    height: 65px;
     border-radius: 20px;
     border: none;
     cursor: pointer;
@@ -357,6 +359,8 @@
     font-family: "MiSans", "Microsoft YaHei", sans-serif;
     -webkit-tap-highlight-color: transparent;
     outline: none;
+    -webkit-appearance: none;
+    appearance: none;
   }
   
   .square-btn:active {
@@ -437,14 +441,18 @@
       font-size: 14px;
     }
     .square-btn {
+      height: 55px;
       font-size: 24px;
-      min-height: 55px;
     }
     .square-btn.theme-btn {
       font-size: 22px;
     }
     .button-bar {
       gap: 10px;
+    }
+    .buttons-section {
+      padding: 10px 12px;
+      min-height: 70px;
     }
     .tip-bubble {
       font-size: 18px;
@@ -475,8 +483,8 @@
       font-size: 12px;
     }
     .square-btn {
+      height: 48px;
       font-size: 20px;
-      min-height: 48px;
     }
     .square-btn.theme-btn {
       font-size: 18px;
@@ -484,9 +492,68 @@
     .button-bar {
       gap: 8px;
     }
+    .buttons-section {
+      padding: 8px 10px;
+      min-height: 60px;
+    }
     .tip-bubble {
       font-size: 16px;
       padding: 5px 10px;
+    }
+  }
+  
+  /* 横屏适配 - 确保按钮始终可见 */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .tape-section {
+      padding: 10px;
+    }
+    .cassette {
+      padding: 12px 15px 15px 15px;
+    }
+    .wheel {
+      width: 50px;
+      height: 50px;
+    }
+    .wheel::before {
+      width: 24px;
+      height: 24px;
+    }
+    .tooth {
+      width: 8px;
+      height: 14px;
+    }
+    .label-container {
+      padding: 8px 6px;
+    }
+    .tape-song {
+      font-size: 14px;
+    }
+    .tape-artist {
+      font-size: 11px;
+    }
+    .progress-area {
+      margin: 2px 0 0 0;
+    }
+    .progress-bar-bg {
+      height: 3px;
+    }
+    .time-row {
+      margin-top: 2px;
+      font-size: 8px;
+    }
+    .tape-footer {
+      margin-top: 6px;
+    }
+    .buttons-section {
+      padding: 6px 10px;
+      min-height: 55px;
+    }
+    .square-btn {
+      height: 45px;
+      font-size: 22px;
+    }
+    .square-btn.theme-btn {
+      font-size: 20px;
     }
   }
 </style>
@@ -575,7 +642,6 @@ function initWheelTeeth() {
       const x = radius * Math.cos(angleRad);
       const y = radius * Math.sin(angleRad);
       const rotateAngle = angles[i];
-      // 关键：设置齿的位置，使其围绕齿轮中心
       tooth.style.left = '50%';
       tooth.style.top = '50%';
       tooth.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) rotate(${rotateAngle}deg)`;
@@ -614,7 +680,7 @@ const savedTheme = localStorage.getItem('radioTheme');
 if (savedTheme === 'dark') {
   setTheme('dark');
 } else {
-  setTheme('light');  // 确保首次进入为浅色模式
+  setTheme('light');
 }
 
 themeToggleBtn.addEventListener('click', toggleTheme);
@@ -844,7 +910,6 @@ function togglePlay() {
   const pauseIcon = document.getElementById('pauseIcon');
   
   if (isPlaying) {
-    // 当前播放中，点击后暂停 -> 显示三角形，按钮变红色
     audio.pause();
     clearLoadTimer();
     isPlaying = false;
@@ -853,7 +918,6 @@ function togglePlay() {
     playBtn.classList.add('paused-state');
     updateWheelSpin();
   } else {
-    // 当前暂停，点击后播放 -> 显示双竖线，按钮变灰色
     isPlaying = true;
     playIcon.style.display = 'none';
     pauseIcon.style.display = 'inline';
