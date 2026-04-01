@@ -339,7 +339,7 @@
     position: relative;
   }
   
-  /* 方形按钮 - 去除手机端点击黄底 */
+  /* 方形按钮 */
   .square-btn {
     flex: 1;
     height: 65px;
@@ -349,31 +349,118 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32px;
-    font-weight: bold;
     background: linear-gradient(145deg, #e0e0e0, #c0c0c0);
     box-shadow: 0 6px 0 #a0a0a0, 0 5px 15px rgba(0,0,0,0.1);
-    color: #444;
     transition: all 0.05s linear;
     position: relative;
-    font-family: "MiSans", "Microsoft YaHei", sans-serif;
     -webkit-tap-highlight-color: transparent;
     outline: none;
     -webkit-appearance: none;
     appearance: none;
   }
   
-  /* 播放图标 - 三角形 */
-  .play-icon-triangle {
-    display: inline-block;
+  .square-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #a0a0a0;
+  }
+  
+  /* 减号图标 - 横线 */
+  .minus-icon {
+    width: 28px;
+    height: 4px;
+    background: currentColor;
+    border-radius: 2px;
+  }
+  
+  /* 加号图标 - 十字 */
+  .plus-icon {
+    position: relative;
+    width: 28px;
+    height: 28px;
+  }
+  .plus-icon::before,
+  .plus-icon::after {
+    content: '';
+    position: absolute;
+    background: currentColor;
+    border-radius: 2px;
+  }
+  .plus-icon::before {
+    width: 28px;
+    height: 4px;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+  }
+  .plus-icon::after {
+    width: 4px;
+    height: 28px;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+  }
+  
+  /* 下一首图标 - 双箭头右 */
+  .next-icon {
+    position: relative;
+    width: 28px;
+    height: 28px;
+  }
+  .next-icon::before,
+  .next-icon::after {
+    content: '';
+    position: absolute;
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 14px 0 14px 24px;
+  }
+  .next-icon::before {
+    border-width: 10px 0 10px 14px;
+    border-color: transparent transparent transparent currentColor;
+    top: 50%;
+    right: 4px;
+    transform: translateY(-50%);
+  }
+  .next-icon::after {
+    border-width: 8px 0 8px 10px;
+    border-color: transparent transparent transparent currentColor;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+  }
+  
+  /* 主题切换图标 - 半圆环 */
+  .theme-icon {
+    position: relative;
+    width: 28px;
+    height: 28px;
+  }
+  .theme-icon::before {
+    content: '';
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border: 3px solid currentColor;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);
+  }
+  .theme-icon.dark::before {
+    clip-path: polygon(50% 0, 100% 0, 100% 100%, 50% 100%);
+  }
+  
+  /* 播放图标 - 三角形 */
+  .play-icon-triangle {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 12px 0 12px 20px;
     border-color: transparent transparent transparent currentColor;
   }
   
-  /* 暂停图标 - 双竖线（纯CSS绘制，无任何背景） */
+  /* 暂停图标 - 双竖线 */
   .pause-icon-bars {
     display: flex;
     gap: 6px;
@@ -382,53 +469,20 @@
   }
   .pause-icon-bars .bar {
     width: 6px;
-    height: 28px;
+    height: 26px;
     background: currentColor;
     border-radius: 2px;
   }
   
-  .square-btn:active {
-    transform: translateY(4px);
-    box-shadow: 0 2px 0 #a0a0a0;
-  }
-  
-  /* 播放按钮默认灰色 - 播放状态（显示双竖线）时灰色 */
+  /* 按钮颜色状态 */
   .square-btn.play-btn {
     background: linear-gradient(145deg, #e0e0e0, #c0c0c0);
     color: #444;
   }
-  
-  /* 暂停状态时（显示三角形）- 红色按钮，白色图标 */
   .square-btn.play-btn.paused-state {
     background: linear-gradient(145deg, #E60012, #b0000e);
     box-shadow: 0 6px 0 #6a0008;
     color: #fff;
-  }
-  
-  .square-btn.theme-btn {
-    font-size: 30px;
-  }
-  
-  /* 提示气泡 */
-  .tip-bubble {
-    position: fixed;
-    background: rgba(0,0,0,0.85);
-    color: #fff;
-    padding: 8px 16px;
-    border-radius: 30px;
-    font-size: 24px;
-    font-weight: bold;
-    font-family: "MiSans", monospace;
-    pointer-events: none;
-    z-index: 1000;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  }
-  
-  .tip-bubble.show {
-    opacity: 1;
   }
   
   /* 手机端适配 */
@@ -466,10 +520,6 @@
     }
     .square-btn {
       height: 55px;
-      font-size: 24px;
-    }
-    .square-btn.theme-btn {
-      font-size: 22px;
     }
     .button-bar {
       gap: 10px;
@@ -478,12 +528,43 @@
       padding: 10px 12px;
       min-height: 70px;
     }
-    .tip-bubble {
-      font-size: 18px;
-      padding: 6px 12px;
+    .minus-icon {
+      width: 24px;
+      height: 3px;
+    }
+    .plus-icon {
+      width: 24px;
+      height: 24px;
+    }
+    .plus-icon::before {
+      width: 24px;
+      height: 3px;
+    }
+    .plus-icon::after {
+      width: 3px;
+      height: 24px;
+    }
+    .next-icon {
+      width: 24px;
+      height: 24px;
+    }
+    .next-icon::before {
+      border-width: 8px 0 8px 12px;
+    }
+    .next-icon::after {
+      border-width: 6px 0 6px 8px;
+    }
+    .theme-icon {
+      width: 24px;
+      height: 24px;
+    }
+    .theme-icon::before {
+      width: 20px;
+      height: 20px;
+      border-width: 2.5px;
     }
     .play-icon-triangle {
-      border-width: 10px 0 10px 18px;
+      border-width: 10px 0 10px 16px;
     }
     .pause-icon-bars .bar {
       width: 5px;
@@ -518,10 +599,6 @@
     }
     .square-btn {
       height: 48px;
-      font-size: 20px;
-    }
-    .square-btn.theme-btn {
-      font-size: 18px;
     }
     .button-bar {
       gap: 8px;
@@ -530,9 +607,40 @@
       padding: 8px 10px;
       min-height: 60px;
     }
-    .tip-bubble {
-      font-size: 16px;
-      padding: 5px 10px;
+    .minus-icon {
+      width: 20px;
+      height: 3px;
+    }
+    .plus-icon {
+      width: 20px;
+      height: 20px;
+    }
+    .plus-icon::before {
+      width: 20px;
+      height: 3px;
+    }
+    .plus-icon::after {
+      width: 3px;
+      height: 20px;
+    }
+    .next-icon {
+      width: 20px;
+      height: 20px;
+    }
+    .next-icon::before {
+      border-width: 7px 0 7px 10px;
+    }
+    .next-icon::after {
+      border-width: 5px 0 5px 7px;
+    }
+    .theme-icon {
+      width: 20px;
+      height: 20px;
+    }
+    .theme-icon::before {
+      width: 18px;
+      height: 18px;
+      border-width: 2px;
     }
     .play-icon-triangle {
       border-width: 8px 0 8px 14px;
@@ -546,7 +654,7 @@
     }
   }
   
-  /* 横屏适配 - 确保按钮始终可见 */
+  /* 横屏适配 */
   @media (orientation: landscape) and (max-height: 500px) {
     .tape-section {
       padding: 10px;
@@ -594,13 +702,44 @@
     }
     .square-btn {
       height: 45px;
-      font-size: 22px;
     }
-    .square-btn.theme-btn {
-      font-size: 20px;
+    .minus-icon {
+      width: 22px;
+      height: 3px;
+    }
+    .plus-icon {
+      width: 22px;
+      height: 22px;
+    }
+    .plus-icon::before {
+      width: 22px;
+      height: 3px;
+    }
+    .plus-icon::after {
+      width: 3px;
+      height: 22px;
+    }
+    .next-icon {
+      width: 22px;
+      height: 22px;
+    }
+    .next-icon::before {
+      border-width: 8px 0 8px 11px;
+    }
+    .next-icon::after {
+      border-width: 6px 0 6px 8px;
+    }
+    .theme-icon {
+      width: 22px;
+      height: 22px;
+    }
+    .theme-icon::before {
+      width: 20px;
+      height: 20px;
+      border-width: 2.5px;
     }
     .play-icon-triangle {
-      border-width: 9px 0 9px 16px;
+      border-width: 9px 0 9px 15px;
     }
     .pause-icon-bars .bar {
       width: 5px;
@@ -666,8 +805,12 @@
   <!-- 按钮区域 -->
   <div class="buttons-section">
     <div class="button-bar">
-      <button class="square-btn" id="volMinusBtn">−</button>
-      <button class="square-btn theme-btn" id="themeToggleBtn">◐</button>
+      <button class="square-btn" id="volMinusBtn">
+        <span class="minus-icon"></span>
+      </button>
+      <button class="square-btn theme-btn" id="themeToggleBtn">
+        <span id="themeIcon" class="theme-icon"></span>
+      </button>
       <button class="square-btn play-btn paused-state" id="playBtn">
         <span id="playIcon" class="play-icon-triangle"></span>
         <span id="pauseIcon" class="pause-icon-bars" style="display:none;">
@@ -675,8 +818,12 @@
           <span class="bar"></span>
         </span>
       </button>
-      <button class="square-btn" id="nextBtn">⏭</button>
-      <button class="square-btn" id="volPlusBtn">+</button>
+      <button class="square-btn" id="nextBtn">
+        <span class="next-icon"></span>
+      </button>
+      <button class="square-btn" id="volPlusBtn">
+        <span class="plus-icon"></span>
+      </button>
     </div>
   </div>
 </div>
@@ -705,15 +852,16 @@ function initWheelTeeth() {
 
 // ========== 主题切换 ==========
 const themeToggleBtn = document.getElementById('themeToggleBtn');
+const themeIcon = document.getElementById('themeIcon');
 
 function setTheme(theme) {
   if (theme === 'dark') {
     document.body.classList.add('dark-mode');
-    themeToggleBtn.innerHTML = '◑';
+    themeIcon.classList.add('dark');
     localStorage.setItem('radioTheme', 'dark');
   } else {
     document.body.classList.remove('dark-mode');
-    themeToggleBtn.innerHTML = '◐';
+    themeIcon.classList.remove('dark');
     localStorage.setItem('radioTheme', 'light');
   }
 }
@@ -964,19 +1112,17 @@ function togglePlay() {
   const pauseIcon = document.getElementById('pauseIcon');
   
   if (isPlaying) {
-    // 当前播放中，点击后暂停 -> 显示三角形，按钮变红色
     audio.pause();
     clearLoadTimer();
     isPlaying = false;
-    playIcon.style.display = 'inline-flex';
+    playIcon.style.display = 'flex';
     pauseIcon.style.display = 'none';
     playBtn.classList.add('paused-state');
     updateWheelSpin();
   } else {
-    // 当前暂停，点击后播放 -> 显示双竖线，按钮变灰色
     isPlaying = true;
     playIcon.style.display = 'none';
-    pauseIcon.style.display = 'inline-flex';
+    pauseIcon.style.display = 'flex';
     playBtn.classList.remove('paused-state');
     updateWheelSpin();
     
