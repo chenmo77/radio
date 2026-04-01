@@ -340,7 +340,7 @@
   }
   
   /* 方形按钮 - 去除手机端点击黄底 */
-.square-btn {
+  .square-btn {
     flex: 1;
     height: 65px;
     border-radius: 20px;
@@ -361,36 +361,30 @@
     outline: none;
     -webkit-appearance: none;
     appearance: none;
-}
-
-/* 关键修复：确保按钮内所有元素都没有高亮背景，特别是暂停图标 */
-.square-btn *,
-.square-btn span,
-.square-btn #playIcon,
-.square-btn #pauseIcon,
-.square-btn .pause-icon-inner,
-.square-btn .pause-icon-inner::before,
-.square-btn .pause-icon-inner::after {
-    -webkit-tap-highlight-color: transparent !important;
-    background: transparent !important;
-}
-  
-  /* 彻底移除暂停图标的任何背景 */
-  .square-btn span {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    -webkit-tap-highlight-color: transparent;
-    background: transparent;
   }
   
-  /* 暂停图标样式 - 纯双竖线，无任何背景 */
-  #pauseIcon {
-    display: inline-flex;
+  /* 播放图标 - 三角形 */
+  .play-icon-triangle {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 14px 0 14px 24px;
+    border-color: transparent transparent transparent currentColor;
+  }
+  
+  /* 暂停图标 - 双竖线（纯CSS绘制，无任何背景） */
+  .pause-icon-bars {
+    display: flex;
+    gap: 6px;
     align-items: center;
     justify-content: center;
-    -webkit-tap-highlight-color: transparent;
-    background: transparent;
+  }
+  .pause-icon-bars .bar {
+    width: 6px;
+    height: 28px;
+    background: currentColor;
+    border-radius: 2px;
   }
   
   .square-btn:active {
@@ -488,6 +482,16 @@
       font-size: 18px;
       padding: 6px 12px;
     }
+    .play-icon-triangle {
+      border-width: 10px 0 10px 18px;
+    }
+    .pause-icon-bars .bar {
+      width: 5px;
+      height: 22px;
+    }
+    .pause-icon-bars {
+      gap: 5px;
+    }
   }
   
   @media (max-width: 480px) {
@@ -529,6 +533,16 @@
     .tip-bubble {
       font-size: 16px;
       padding: 5px 10px;
+    }
+    .play-icon-triangle {
+      border-width: 8px 0 8px 14px;
+    }
+    .pause-icon-bars .bar {
+      width: 4px;
+      height: 18px;
+    }
+    .pause-icon-bars {
+      gap: 4px;
     }
   }
   
@@ -584,6 +598,13 @@
     }
     .square-btn.theme-btn {
       font-size: 20px;
+    }
+    .play-icon-triangle {
+      border-width: 9px 0 9px 16px;
+    }
+    .pause-icon-bars .bar {
+      width: 5px;
+      height: 20px;
     }
   }
 </style>
@@ -648,8 +669,11 @@
       <button class="square-btn" id="volMinusBtn">−</button>
       <button class="square-btn theme-btn" id="themeToggleBtn">◐</button>
       <button class="square-btn play-btn paused-state" id="playBtn">
-        <span id="playIcon">▶</span>
-        <span id="pauseIcon" style="display:none;">⏸</span>
+        <span id="playIcon" class="play-icon-triangle"></span>
+        <span id="pauseIcon" class="pause-icon-bars" style="display:none;">
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </span>
       </button>
       <button class="square-btn" id="nextBtn">⏭</button>
       <button class="square-btn" id="volPlusBtn">+</button>
@@ -940,17 +964,19 @@ function togglePlay() {
   const pauseIcon = document.getElementById('pauseIcon');
   
   if (isPlaying) {
+    // 当前播放中，点击后暂停 -> 显示三角形，按钮变红色
     audio.pause();
     clearLoadTimer();
     isPlaying = false;
-    playIcon.style.display = 'inline';
+    playIcon.style.display = 'inline-flex';
     pauseIcon.style.display = 'none';
     playBtn.classList.add('paused-state');
     updateWheelSpin();
   } else {
+    // 当前暂停，点击后播放 -> 显示双竖线，按钮变灰色
     isPlaying = true;
     playIcon.style.display = 'none';
-    pauseIcon.style.display = 'inline';
+    pauseIcon.style.display = 'inline-flex';
     playBtn.classList.remove('paused-state');
     updateWheelSpin();
     
