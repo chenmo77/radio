@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>HellYell音乐电台 - 复古磁带机</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #e2dcd5;
+            font-family: 'Arial', 'MiSans', 'Microsoft YaHei', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding: 2vh;
+            transition: background-color 0.3s ease;
+        }
+
+        /* 深色模式样式 */
+        body.dark-mode {
+            background-color: #1a1a1a;
+        }
+
+        body.dark-mode .cassette {
+            background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+            border: 1px solid #3a3a3a;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        body.dark-mode .label-area {
+            background-color: #1f1f1f;
+            box-shadow: inset 0 0 0 1px #3a3a3a;
+        }
+
+        body.dark-mode .song-info-display {
+            background-color: #2c2c2c;
+        }
+
+        body.dark-mode .side-badge, body.dark-mode .c60-badge {
+            background-color: #111;
+            color: #ffd966;
+        }
+
+        body.dark-mode .window-area {
+            background-color: #0a0a0a;
+        }
+
+        body.dark-mode .reel {
+            background: radial-gradient(circle at 35% 35%, #6a6a6a, #4a4a4a);
+        }
+
+        body.dark-mode .reel-inner {
+            background: radial-gradient(circle, #7a7a7a, #5a5a5a);
+        }
+
+        body.dark-mode .reel-center {
+            background: radial-gradient(circle, #c0c0c0, #9a9a9a);
+        }
+
+        body.dark-mode .reel-tooth {
+            background: linear-gradient(135deg, #5a5a5a, #3a3a3a);
+        }
+
+        body.dark-mode .tape {
+            background: linear-gradient(90deg, #5a3a2a 0%, #5a3a2a 45%, #ccc 45%, #ccc 55%, #5a3a2a 55%, #5a3a2a 100%);
+        }
+
+        body.dark-mode .hole-area {
+            background-color: #111;
+        }
+
+        body.dark-mode .hole {
+            background-color: #2a2a2a;
+        }
+
+        body.dark-mode .screw {
+            background-color: #222;
+            color: #aaa;
+        }
+
+        body.dark-mode .buttons-container {
+            background-color: #1f1f1f;
+        }
+
+        body.dark-mode .tape-button {
+            background-color: #333;
+            color: #eee;
+            box-shadow: 0 4px 0 #111;
+        }
+
+        body.dark-mode .tape-button:hover {
+            background-color: #444;
+        }
+
+        /* 磁带容器 */
+        .cassette-container {
+            flex: 1 1 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2vh;
+            min-height: 0;
+        }
+
+        /* 磁带主体 - 浅色模式优化 */
+        .cassette {
+            width: min(90vw, 800px);
+            aspect-ratio: 1.4 / 1;
+            background: linear-gradient(145deg, #f0ebe3, #d9d2c5);
+            border-radius: 16px;
+            position: relative;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.7);
+            padding: 2%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: background 0.3s ease;
+            border: 1px solid #c8bfae;
+        }
+
+        /* 螺丝装饰 */
+        .screw {
+            position: absolute;
+            width: 2.5%;
+            aspect-ratio: 1 / 1;
+            background-color: #c0b59e;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8a7a5c;
+            font-size: 0.8em;
+            font-weight: bold;
+            box-shadow: inset 0 0 2px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.6);
+            pointer-events: none;
+        }
+
+        .screw-top-left { top: 3%; left: 3%; }
+        .screw-top-right { top: 3%; right: 3%; }
+        .screw-bottom-left { bottom: 3%; left: 3%; }
+        .screw-bottom-right { bottom: 3%; right: 3%; }
+        .screw-center-bottom { bottom: 12%; left: 50%; transform: translateX(-50%); }
+
+        /* 标签区域 */
+        .label-area {
+            width: 96%;
+            margin: 2% auto;
+            background-color: #f5efdf;
+            border-radius: 8px;
+            padding: 2%;
+            display: flex;
+            align-items: center;
+            gap: 2%;
+            transition: background 0.3s ease;
+            box-shadow: inset 0 0 0 1px #e0d5c0, 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .side-badge {
+            flex: 0 0 10%;
+            background-color: #2d2d2d;
+            color: #ffd700;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2%;
+            font-weight: bold;
+        }
+
+        .side-badge .b {
+            font-size: 2em;
+            line-height: 1;
+        }
+
+        .side-badge .side {
+            font-size: 1.2em;
+            line-height: 1;
+        }
+
+        /* 音乐信息显示区域 */
+        .song-info-display {
+            flex: 1;
+            background-color: #fffef7;
+            border-radius: 6px;
+            padding: 0 12px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            overflow: hidden;
+            transition: background 0.3s ease;
+            height: 100%;
+            min-height: 0;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .tape-song-line {
+            font-size: clamp(14px, 5vw, 28px);
+            font-weight: bold;
+            color: #2c2a24;
+            white-space: nowrap;
+            overflow-x: visible;
+            font-family: "MiSans", "Microsoft YaHei", sans-serif;
+            letter-spacing: 0;
+            line-height: 1.3;
+        }
+
+        body.dark-mode .tape-song-line {
+            color: #f0f0f0;
+        }
+
+        /* 跑马灯动画 */
+        .marquee-text {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marqueeScroll 12s linear infinite;
+        }
+
+        @keyframes marqueeScroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .c60-badge {
+            flex: 0 0 12%;
+            background-color: #2d2d2d;
+            color: #ffd700;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        /* 磁带窗口区域 */
+        .window-area {
+            width: 80%;
+            height: 28%;
+            margin: 0 auto;
+            background-color: #1e1a14;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 2%;
+            gap: 8%;
+            box-shadow: inset 0 0 0 2px #3a2e22, 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        /* 金属齿轮卷带轮 */
+        .reel {
+            width: 22%;
+            aspect-ratio: 1 / 1;
+            position: relative;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #b8b0a0, #8a7e6c);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.5);
+        }
+
+        .reel-inner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 55%;
+            aspect-ratio: 1 / 1;
+            background: radial-gradient(circle, #c8c0b0, #9a8e7c);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.2), 0 1px 0 rgba(255,255,255,0.4);
+        }
+
+        .reel-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 25%;
+            aspect-ratio: 1 / 1;
+            background: radial-gradient(circle, #e8e0d0, #b8ae9a);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: inset 0 1px 1px rgba(0,0,0,0.1), 0 1px 0 rgba(255,255,255,0.6);
+            z-index: 2;
+        }
+
+        .reel-tooth {
+            position: absolute;
+            width: 18%;
+            height: 22%;
+            background: linear-gradient(135deg, #9a8e7c, #6a5e4c);
+            border-radius: 3px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            transform-origin: center;
+            top: 50%;
+            left: 50%;
+            margin-left: -9%;
+            margin-top: -11%;
+        }
+
+        .reel-tooth:nth-child(1) { transform: rotate(0deg) translateY(-120%); }
+        .reel-tooth:nth-child(2) { transform: rotate(45deg) translateY(-120%); }
+        .reel-tooth:nth-child(3) { transform: rotate(90deg) translateY(-120%); }
+        .reel-tooth:nth-child(4) { transform: rotate(135deg) translateY(-120%); }
+        .reel-tooth:nth-child(5) { transform: rotate(180deg) translateY(-120%); }
+        .reel-tooth:nth-child(6) { transform: rotate(225deg) translateY(-120%); }
+        .reel-tooth:nth-child(7) { transform: rotate(270deg) translateY(-120%); }
+        .reel-tooth:nth-child(8) { transform: rotate(315deg) translateY(-120%); }
+
+        /* 齿轮旋转动画 */
+        .reel.spinning {
+            animation: spinReel 2.0s linear infinite;
+        }
+
+        @keyframes spinReel {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* 中间直线磁带 */
+        .tape {
+            width: 35%;
+            height: 80%;
+            background: linear-gradient(90deg, #3a281f 0%, #3a281f 45%, #fff 45%, #fff 55%, #3a281f 55%, #3a281f 100%);
+            border-radius: 4px;
+        }
+
+        /* 底部孔位区域 */
+        .hole-area {
+            width: 80%;
+            height: 14%;
+            margin: 0 auto;
+            background-color: #d9d0be;
+            border-radius: 4px 4px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 0 5%;
+            position: relative;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .hole {
+            width: 8%;
+            aspect-ratio: 1 / 1;
+            background-color: #4a3e2c;
+            border-radius: 50%;
+            box-shadow: inset 0 0 3px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.3);
+        }
+
+        /* 按键容器 - 5个按钮等宽满宽 */
+        .buttons-container {
+            flex-shrink: 0;
+            width: 100%;
+            padding: 1.5vh 1vw;
+            background-color: #d9d0be;
+            border-radius: 12px;
+            margin-top: 2vh;
+            transition: background 0.3s ease;
+        }
+
+        .button-bar {
+            display: flex;
+            width: 100%;
+            gap: 2vw;
+            justify-content: space-between;
+        }
+
+        .tape-button {
+            flex: 1;
+            height: 70px;
+            border: none;
+            border-radius: 16px;
+            background-color: #c8bfae;
+            color: #3a2e22;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            box-shadow: 0 5px 0 #9a8e7a, 0 3px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-tap-highlight-color: transparent;
+            font-weight: bold;
+            font-size: 2rem;
+        }
+
+        .tape-button:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #9a8e7a, 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .tape-button:hover {
+            background-color: #b8ae9a;
+        }
+
+        /* 播放按钮特殊状态 - 使用CSS绘制图标，无背景色问题 */
+        .tape-button.play-btn {
+            background-color: #c8bfae;
+        }
+
+        .tape-button.play-btn.paused-state {
+            background-color: #E60012;
+            box-shadow: 0 5px 0 #8a0008;
+            color: #fff;
+        }
+
+        /* CSS绘制的播放图标（三角形） */
+        .play-icon-css {
+            display: inline-block;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 14px 0 14px 24px;
+            border-color: transparent transparent transparent currentColor;
+        }
+
+        /* CSS绘制的暂停图标（双竖线） */
+        .pause-icon-css {
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+        }
+        .pause-icon-css .bar {
+            width: 8px;
+            height: 28px;
+            background-color: currentColor;
+            border-radius: 2px;
+        }
+
+        /* 响应式调整图标大小 */
+        @media (max-width: 768px) {
+            .play-icon-css {
+                border-width: 10px 0 10px 18px;
+            }
+            .pause-icon-css .bar {
+                width: 6px;
+                height: 22px;
+            }
+            .pause-icon-css {
+                gap: 6px;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .play-icon-css {
+                border-width: 9px 0 9px 16px;
+            }
+            .pause-icon-css .bar {
+                width: 5px;
+                height: 20px;
+            }
+            .pause-icon-css {
+                gap: 5px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .play-icon-css {
+                border-width: 8px 0 8px 14px;
+            }
+            .pause-icon-css .bar {
+                width: 5px;
+                height: 18px;
+            }
+            .pause-icon-css {
+                gap: 4px;
+            }
+        }
+
+        /* 提示气泡 */
+        .tip-bubble {
+            position: fixed;
+            background: rgba(0,0,0,0.85);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 24px;
+            font-weight: bold;
+            font-family: monospace;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .tip-bubble.show {
+            opacity: 1;
+        }
+
+        /* 响应式按钮高度 */
+        @media (max-width: 768px) {
+            .tape-button {
+                height: 60px;
+                font-size: 1.8rem;
+            }
+            .side-badge .b { font-size: 1.5em; }
+            .side-badge .side { font-size: 1em; }
+            .c60-badge { font-size: 1.5em; }
+            .tape-song-line { font-size: clamp(12px, 4vw, 22px); }
+        }
+
+        @media (max-width: 560px) {
+            .tape-button {
+                height: 55px;
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .tape-button {
+                height: 50px;
+                font-size: 1.3rem;
+            }
+            .tape-song-line { font-size: clamp(10px, 3.5vw, 18px); }
+        }
+
+        @media (orientation: landscape) and (max-height: 500px) {
+            .tape-button {
+                height: 48px;
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cassette-container">
+        <div class="cassette">
+            <div class="screw screw-top-left">✚</div>
+            <div class="screw screw-top-right">✚</div>
+            <div class="screw screw-bottom-left">✚</div>
+            <div class="screw screw-bottom-right">✚</div>
+            <div class="screw screw-center-bottom">✚</div>
+
+            <div class="label-area">
+                <div class="side-badge">
+                    <span class="b">A</span>
+                    <span class="side">SIDE</span>
+                </div>
+                <div class="song-info-display" id="songInfoArea">
+                    <div class="tape-song-line" id="tapeSongLine">欢迎收听 HellYell Radio</div>
+                </div>
+                <div class="c60-badge">HY6</div>
+            </div>
+
+            <!-- 磁带窗口区域: 左右金属齿轮 + 中间直线磁带 -->
+            <div class="window-area">
+                <div class="reel" id="leftReel">
+                    <div class="reel-inner"></div>
+                    <div class="reel-center"></div>
+                    <div class="reel-tooth"></div>
+                    <div class="reel-tooth"></div>
+                    <div class="reel-tooth"></div>
+                    <div class="reel-tooth"></div>
+                    <div class="reel-tooth"></div>
+                    <div class="reel-tooth"></div>
+                    <div class="reel-tooth"></div>
+                    <div class="reel-tooth"></div>
+                </div>
+                <div class="tape"></div>
+                <div class="reel" id="rightReel">
+                    <div class="reel-inner"></div>
+                    <div class="reel-center"></div>
+                    <div class="reel-tooth"></div>
+                    <div class="reel-tooth"></div>
+                    <div class="reel-tooth"></div>
+                    <div class="reel-tooth"></div>
+                    <div class="reel-tooth"></div>
+                    <div class="reel-tooth"></div>
+                    <div class="reel-tooth"></div>
+                    <div class="reel-tooth"></div>
+                </div>
+            </div>
+
+            <div class="hole-area">
+                <div class="hole"></div>
+                <div class="hole"></div>
+                <div class="hole"></div>
+                <div class="hole"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="buttons-container">
+        <div class="button-bar">
+            <button class="tape-button" id="volMinusBtn">−</button>
+            <button class="tape-button" id="themeToggleBtn">◐</button>
+            <button class="tape-button play-btn paused-state" id="playBtn">
+                <span id="playIcon" class="play-icon-css"></span>
+                <span id="pauseIcon" class="pause-icon-css" style="display:none;">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </span>
+            </button>
+            <button class="tape-button" id="nextBtn">⏭</button>
+            <button class="tape-button" id="volPlusBtn">+</button>
+        </div>
+    </div>
+
+    <div class="tip-bubble" id="tipBubble"></div>
+
+    <script>
+        // ========== 完整播放逻辑，齿轮转动效果，CSS图标无手机黄底 ==========
+        const leftReel = document.getElementById('leftReel');
+        const rightReel = document.getElementById('rightReel');
+        
+        function updateWheelSpin() {
+            if (isPlaying) {
+                leftReel.classList.add('spinning');
+                rightReel.classList.add('spinning');
+            } else {
+                leftReel.classList.remove('spinning');
+                rightReel.classList.remove('spinning');
+            }
+        }
+
+        function setScrollingText(lineElement, fullText) {
+            lineElement.style.whiteSpace = 'nowrap';
+            lineElement.style.animation = 'none';
+            lineElement.innerHTML = fullText;
+            const checkMarquee = () => {
+                const parent = lineElement.parentElement;
+                if (!parent) return;
+                const isOverflow = lineElement.scrollWidth > parent.clientWidth;
+                if (isOverflow) {
+                    lineElement.innerHTML = fullText + fullText;
+                    lineElement.style.animation = 'marqueeScroll 12s linear infinite';
+                } else {
+                    lineElement.innerHTML = fullText;
+                    lineElement.style.animation = 'none';
+                }
+            };
+            setTimeout(checkMarquee, 30);
+            const resizeHandler = () => { setTimeout(checkMarquee, 100); };
+            window.addEventListener('resize', resizeHandler);
+            if (window.lastResizeHandler) window.removeEventListener('resize', window.lastResizeHandler);
+            window.lastResizeHandler = resizeHandler;
+        }
+
+        function updateUINew(song) {
+            const lineEl = document.getElementById('tapeSongLine');
+            const container = document.getElementById('songInfoArea');
+            container.style.transition = 'opacity 0.2s';
+            container.style.opacity = '0';
+            setTimeout(() => {
+                setScrollingText(lineEl, song.name);
+                container.style.opacity = '1';
+            }, 150);
+            document.title = song.name;
+        }
+
+        const audio = new Audio();
+        audio.preload = "auto";
+        let allSongs = [];
+        let currentSong = null;
+        let isPlaying = false;
+        let normalCount = 0;
+        let hasStarted = false;
+        let isSwitching = false;
+        let loadTimer = null;
+        let volume = 0.6;
+        const promoSong = { name: "HellYell Radio - 欢迎收听", url: "https://radio.hellyell.com/hy.mp3" };
+
+        function clearLoadTimer() {
+            if (loadTimer) { clearTimeout(loadTimer); loadTimer = null; }
+        }
+
+        function getNextSong() {
+            if (normalCount === 7) { normalCount = 0; return promoSong; }
+            if (allSongs.length === 0) return promoSong;
+            const randomIndex = Math.floor(Math.random() * allSongs.length);
+            return allSongs[randomIndex];
+        }
+
+        function playSong(song, autoPlay = true) {
+            if (isSwitching) return;
+            isSwitching = true;
+            clearLoadTimer();
+            currentSong = song;
+            updateUINew(song);
+            audio.pause();
+            audio.src = song.url;
+            audio.volume = volume;
+            if (autoPlay && isPlaying) {
+                loadTimer = setTimeout(() => {
+                    if (isPlaying && !isSwitching) nextSong();
+                }, 6000);
+                audio.play().then(() => {
+                    clearLoadTimer();
+                    isSwitching = false;
+                    updateWheelSpin();
+                }).catch(err => {
+                    console.error('播放失败:', err);
+                    clearLoadTimer();
+                    isSwitching = false;
+                    setTimeout(() => nextSong(), 500);
+                });
+            } else {
+                isSwitching = false;
+                updateWheelSpin();
+            }
+        }
+
+        function nextSong() {
+            if (isSwitching) return;
+            clearLoadTimer();
+            const next = getNextSong();
+            if (next !== promoSong) { normalCount++; }
+            playSong(next, isPlaying);
+        }
+
+        function togglePlay() {
+            const playBtn = document.getElementById('playBtn');
+            const playIconSpan = document.getElementById('playIcon');
+            const pauseIconSpan = document.getElementById('pauseIcon');
+            if (isPlaying) {
+                audio.pause();
+                clearLoadTimer();
+                isPlaying = false;
+                playIconSpan.style.display = 'inline-flex';
+                pauseIconSpan.style.display = 'none';
+                playBtn.classList.add('paused-state');
+                updateWheelSpin();
+            } else {
+                isPlaying = true;
+                playIconSpan.style.display = 'none';
+                pauseIconSpan.style.display = 'inline-flex';
+                playBtn.classList.remove('paused-state');
+                updateWheelSpin();
+                if (!hasStarted) {
+                    hasStarted = true;
+                    normalCount = 0;
+                    playSong(promoSong, true);
+                } else if (currentSong) {
+                    clearLoadTimer();
+                    loadTimer = setTimeout(() => {
+                        if (isPlaying && !isSwitching) nextSong();
+                    }, 6000);
+                    audio.play().then(() => {
+                        clearLoadTimer();
+                        updateWheelSpin();
+                    }).catch(err => {
+                        console.error('恢复播放失败:', err);
+                        clearLoadTimer();
+                        nextSong();
+                    });
+                } else {
+                    playSong(promoSong, true);
+                }
+            }
+        }
+
+        function volumeUp() {
+            let newVol = volume + 0.1;
+            if (newVol > 1) { if (volume >= 0.9) showTip('最大', document.getElementById('volPlusBtn')); return; }
+            volume = newVol;
+            audio.volume = volume;
+            let val = Math.round(volume * 10);
+            showTip(val.toString(), document.getElementById('volPlusBtn'));
+        }
+        function volumeDown() {
+            let newVol = volume - 0.1;
+            if (newVol < 0) { if (volume <= 0.1) showTip('最小', document.getElementById('volMinusBtn')); return; }
+            volume = newVol;
+            audio.volume = volume;
+            let val = Math.round(volume * 10);
+            showTip(val.toString(), document.getElementById('volMinusBtn'));
+        }
+
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        function setTheme(theme) {
+            if (theme === 'dark') {
+                document.body.classList.add('dark-mode');
+                themeToggleBtn.innerHTML = '◑';
+                localStorage.setItem('radioTheme', 'dark');
+            } else {
+                document.body.classList.remove('dark-mode');
+                themeToggleBtn.innerHTML = '◐';
+                localStorage.setItem('radioTheme', 'light');
+            }
+        }
+        function toggleTheme() {
+            const isDark = document.body.classList.contains('dark-mode');
+            if (isDark) { setTheme('light'); showTip('浅色', themeToggleBtn); }
+            else { setTheme('dark'); showTip('深色', themeToggleBtn); }
+        }
+        const savedTheme = localStorage.getItem('radioTheme');
+        if (savedTheme === 'dark') setTheme('dark');
+        else setTheme('light');
+
+        const tipBubble = document.getElementById('tipBubble');
+        function showTip(message, targetBtn) {
+            if (!targetBtn) return;
+            const rect = targetBtn.getBoundingClientRect();
+            tipBubble.style.left = rect.left + rect.width / 2 + 'px';
+            tipBubble.style.top = rect.top - 50 + 'px';
+            tipBubble.style.transform = 'translateX(-50%)';
+            tipBubble.textContent = message;
+            tipBubble.classList.add('show');
+            setTimeout(() => tipBubble.classList.remove('show'), 600);
+        }
+
+        audio.addEventListener('ended', () => { if (!isSwitching && isPlaying) nextSong(); });
+        audio.addEventListener('error', () => { if (!isSwitching && isPlaying) { clearLoadTimer(); nextSong(); } });
+
+        async function init() {
+            try {
+                const [hj, qc] = await Promise.all([
+                    fetch('https://radio.hellyell.com/huaijiu-musiclist.json').then(r => r.json()),
+                    fetch('https://radio.hellyell.com/qiche-musiclist.json').then(r => r.json())
+                ]);
+                const all = [...hj, ...qc];
+                allSongs = all.filter(item => {
+                    const singer = item.name.split(' - ')[0];
+                    return singer !== 'HellYell怀旧电台' && singer !== 'HellYell汽车电台' && item.url && item.url.startsWith('http');
+                });
+                console.log(`加载了 ${allSongs.length} 首歌曲`);
+            } catch(e) { console.error('加载失败', e); allSongs = []; }
+            
+            const lineEl = document.getElementById('tapeSongLine');
+            lineEl.innerText = '欢迎收听 HellYell Radio';
+            setTimeout(() => {
+                const parent = lineEl.parentElement;
+                if (parent && lineEl.scrollWidth > parent.clientWidth) {
+                    lineEl.innerHTML = '欢迎收听 HellYell Radio欢迎收听 HellYell Radio';
+                    lineEl.style.animation = 'marqueeScroll 12s linear infinite';
+                }
+            }, 50);
+            
+            hasStarted = false;
+            isPlaying = false;
+            currentSong = null;
+            normalCount = 0;
+            audio.volume = volume;
+            
+            document.getElementById('playBtn').onclick = togglePlay;
+            document.getElementById('nextBtn').onclick = () => { if (!isSwitching) nextSong(); };
+            document.getElementById('volMinusBtn').onclick = volumeDown;
+            document.getElementById('volPlusBtn').onclick = volumeUp;
+            themeToggleBtn.onclick = toggleTheme;
+            
+            updateWheelSpin();
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
