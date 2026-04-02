@@ -11,7 +11,6 @@
             box-sizing: border-box;
         }
 
-        /* 根元素和body确保无滚动条，高度锁定 */
         html, body {
             width: 100%;
             height: 100%;
@@ -29,7 +28,6 @@
             transition: background-color 0.3s ease;
         }
 
-        /* 深色模式样式 */
         body.dark-mode {
             background-color: #1a1a1a;
         }
@@ -81,7 +79,6 @@
 
         body.dark-mode .progress-slider {
             background: #ffffff;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
 
         body.dark-mode .hole-area {
@@ -111,7 +108,6 @@
             background-color: #444;
         }
 
-        /* 磁带容器 - 占整个高度的80% */
         .cassette-container {
             flex: 8;
             display: flex;
@@ -121,7 +117,6 @@
             position: relative;
         }
 
-        /* 磁带主体 - 尺寸完全由网页高宽和边距决定，固定不变 */
         .cassette {
             background: linear-gradient(145deg, #f0ebe3, #d9d2c5);
             border-radius: 16px;
@@ -136,7 +131,6 @@
             overflow: hidden;
         }
 
-        /* 当网页高 > 宽（竖屏）时：左右两边距离网页两边15px，然后定磁带的高度 */
         @media (orientation: portrait) {
             .cassette-container {
                 padding: 0 15px;
@@ -149,7 +143,6 @@
             }
         }
 
-        /* 当网页宽 > 高（横屏）时：上下两边距离网页上边15px、距离底部按钮区域15px，然后定磁带的宽度 */
         @media (orientation: landscape) {
             .cassette-container {
                 padding: 15px 0;
@@ -162,7 +155,6 @@
             }
         }
 
-        /* 螺丝装饰 */
         .screw {
             position: absolute;
             width: 2.5%;
@@ -185,7 +177,6 @@
         .screw-bottom-right { bottom: 3%; right: 3%; }
         .screw-center-bottom { bottom: 12%; left: 50%; transform: translateX(-50%); }
 
-        /* 标签区域 */
         .label-area {
             width: 96%;
             margin: 2% auto;
@@ -224,7 +215,6 @@
             line-height: 1;
         }
 
-        /* 音乐信息显示区域 - 固定宽度，不改变磁带长高 */
         .song-info-display {
             flex: 1;
             background-color: #fffef7;
@@ -257,7 +247,6 @@
             color: #f0f0f0;
         }
 
-        /* 跑马灯动画 - 无限循环 */
         .marquee-text {
             display: inline-block;
             white-space: nowrap;
@@ -282,7 +271,6 @@
             flex-shrink: 0;
         }
 
-        /* 磁带窗口区域 */
         .window-area {
             width: 85%;
             height: 28%;
@@ -299,7 +287,6 @@
             flex-shrink: 0;
         }
 
-        /* 金属齿轮 */
         .reel {
             width: 22%;
             aspect-ratio: 1 / 1;
@@ -367,7 +354,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* 中间进度条区域 */
         .tape-middle {
             flex: 1;
             height: 75%;
@@ -388,78 +374,78 @@
             overflow: visible;
         }
 
-        /* 白色滑块 - 纯CSS绘制，左弧形像】，右弧形像【，顺滑过渡 */
+        /* ========== 白色滑块：顶部宽60px，中间宽20px，底部宽60px，圆弧过渡（沙漏形） ========== */
         .progress-slider {
             position: absolute;
-            width: 24px;
+            width: 60px;
             height: 100%;
             left: 0%;
             top: 0;
             transform: translateX(0);
             transition: left 0.05s linear;
             pointer-events: none;
-        }
-        /* 使用伪元素绘制弧形滑块主体 */
-        .progress-slider::before {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
+            /* 使用 clip-path 实现沙漏形状：顶部宽60，中间窄20，底部宽60，圆弧过渡 */
+            clip-path: path("M 0,0 C 20,0 40,0 60,0 C 60,20 50,40 40,50 C 35,55 35,55 40,60 C 50,70 60,90 60,100 C 40,100 20,100 0,100 C 0,80 10,60 20,50 C 25,45 25,45 20,40 C 10,30 0,10 0,0 Z");
             background: #ffffff;
-            border-radius: 40% / 50% 50% 50% 50%;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-            /* 关键：左右弧形通过径向渐变和圆角实现左】右【效果 */
-            background: radial-gradient(ellipse at 30% 50%, #ffffff 60%, #f5f5f5 100%);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+            border-radius: 0;
         }
-        /* 左侧内凹弧形模拟 】 效果 */
-        .progress-slider::before {
-            clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 8% 50%);
-        }
-        /* 右侧外凸弧形模拟 【 效果，通过叠加一个右侧圆角 */
-        .progress-slider::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: 40%;
-            height: 100%;
-            background: #ffffff;
-            border-radius: 0 30% 30% 0;
-            pointer-events: none;
-        }
-        /* 为了更顺滑的左右弧形，重新设计：使用两个伪元素分别绘制左右弧形，主体为白色矩形 */
-        /* 更优雅的方案：主体白色矩形，左右附加弧形块 */
+        
+        /* 兼容性更好的实现：使用 SVG 背景或者更标准的 clip-path */
+        /* 由于 path 中的百分比需要适应高度，改用更可靠的方案：使用径向渐变 + 伪元素实现沙漏形状 */
+        /* 最终采用标准 clip-path 多边形 + 圆弧效果，确保在所有浏览器中正常工作 */
+        
+        /* 重新实现：使用两个半圆 + 矩形组合，或者用更精确的 clip-path 多边形模拟圆弧沙漏 */
         .progress-slider {
             background: #ffffff;
-            border-radius: 20% / 40% 40% 40% 40%;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+            /* 使用 border-radius 和伪元素实现顶部宽、中间窄、底部宽的效果 */
+            border-radius: 50% / 20% 20% 80% 80%;
+            width: 60px;
         }
-        /* 左侧弧形 (像】) */
+        
+        /* 通过径向渐变制造中间窄的视觉，同时保持顶部底部宽 */
         .progress-slider::before {
             content: '';
             position: absolute;
-            left: -6px;
             top: 0;
-            width: 12px;
+            left: 20px;
+            width: 20px;
             height: 100%;
             background: #ffffff;
-            border-radius: 50% / 40% 40% 60% 60%;
-            box-shadow: -1px 0 2px rgba(0,0,0,0.1);
+            border-radius: 0;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.05);
         }
-        /* 右侧弧形 (像【) */
+        
+        /* 更优雅的纯沙漏形状：使用径向渐变切出中间凹陷 */
+        .progress-slider {
+            background: radial-gradient(ellipse at center, 
+                #ffffff 0%, 
+                #ffffff 35%, 
+                #e8e8e8 38%, 
+                #ffffff 42%, 
+                #ffffff 100%);
+            border-radius: 50% / 25% 25% 75% 75%;
+        }
+        
+        /* 最终方案：使用 SVG 背景图片绘制完美的沙漏形（顶部宽60，中间窄20，底部宽60，圆弧过渡） */
+        .progress-slider {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 100' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L60,0 C60,0 60,20 50,35 C45,42 40,48 40,50 C40,52 45,58 50,65 C60,80 60,100 60,100 L0,100 C0,100 0,80 10,65 C15,58 20,52 20,50 C20,48 15,42 10,35 C0,20 0,0 0,0 Z' fill='%23ffffff' stroke='%23dddddd' stroke-width='0.5'/%3E%3C/svg%3E");
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-color: transparent;
+            width: 60px;
+            border-radius: 0;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+        }
+        
+        /* 移除所有伪元素干扰 */
+        .progress-slider::before,
         .progress-slider::after {
-            content: '';
-            position: absolute;
-            right: -6px;
-            top: 0;
-            width: 12px;
-            height: 100%;
-            background: #ffffff;
-            border-radius: 50% / 40% 40% 60% 60%;
-            box-shadow: 1px 0 2px rgba(0,0,0,0.1);
+            display: none;
         }
 
-        /* 底部孔位区域 */
         .hole-area {
             width: 85%;
             height: 12%;
@@ -483,7 +469,6 @@
             box-shadow: inset 0 0 3px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.3);
         }
 
-        /* 按键容器 - 占整个高度的20% */
         .buttons-container {
             flex: 2;
             width: 100%;
@@ -583,7 +568,6 @@
             opacity: 1;
         }
 
-        /* 响应式调整按钮内边距和字体 */
         @media (max-width: 768px) {
             .tape-button {
                 font-size: 1.5rem;
@@ -599,12 +583,7 @@
             .side-badge .side { font-size: 0.9em; }
             .c60-badge { font-size: 1.3em; }
             .progress-slider {
-                width: 20px;
-            }
-            .progress-slider::before, .progress-slider::after {
-                width: 10px;
-                left: -5px;
-                right: -5px;
+                width: 50px;
             }
         }
 
@@ -620,12 +599,7 @@
                 height: 18px;
             }
             .progress-slider {
-                width: 18px;
-            }
-            .progress-slider::before, .progress-slider::after {
-                width: 8px;
-                left: -4px;
-                right: -4px;
+                width: 45px;
             }
         }
 
@@ -717,13 +691,11 @@
     <div class="tip-bubble" id="tipBubble"></div>
 
     <script>
-        // ========== 播放逻辑 + 进度滑块移动 + 跑马灯文字 ==========
         const leftReel = document.getElementById('leftReel');
         const rightReel = document.getElementById('rightReel');
         const progressSlider = document.getElementById('progressSlider');
         const progressBarBg = document.getElementById('progressBarBg');
         
-        // 更新滑块位置
         function updateSliderProgress() {
             if (!progressSlider || !progressBarBg) return;
             if (audio.duration && !isNaN(audio.duration) && audio.duration > 0 && isPlaying) {
@@ -751,7 +723,6 @@
                 } else {
                     resetSliderToStart();
                 }
-                // 重新检查跑马灯，但绝不改变磁带尺寸
                 const lineEl = document.getElementById('tapeSongLine');
                 if (lineEl && lineEl.currentFullText) {
                     updateMarquee(lineEl, lineEl.currentFullText);
@@ -769,7 +740,6 @@
             }
         }
 
-        // 跑马灯逻辑 - 无限循环，绝不改变磁带尺寸
         function updateMarquee(lineElement, fullText) {
             lineElement.style.whiteSpace = 'nowrap';
             lineElement.style.animation = 'none';
