@@ -78,7 +78,7 @@
         }
 
         body.dark-mode .progress-slider {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 100' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L50,0 L50,20 C35,20 30,40 25,50 C30,60 35,80 50,80 L50,100 L0,100 L0,80 C15,80 20,60 25,50 C20,40 15,20 0,20 Z' fill='%23ffffff' stroke='%23cccccc' stroke-width='0.5'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 100' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L50,0 L50,0 C50,0 50,0 50,0 C50,20 40,35 25,50 C40,65 50,80 50,100 L0,100 C0,80 10,65 25,50 C10,35 0,20 0,0 Z' fill='%23ffffff' stroke='%23aaaaaa' stroke-width='0.5'/%3E%3C/svg%3E");
         }
 
         body.dark-mode .hole-area {
@@ -374,7 +374,7 @@
             overflow: visible;
         }
 
-        /* ========== 白色滑块：上下平直宽50px，左右向内凹1/5圆弧，最窄处25px ========== */
+        /* ========== 白色滑块：左边像)向右凹，右边像(向左凹，最窄处25px ========== */
         .progress-slider {
             position: absolute;
             width: 50px;
@@ -384,11 +384,11 @@
             transform: translateX(0);
             transition: left 0.05s linear;
             pointer-events: none;
-            /* 使用SVG绘制精确形状：
-               上边平直50px，左边向右凹的1/5圆弧，最窄处25px，右边向左凹的1/5圆弧，下边平直50px
-               圆弧半径为12.5px（因为从50px收缩到25px，差25px，1/5圆弧意味着弧深为半径的1/5？实际用贝塞尔曲线实现平滑内凹）
+            /* SVG路径: 
+               左上角(0,0) -> 右上角(50,0) -> 右侧弧线(从50,0平滑收缩到中间25,50再扩张回50,100)
+               -> 右下角(50,100) -> 左下角(0,100) -> 左侧弧线(从0,100平滑收缩到中间25,50再扩张回0,0)
             */
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 100' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L50,0 L50,0 C50,0 50,0 50,0 L50,20 C42,20 35,35 25,50 C35,65 42,80 50,80 L50,100 L0,100 L0,80 C8,80 15,65 25,50 C15,35 8,20 0,20 Z' fill='%23ffffff' stroke='%23dddddd' stroke-width='0.5'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 100' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L50,0 C50,0 45,20 35,35 C28,46 26,48 25,50 C26,52 28,54 35,65 C45,80 50,100 50,100 L0,100 C0,100 5,80 15,65 C22,54 24,52 25,50 C24,48 22,46 15,35 C5,20 0,0 0,0 Z' fill='%23ffffff' stroke='%23cccccc' stroke-width='0.8'/%3E%3C/svg%3E");
             background-size: 100% 100%;
             background-repeat: no-repeat;
             background-position: center;
@@ -397,7 +397,7 @@
             border-radius: 0;
         }
         
-        /* 移除所有伪元素干扰 */
+        /* 移除伪元素干扰 */
         .progress-slider::before,
         .progress-slider::after {
             display: none;
