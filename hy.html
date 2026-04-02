@@ -80,7 +80,7 @@
         }
 
         body.dark-mode .progress-slider {
-            background: radial-gradient(ellipse at center, #ffffff, #e0e0e0);
+            background: #ffffff;
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
 
@@ -388,45 +388,75 @@
             overflow: visible;
         }
 
-        /* 白色滑块 - 顶和底边宽、中间窄的弧线形状（沙漏形/工字形弧线版） */
+        /* 白色滑块 - 纯CSS绘制，左弧形像】，右弧形像【，顺滑过渡 */
         .progress-slider {
             position: absolute;
-            width: 22px;
+            width: 24px;
             height: 100%;
-            background: #ffffff;
             left: 0%;
             top: 0;
             transform: translateX(0);
             transition: left 0.05s linear;
             pointer-events: none;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-            /* 使用clip-path实现顶部宽、中间窄、底部宽的弧线沙漏形状 */
-            clip-path: polygon(0% 0%, 100% 0%, 75% 30%, 75% 70%, 100% 100%, 0% 100%, 25% 70%, 25% 30%);
-            border-radius: 4px;
         }
-        /* 增加内阴影让弧线更自然，并添加微小高光 */
+        /* 使用伪元素绘制弧形滑块主体 */
         .progress-slider::before {
             content: '';
             position: absolute;
-            top: 2%;
-            left: 20%;
-            width: 60%;
-            height: 20%;
-            background: radial-gradient(ellipse at center, rgba(255,255,255,0.9), rgba(255,255,255,0.3));
-            border-radius: 50%;
-            pointer-events: none;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            border-radius: 40% / 50% 50% 50% 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            /* 关键：左右弧形通过径向渐变和圆角实现左】右【效果 */
+            background: radial-gradient(ellipse at 30% 50%, #ffffff 60%, #f5f5f5 100%);
         }
-        /* 增加底部高光，强化立体感 */
+        /* 左侧内凹弧形模拟 】 效果 */
+        .progress-slider::before {
+            clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 8% 50%);
+        }
+        /* 右侧外凸弧形模拟 【 效果，通过叠加一个右侧圆角 */
         .progress-slider::after {
             content: '';
             position: absolute;
-            bottom: 2%;
-            left: 20%;
-            width: 60%;
-            height: 20%;
-            background: radial-gradient(ellipse at center, rgba(255,255,255,0.7), rgba(255,255,255,0.1));
-            border-radius: 50%;
+            right: 0;
+            top: 0;
+            width: 40%;
+            height: 100%;
+            background: #ffffff;
+            border-radius: 0 30% 30% 0;
             pointer-events: none;
+        }
+        /* 为了更顺滑的左右弧形，重新设计：使用两个伪元素分别绘制左右弧形，主体为白色矩形 */
+        /* 更优雅的方案：主体白色矩形，左右附加弧形块 */
+        .progress-slider {
+            background: #ffffff;
+            border-radius: 20% / 40% 40% 40% 40%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        /* 左侧弧形 (像】) */
+        .progress-slider::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 0;
+            width: 12px;
+            height: 100%;
+            background: #ffffff;
+            border-radius: 50% / 40% 40% 60% 60%;
+            box-shadow: -1px 0 2px rgba(0,0,0,0.1);
+        }
+        /* 右侧弧形 (像【) */
+        .progress-slider::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: 0;
+            width: 12px;
+            height: 100%;
+            background: #ffffff;
+            border-radius: 50% / 40% 40% 60% 60%;
+            box-shadow: 1px 0 2px rgba(0,0,0,0.1);
         }
 
         /* 底部孔位区域 */
@@ -569,7 +599,12 @@
             .side-badge .side { font-size: 0.9em; }
             .c60-badge { font-size: 1.3em; }
             .progress-slider {
-                width: 18px;
+                width: 20px;
+            }
+            .progress-slider::before, .progress-slider::after {
+                width: 10px;
+                left: -5px;
+                right: -5px;
             }
         }
 
@@ -585,7 +620,12 @@
                 height: 18px;
             }
             .progress-slider {
-                width: 16px;
+                width: 18px;
+            }
+            .progress-slider::before, .progress-slider::after {
+                width: 8px;
+                left: -4px;
+                right: -4px;
             }
         }
 
