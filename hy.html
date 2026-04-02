@@ -78,7 +78,8 @@
         }
 
         body.dark-mode .progress-slider {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 100' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L50,0 L50,0 C50,0 50,0 50,0 C50,20 40,35 25,50 C40,65 50,80 50,100 L0,100 C0,80 10,65 25,50 C10,35 0,20 0,0 Z' fill='%23ffffff' stroke='%23aaaaaa' stroke-width='0.5'/%3E%3C/svg%3E");
+            background: #ffffff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
 
         body.dark-mode .hole-area {
@@ -374,33 +375,19 @@
             overflow: visible;
         }
 
-        /* ========== 白色滑块：左边像)向右凹，右边像(向左凹，最窄处25px ========== */
+        /* ========== 白色滑块：简单纯粹的25px宽白色矩形 ========== */
         .progress-slider {
             position: absolute;
-            width: 50px;
+            width: 25px;
             height: 100%;
+            background: #ffffff;
             left: 0%;
             top: 0;
             transform: translateX(0);
             transition: left 0.05s linear;
             pointer-events: none;
-            /* SVG路径: 
-               左上角(0,0) -> 右上角(50,0) -> 右侧弧线(从50,0平滑收缩到中间25,50再扩张回50,100)
-               -> 右下角(50,100) -> 左下角(0,100) -> 左侧弧线(从0,100平滑收缩到中间25,50再扩张回0,0)
-            */
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 100' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L50,0 C50,0 45,20 35,35 C28,46 26,48 25,50 C26,52 28,54 35,65 C45,80 50,100 50,100 L0,100 C0,100 5,80 15,65 C22,54 24,52 25,50 C24,48 22,46 15,35 C5,20 0,0 0,0 Z' fill='%23ffffff' stroke='%23cccccc' stroke-width='0.8'/%3E%3C/svg%3E");
-            background-size: 100% 100%;
-            background-repeat: no-repeat;
-            background-position: center;
-            background-color: transparent;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
-            border-radius: 0;
-        }
-        
-        /* 移除伪元素干扰 */
-        .progress-slider::before,
-        .progress-slider::after {
-            display: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            border-radius: 2px;
         }
 
         .hole-area {
@@ -539,9 +526,6 @@
             .side-badge .b { font-size: 1.3em; }
             .side-badge .side { font-size: 0.9em; }
             .c60-badge { font-size: 1.3em; }
-            .progress-slider {
-                width: 42px;
-            }
         }
 
         @media (max-width: 560px) {
@@ -554,9 +538,6 @@
             .pause-icon-css .bar {
                 width: 5px;
                 height: 18px;
-            }
-            .progress-slider {
-                width: 38px;
             }
         }
 
