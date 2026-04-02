@@ -80,8 +80,8 @@
         }
 
         body.dark-mode .progress-slider {
-            background: radial-gradient(ellipse at center, #a0a0a0, #606060);
-            box-shadow: inset 0 0 6px rgba(0,0,0,0.4), 0 0 2px rgba(255,255,255,0.3);
+            background: #ffffff;
+            box-shadow: 0 0 2px rgba(255,255,255,0.5);
         }
 
         body.dark-mode .hole-area {
@@ -121,7 +121,7 @@
             position: relative;
         }
 
-        /* 磁带主体 - 尺寸完全由网页高宽和边距决定，固定不变 */
+        /* 磁带主体 - 尺寸完全由网页高宽和边距决定，固定不变，不随歌曲信息调整 */
         .cassette {
             background: linear-gradient(145deg, #f0ebe3, #d9d2c5);
             border-radius: 16px;
@@ -381,45 +381,35 @@
             overflow: visible;
         }
 
-        /* 白色滑块 - 真正的凹面镜形状：左右两边内凹，中间稍凸起 */
+        /* 白色滑块 - 纯白色 )( 形状：左右两边内凹，中间窄 */
         .progress-slider {
             position: absolute;
             width: 20px;
             height: 100%;
-            background: radial-gradient(ellipse at center, #ffffff, #d8d8d8);
-            border-radius: 50% / 20% 20% 80% 80%;
-            box-shadow: inset 0 2px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(255,255,255,0.8);
+            background: #ffffff;
+            border-radius: 50% / 30% 30% 70% 70%;
             left: 0%;
             top: 0;
             transform: translateX(0);
             transition: left 0.05s linear;
             pointer-events: none;
+            box-shadow: none;
             border: none;
         }
-        /* 凹面镜内凹效果：使用径向渐变模拟两侧暗中间亮 */
-        .progress-slider::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(ellipse at center, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.05) 100%);
-            border-radius: 50% / 20% 20% 80% 80%;
-            pointer-events: none;
-        }
-        /* 两侧高光，增强凹面感 */
+        /* 使用伪元素强化 )( 视觉效果，纯白色无其他效果 */
+        .progress-slider::before,
         .progress-slider::after {
             content: '';
             position: absolute;
-            top: 10%;
-            left: 15%;
-            width: 70%;
-            height: 30%;
-            background: radial-gradient(ellipse at center, rgba(255,255,255,0.9), rgba(255,255,255,0.2));
-            border-radius: 50%;
-            pointer-events: none;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            border-radius: inherit;
+            top: 0;
+            left: 0;
+            z-index: -1;
         }
+        /* 确保完全白色，无任何阴影或渐变 */
 
         /* 底部孔位区域 */
         .hole-area {
