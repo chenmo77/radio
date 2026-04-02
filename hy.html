@@ -26,7 +26,7 @@
             font-family: 'Arial', 'MiSans', 'Microsoft YaHei', sans-serif;
             display: flex;
             flex-direction: column;
-            padding: 2vh 2vw;
+            padding: 1.5vh 2vw;
             transition: background-color 0.3s ease;
             overflow-y: auto;
             overflow-x: hidden;
@@ -115,11 +115,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 1vh 0;
+            padding: 0.5vh 0;
             min-height: 0;
         }
 
-        /* 磁带主体 - 浅色模式优化，限制最大高度 */
+        /* 磁带主体 - 限制最大尺寸 */
         .cassette {
             width: min(90vw, 700px);
             aspect-ratio: 1.4 / 1;
@@ -368,10 +368,10 @@
         .buttons-container {
             flex-shrink: 0;
             width: 100%;
-            padding: 1.2vh 1vw;
+            padding: 1vh 1vw;
             background-color: #d9d0be;
             border-radius: 12px;
-            margin-top: 1.5vh;
+            margin-top: 1vh;
             transition: background 0.3s ease;
         }
 
@@ -465,8 +465,8 @@
             opacity: 1;
         }
 
-        /* 响应式：确保手机端按钮高度合适且可见 */
-        @media (max-width: 768px) {
+        /* 响应式：竖屏常规 */
+        @media (max-width: 768px) and (orientation: portrait) {
             body {
                 padding: 1.5vh 2vw;
             }
@@ -481,16 +481,12 @@
                 width: 5px;
                 height: 20px;
             }
-            .pause-icon-css {
-                gap: 5px;
-            }
             .side-badge .b { font-size: 1.3em; }
             .side-badge .side { font-size: 0.9em; }
             .c60-badge { font-size: 1.3em; }
-            .tape-song-line { font-size: clamp(11px, 3.8vw, 20px); }
         }
 
-        @media (max-width: 560px) {
+        @media (max-width: 560px) and (orientation: portrait) {
             .tape-button {
                 height: 52px;
                 font-size: 1.3rem;
@@ -504,43 +500,92 @@
                 height: 18px;
             }
             .buttons-container {
-                padding: 1vh 1vw;
-            }
-            .button-bar {
-                gap: 1.5vw;
+                padding: 0.8vh 1vw;
             }
         }
 
-        @media (max-width: 480px) {
+        /* ========== 关键：横屏模式优化，确保按钮始终可见且无滚动条 ========== */
+        @media (orientation: landscape) {
+            html, body {
+                overflow: hidden;
+            }
+            body {
+                padding: 0.8vh 2vw;
+                justify-content: space-between;
+            }
+            /* 磁带容器缩小比例，给按钮留出空间 */
+            .cassette-container {
+                flex: 0 1 auto;
+                padding: 0;
+                margin: 0;
+            }
+            .cassette {
+                width: min(85vw, 65vh);
+                aspect-ratio: 1.4 / 1;
+                padding: 1.5%;
+            }
+            .window-area {
+                height: 26%;
+                width: 88%;
+            }
+            .reel {
+                width: 22%;
+            }
+            .tape {
+                width: 30%;
+            }
+            .hole-area {
+                height: 11%;
+                width: 88%;
+            }
+            .label-area {
+                padding: 1.5%;
+                margin: 1% auto;
+            }
+            .side-badge .b {
+                font-size: 1.5em;
+            }
+            .side-badge .side {
+                font-size: 1em;
+            }
+            .c60-badge {
+                font-size: 1.4em;
+            }
+            .tape-song-line {
+                font-size: clamp(11px, 3.2vh, 20px);
+            }
+            /* 按钮区域固定高度，始终可见 */
+            .buttons-container {
+                flex-shrink: 0;
+                margin-top: 0.5vh;
+                padding: 0.6vh 1vw;
+            }
             .tape-button {
                 height: 48px;
-                font-size: 1.2rem;
+                font-size: 1.3rem;
                 border-radius: 12px;
             }
             .play-icon-css {
-                border-width: 8px 0 8px 14px;
+                border-width: 9px 0 9px 16px;
             }
             .pause-icon-css .bar {
-                width: 4px;
-                height: 16px;
+                width: 5px;
+                height: 18px;
             }
             .pause-icon-css {
-                gap: 4px;
+                gap: 5px;
             }
-            .tape-song-line { font-size: clamp(10px, 3.2vw, 18px); }
         }
 
-        /* 横屏且高度较小时，进一步压缩按钮高度，确保整体可见 */
-        @media (orientation: landscape) and (max-height: 500px) {
-            body {
-                padding: 1vh 2vw;
-            }
+        /* 横屏且高度特别小时进一步压缩 */
+        @media (orientation: landscape) and (max-height: 480px) {
             .cassette {
-                aspect-ratio: 1.6 / 1;
+                width: min(80vw, 55vh);
             }
             .tape-button {
-                height: 44px;
+                height: 42px;
                 font-size: 1.2rem;
+                border-radius: 10px;
             }
             .play-icon-css {
                 border-width: 8px 0 8px 14px;
@@ -550,20 +595,38 @@
                 height: 16px;
             }
             .buttons-container {
-                padding: 0.8vh 1vw;
-                margin-top: 1vh;
+                padding: 0.4vh 1vw;
             }
-            .window-area {
-                height: 30%;
+            .side-badge .b {
+                font-size: 1.2em;
+            }
+            .side-badge .side {
+                font-size: 0.8em;
+            }
+            .c60-badge {
+                font-size: 1.2em;
+            }
+            .tape-song-line {
+                font-size: clamp(10px, 2.8vh, 16px);
             }
         }
 
-        /* 确保在任何设备上底部按钮都不会被截断，body滚动条隐藏但可滚动 */
-        body {
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
+        /* 横屏且宽度较小（窄屏手机） */
+        @media (orientation: landscape) and (max-width: 800px) and (max-height: 450px) {
+            .tape-button {
+                height: 40px;
+                font-size: 1.1rem;
+            }
+            .play-icon-css {
+                border-width: 7px 0 7px 12px;
+            }
+            .pause-icon-css .bar {
+                width: 4px;
+                height: 14px;
+            }
         }
-        /* 隐藏滚动条但保留滚动功能（可选，提升美观） */
+
+        /* 隐藏滚动条但保留滚动功能（美观） */
         body::-webkit-scrollbar {
             width: 0;
             background: transparent;
