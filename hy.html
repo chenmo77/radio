@@ -78,8 +78,9 @@
             background: linear-gradient(135deg, #5a5a5a, #3a3a3a);
         }
 
-        body.dark-mode .tape {
-            background: linear-gradient(90deg, #5a3a2a 0%, #5a3a2a 45%, #ccc 45%, #ccc 55%, #5a3a2a 55%, #5a3a2a 100%);
+        body.dark-mode .tape-slider {
+            background: linear-gradient(90deg, #a08060 0%, #f0e0c0 30%, #f0e0c0 70%, #a08060 100%);
+            box-shadow: 0 0 6px rgba(255,215,0,0.5);
         }
 
         body.dark-mode .hole-area {
@@ -109,13 +110,13 @@
             background-color: #444;
         }
 
-        /* 磁带容器 - 弹性伸缩，确保按钮区域可见 */
+        /* 磁带容器 - 弹性伸缩 */
         .cassette-container {
             flex: 1 0 auto;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 0.5vh 0;
+            padding: 0;
             min-height: 0;
         }
 
@@ -263,6 +264,8 @@
             padding: 2%;
             gap: 6%;
             box-shadow: inset 0 0 0 2px #3a2e22, 0 2px 6px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
         }
 
         /* 金属齿轮卷带轮 */
@@ -273,6 +276,7 @@
             border-radius: 50%;
             background: radial-gradient(circle at 35% 35%, #b8b0a0, #8a7e6c);
             box-shadow: 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.5);
+            z-index: 2;
         }
 
         .reel-inner {
@@ -333,12 +337,30 @@
             to { transform: rotate(360deg); }
         }
 
-        /* 中间直线磁带 */
-        .tape {
+        /* 进度滑块 - 原来的竖白色块，现在作为进度条滑块 */
+        .tape-slider {
+            position: absolute;
+            width: 4px;
+            height: 75%;
+            background: linear-gradient(135deg, #fff8e0, #ffe0a0);
+            border-radius: 2px;
+            box-shadow: 0 0 4px rgba(255,215,0,0.6);
+            left: 0%;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: left 0.05s linear;
+            z-index: 10;
+            pointer-events: none;
+            opacity: 0.95;
+        }
+
+        /* 中间直线磁带背景（装饰） */
+        .tape-bg {
             width: 32%;
             height: 75%;
             background: linear-gradient(90deg, #3a281f 0%, #3a281f 45%, #fff 45%, #fff 55%, #3a281f 55%, #3a281f 100%);
             border-radius: 4px;
+            position: relative;
         }
 
         /* 底部孔位区域 */
@@ -364,7 +386,7 @@
             box-shadow: inset 0 0 3px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.3);
         }
 
-        /* 按键容器 - 固定底部，确保永远可见 */
+        /* 按键容器 */
         .buttons-container {
             flex-shrink: 0;
             width: 100%;
@@ -409,7 +431,6 @@
             background-color: #b8ae9a;
         }
 
-        /* 播放按钮特殊状态 - 使用CSS绘制图标 */
         .tape-button.play-btn {
             background-color: #c8bfae;
         }
@@ -420,7 +441,6 @@
             color: #fff;
         }
 
-        /* CSS绘制的播放图标 */
         .play-icon-css {
             display: inline-block;
             width: 0;
@@ -430,7 +450,6 @@
             border-color: transparent transparent transparent currentColor;
         }
 
-        /* CSS绘制的暂停图标 */
         .pause-icon-css {
             display: inline-flex;
             gap: 6px;
@@ -444,7 +463,6 @@
             border-radius: 2px;
         }
 
-        /* 提示气泡 */
         .tip-bubble {
             position: fixed;
             background: rgba(0,0,0,0.85);
@@ -465,7 +483,7 @@
             opacity: 1;
         }
 
-        /* 响应式：竖屏常规 */
+        /* 竖屏常规 */
         @media (max-width: 768px) and (orientation: portrait) {
             body {
                 padding: 1.5vh 2vw;
@@ -486,83 +504,44 @@
             .c60-badge { font-size: 1.3em; }
         }
 
-        @media (max-width: 560px) and (orientation: portrait) {
-            .tape-button {
-                height: 52px;
-                font-size: 1.3rem;
-                border-radius: 14px;
-            }
-            .play-icon-css {
-                border-width: 9px 0 9px 16px;
-            }
-            .pause-icon-css .bar {
-                width: 5px;
-                height: 18px;
-            }
-            .buttons-container {
-                padding: 0.8vh 1vw;
-            }
-        }
-
-        /* ========== 关键：横屏模式优化，确保按钮始终可见且无滚动条 ========== */
+        /* ========== 横屏模式：磁带顶边离网页边缘15px，底边离底部按钮上边15px，左右根据高动态调整 ========== */
         @media (orientation: landscape) {
             html, body {
                 overflow: hidden;
             }
             body {
-                padding: 0.8vh 2vw;
+                padding: 0;
                 justify-content: space-between;
             }
-            /* 磁带容器缩小比例，给按钮留出空间 */
             .cassette-container {
                 flex: 0 1 auto;
-                padding: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 15px 0 0 0;  /* 顶部留出15px */
                 margin: 0;
+                min-height: auto;
             }
             .cassette {
-                width: min(85vw, 65vh);
+                width: auto;
+                height: calc(100vh - 15px - 15px - 80px); /* 顶部15px + 底部按钮区域预估高度 */
+                max-height: 70vh;
                 aspect-ratio: 1.4 / 1;
-                padding: 1.5%;
+                margin: 0 auto;
             }
-            .window-area {
-                height: 26%;
-                width: 88%;
+            /* 动态左右边距：根据磁带实际高度自动调整 */
+            .cassette-container {
+                padding-left: max(2vw, calc((100vw - (calc(100vh - 110px) * 1.4)) / 2));
+                padding-right: max(2vw, calc((100vw - (calc(100vh - 110px) * 1.4)) / 2));
             }
-            .reel {
-                width: 22%;
-            }
-            .tape {
-                width: 30%;
-            }
-            .hole-area {
-                height: 11%;
-                width: 88%;
-            }
-            .label-area {
-                padding: 1.5%;
-                margin: 1% auto;
-            }
-            .side-badge .b {
-                font-size: 1.5em;
-            }
-            .side-badge .side {
-                font-size: 1em;
-            }
-            .c60-badge {
-                font-size: 1.4em;
-            }
-            .tape-song-line {
-                font-size: clamp(11px, 3.2vh, 20px);
-            }
-            /* 按钮区域固定高度，始终可见 */
             .buttons-container {
-                flex-shrink: 0;
-                margin-top: 0.5vh;
-                padding: 0.6vh 1vw;
+                margin-top: 0;
+                margin-bottom: 15px;  /* 底部留出15px */
+                padding: 0.6vh 2vw;
             }
             .tape-button {
-                height: 48px;
-                font-size: 1.3rem;
+                height: 52px;
+                font-size: 1.4rem;
                 border-radius: 12px;
             }
             .play-icon-css {
@@ -570,63 +549,33 @@
             }
             .pause-icon-css .bar {
                 width: 5px;
-                height: 18px;
+                height: 20px;
             }
-            .pause-icon-css {
-                gap: 5px;
+            .window-area {
+                height: 28%;
+            }
+            .tape-slider {
+                height: 70%;
             }
         }
 
-        /* 横屏且高度特别小时进一步压缩 */
+        /* 横屏高度较小时进一步调整 */
         @media (orientation: landscape) and (max-height: 480px) {
             .cassette {
-                width: min(80vw, 55vh);
+                max-height: 60vh;
             }
             .tape-button {
-                height: 42px;
+                height: 44px;
                 font-size: 1.2rem;
-                border-radius: 10px;
-            }
-            .play-icon-css {
-                border-width: 8px 0 8px 14px;
-            }
-            .pause-icon-css .bar {
-                width: 4px;
-                height: 16px;
             }
             .buttons-container {
-                padding: 0.4vh 1vw;
+                margin-bottom: 10px;
             }
-            .side-badge .b {
-                font-size: 1.2em;
-            }
-            .side-badge .side {
-                font-size: 0.8em;
-            }
-            .c60-badge {
-                font-size: 1.2em;
-            }
-            .tape-song-line {
-                font-size: clamp(10px, 2.8vh, 16px);
+            .cassette-container {
+                padding-top: 10px;
             }
         }
 
-        /* 横屏且宽度较小（窄屏手机） */
-        @media (orientation: landscape) and (max-width: 800px) and (max-height: 450px) {
-            .tape-button {
-                height: 40px;
-                font-size: 1.1rem;
-            }
-            .play-icon-css {
-                border-width: 7px 0 7px 12px;
-            }
-            .pause-icon-css .bar {
-                width: 4px;
-                height: 14px;
-            }
-        }
-
-        /* 隐藏滚动条但保留滚动功能（美观） */
         body::-webkit-scrollbar {
             width: 0;
             background: transparent;
@@ -653,7 +602,7 @@
                 <div class="c60-badge">HY6</div>
             </div>
 
-            <div class="window-area">
+            <div class="window-area" id="windowArea">
                 <div class="reel" id="leftReel">
                     <div class="reel-inner"></div>
                     <div class="reel-center"></div>
@@ -666,7 +615,7 @@
                     <div class="reel-tooth"></div>
                     <div class="reel-tooth"></div>
                 </div>
-                <div class="tape"></div>
+                <div class="tape-bg"></div>
                 <div class="reel" id="rightReel">
                     <div class="reel-inner"></div>
                     <div class="reel-center"></div>
@@ -679,6 +628,8 @@
                     <div class="reel-tooth"></div>
                     <div class="reel-tooth"></div>
                 </div>
+                <!-- 进度滑块 -->
+                <div class="tape-slider" id="progressSlider"></div>
             </div>
 
             <div class="hole-area">
@@ -709,9 +660,67 @@
     <div class="tip-bubble" id="tipBubble"></div>
 
     <script>
-        // ========== 完整播放逻辑，齿轮转动效果，CSS图标无手机黄底 ==========
+        // ========== 播放逻辑 + 进度滑块移动 ==========
         const leftReel = document.getElementById('leftReel');
         const rightReel = document.getElementById('rightReel');
+        const progressSlider = document.getElementById('progressSlider');
+        const windowArea = document.getElementById('windowArea');
+        
+        // 计算滑块可移动的最大左边界（滑块在左右齿轮之间移动）
+        function getSliderMaxLeft() {
+            if (!windowArea) return 0;
+            const windowRect = windowArea.getBoundingClientRect();
+            const leftReelRect = leftReel.getBoundingClientRect();
+            const rightReelRect = rightReel.getBoundingClientRect();
+            if (!leftReelRect || !rightReelRect) return 0;
+            // 滑块起始位置：左齿轮右边缘 + 少许偏移
+            const startX = leftReelRect.right - windowRect.left + 4;
+            // 结束位置：右齿轮左边缘 - 滑块宽度
+            const endX = rightReelRect.left - windowRect.left - 6;
+            return Math.max(startX, endX > startX ? endX : startX);
+        }
+        
+        function getSliderStartLeft() {
+            if (!windowArea || !leftReel) return 0;
+            const windowRect = windowArea.getBoundingClientRect();
+            const leftReelRect = leftReel.getBoundingClientRect();
+            return leftReelRect.right - windowRect.left + 4;
+        }
+        
+        // 更新滑块位置
+        function updateSliderProgress() {
+            if (!progressSlider) return;
+            if (audio.duration && !isNaN(audio.duration) && audio.duration > 0 && isPlaying) {
+                const percent = audio.currentTime / audio.duration;
+                const maxLeft = getSliderMaxLeft();
+                const startLeft = getSliderStartLeft();
+                const newLeft = startLeft + percent * (maxLeft - startLeft);
+                progressSlider.style.left = Math.min(maxLeft, Math.max(startLeft, newLeft)) + 'px';
+            } else if (!isPlaying) {
+                // 暂停时保持当前位置，不额外处理
+            }
+        }
+        
+        // 重置滑块到起始位置
+        function resetSliderToStart() {
+            if (progressSlider) {
+                const startLeft = getSliderStartLeft();
+                progressSlider.style.left = startLeft + 'px';
+            }
+        }
+        
+        // 监听窗口大小变化重新计算滑块位置
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            if (resizeTimer) clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (audio.duration && !isNaN(audio.duration) && audio.duration > 0 && isPlaying) {
+                    updateSliderProgress();
+                } else {
+                    resetSliderToStart();
+                }
+            }, 100);
+        });
         
         function updateWheelSpin() {
             if (isPlaying) {
@@ -798,6 +807,7 @@
                     clearLoadTimer();
                     isSwitching = false;
                     updateWheelSpin();
+                    resetSliderToStart();
                 }).catch(err => {
                     console.error('播放失败:', err);
                     clearLoadTimer();
@@ -807,6 +817,7 @@
             } else {
                 isSwitching = false;
                 updateWheelSpin();
+                if (!autoPlay) resetSliderToStart();
             }
         }
 
@@ -848,6 +859,7 @@
                     audio.play().then(() => {
                         clearLoadTimer();
                         updateWheelSpin();
+                        resetSliderToStart();
                     }).catch(err => {
                         console.error('恢复播放失败:', err);
                         clearLoadTimer();
@@ -911,6 +923,19 @@
 
         audio.addEventListener('ended', () => { if (!isSwitching && isPlaying) nextSong(); });
         audio.addEventListener('error', () => { if (!isSwitching && isPlaying) { clearLoadTimer(); nextSong(); } });
+        
+        // 进度更新
+        audio.addEventListener('timeupdate', () => {
+            if (isPlaying && audio.duration && !isNaN(audio.duration)) {
+                updateSliderProgress();
+            }
+        });
+        
+        audio.addEventListener('play', () => {
+            setTimeout(() => {
+                if (isPlaying) updateSliderProgress();
+            }, 50);
+        });
 
         async function init() {
             try {
@@ -949,6 +974,9 @@
             themeToggleBtn.onclick = toggleTheme;
             
             updateWheelSpin();
+            setTimeout(() => {
+                resetSliderToStart();
+            }, 100);
         }
 
         window.onload = init;
