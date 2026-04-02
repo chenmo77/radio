@@ -80,8 +80,8 @@
         }
 
         body.dark-mode .progress-slider {
-            background: linear-gradient(135deg, #f0f0f0, #d0d0d0);
-            box-shadow: 0 0 4px rgba(255,255,255,0.5);
+            background: linear-gradient(135deg, #d0d0d0, #a0a0a0);
+            box-shadow: 0 0 4px rgba(255,255,255,0.3), inset 0 1px 2px rgba(0,0,0,0.2);
         }
 
         body.dark-mode .hole-area {
@@ -117,15 +117,12 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 15px 0;
             min-height: 0;
+            position: relative;
         }
 
-        /* 磁带主体 - 高度由容器决定，长度按比例自动调整 */
+        /* 磁带主体 - 尺寸完全由网页高宽和边距决定，不随歌曲信息变化 */
         .cassette {
-            height: 100%;
-            width: auto;
-            aspect-ratio: 1.4 / 1;
             background: linear-gradient(145deg, #f0ebe3, #d9d2c5);
             border-radius: 16px;
             position: relative;
@@ -136,6 +133,32 @@
             justify-content: space-between;
             transition: background 0.3s ease;
             border: 1px solid #c8bfae;
+        }
+
+        /* 当网页高 > 宽（竖屏）时：左右两边距离网页两边15px，然后定磁带的高度 */
+        @media (orientation: portrait) {
+            .cassette-container {
+                padding: 0 15px;
+            }
+            .cassette {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 1.4 / 1;
+                max-height: calc(80vh - 30px);
+            }
+        }
+
+        /* 当网页宽 > 高（横屏）时：上下两边距离网页上边15px、距离底部按钮区域15px，然后定磁带的宽度 */
+        @media (orientation: landscape) {
+            .cassette-container {
+                padding: 15px 0;
+            }
+            .cassette {
+                height: 100%;
+                width: auto;
+                aspect-ratio: 1.4 / 1;
+                max-width: calc(100vw - 30px);
+            }
         }
 
         /* 螺丝装饰 */
@@ -358,12 +381,13 @@
             overflow: visible;
         }
 
+        /* 白色滑块 - 凹面镜形状：左右两边内凹 */
         .progress-slider {
             position: absolute;
             width: 20px;
             height: 100%;
             background: linear-gradient(135deg, #ffffff, #e8e8e8);
-            border-radius: 3px;
+            border-radius: 50% / 30% 30% 70% 70%;
             box-shadow: 0 0 5px rgba(255,255,255,0.9), inset 0 1px 0 rgba(255,255,255,0.8);
             left: 0%;
             top: 0;
@@ -371,6 +395,25 @@
             transition: left 0.05s linear;
             pointer-events: none;
             border: 1px solid rgba(0,0,0,0.1);
+        }
+        /* 让滑块左右内凹效果更明显 */
+        .progress-slider::before,
+        .progress-slider::after {
+            content: '';
+            position: absolute;
+            width: 30%;
+            height: 60%;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0.08), transparent);
+            top: 50%;
+            transform: translateY(-50%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .progress-slider::before {
+            left: -15%;
+        }
+        .progress-slider::after {
+            right: -15%;
         }
 
         /* 底部孔位区域 */
