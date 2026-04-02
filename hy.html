@@ -11,14 +11,26 @@
             box-sizing: border-box;
         }
 
+        /* 根元素和body确保无滚动条，高度锁定 */
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
         body {
             background-color: #e2dcd5;
             font-family: 'Arial', 'MiSans', 'Microsoft YaHei', sans-serif;
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
-            padding: 2vh;
+            padding: 2vh 2vw;
             transition: background-color 0.3s ease;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
         }
 
         /* 深色模式样式 */
@@ -97,19 +109,19 @@
             background-color: #444;
         }
 
-        /* 磁带容器 */
+        /* 磁带容器 - 弹性伸缩，确保按钮区域可见 */
         .cassette-container {
-            flex: 1 1 auto;
+            flex: 1 0 auto;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 2vh;
+            padding: 1vh 0;
             min-height: 0;
         }
 
-        /* 磁带主体 - 浅色模式优化 */
+        /* 磁带主体 - 浅色模式优化，限制最大高度 */
         .cassette {
-            width: min(90vw, 800px);
+            width: min(90vw, 700px);
             aspect-ratio: 1.4 / 1;
             background: linear-gradient(145deg, #f0ebe3, #d9d2c5);
             border-radius: 16px;
@@ -200,7 +212,7 @@
         }
 
         .tape-song-line {
-            font-size: clamp(14px, 5vw, 28px);
+            font-size: clamp(12px, 4.5vw, 24px);
             font-weight: bold;
             color: #2c2a24;
             white-space: nowrap;
@@ -234,13 +246,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2em;
+            font-size: 1.8em;
             font-weight: bold;
         }
 
         /* 磁带窗口区域 */
         .window-area {
-            width: 80%;
+            width: 85%;
             height: 28%;
             margin: 0 auto;
             background-color: #1e1a14;
@@ -249,13 +261,13 @@
             align-items: center;
             justify-content: space-around;
             padding: 2%;
-            gap: 8%;
+            gap: 6%;
             box-shadow: inset 0 0 0 2px #3a2e22, 0 2px 6px rgba(0,0,0,0.2);
         }
 
         /* 金属齿轮卷带轮 */
         .reel {
-            width: 22%;
+            width: 24%;
             aspect-ratio: 1 / 1;
             position: relative;
             border-radius: 50%;
@@ -323,16 +335,16 @@
 
         /* 中间直线磁带 */
         .tape {
-            width: 35%;
-            height: 80%;
+            width: 32%;
+            height: 75%;
             background: linear-gradient(90deg, #3a281f 0%, #3a281f 45%, #fff 45%, #fff 55%, #3a281f 55%, #3a281f 100%);
             border-radius: 4px;
         }
 
         /* 底部孔位区域 */
         .hole-area {
-            width: 80%;
-            height: 14%;
+            width: 85%;
+            height: 12%;
             margin: 0 auto;
             background-color: #d9d0be;
             border-radius: 4px 4px 0 0;
@@ -352,14 +364,14 @@
             box-shadow: inset 0 0 3px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.3);
         }
 
-        /* 按键容器 - 5个按钮等宽满宽 */
+        /* 按键容器 - 固定底部，确保永远可见 */
         .buttons-container {
             flex-shrink: 0;
             width: 100%;
-            padding: 1.5vh 1vw;
+            padding: 1.2vh 1vw;
             background-color: #d9d0be;
             border-radius: 12px;
-            margin-top: 2vh;
+            margin-top: 1.5vh;
             transition: background 0.3s ease;
         }
 
@@ -372,7 +384,7 @@
 
         .tape-button {
             flex: 1;
-            height: 70px;
+            height: 65px;
             border: none;
             border-radius: 16px;
             background-color: #c8bfae;
@@ -385,7 +397,7 @@
             justify-content: center;
             -webkit-tap-highlight-color: transparent;
             font-weight: bold;
-            font-size: 2rem;
+            font-size: 1.8rem;
         }
 
         .tape-button:active {
@@ -397,7 +409,7 @@
             background-color: #b8ae9a;
         }
 
-        /* 播放按钮特殊状态 - 使用CSS绘制图标，无背景色问题 */
+        /* 播放按钮特殊状态 - 使用CSS绘制图标 */
         .tape-button.play-btn {
             background-color: #c8bfae;
         }
@@ -408,68 +420,28 @@
             color: #fff;
         }
 
-        /* CSS绘制的播放图标（三角形） */
+        /* CSS绘制的播放图标 */
         .play-icon-css {
             display: inline-block;
             width: 0;
             height: 0;
             border-style: solid;
-            border-width: 14px 0 14px 24px;
+            border-width: 12px 0 12px 20px;
             border-color: transparent transparent transparent currentColor;
         }
 
-        /* CSS绘制的暂停图标（双竖线） */
+        /* CSS绘制的暂停图标 */
         .pause-icon-css {
             display: inline-flex;
-            gap: 8px;
+            gap: 6px;
             align-items: center;
             justify-content: center;
         }
         .pause-icon-css .bar {
-            width: 8px;
-            height: 28px;
+            width: 6px;
+            height: 24px;
             background-color: currentColor;
             border-radius: 2px;
-        }
-
-        /* 响应式调整图标大小 */
-        @media (max-width: 768px) {
-            .play-icon-css {
-                border-width: 10px 0 10px 18px;
-            }
-            .pause-icon-css .bar {
-                width: 6px;
-                height: 22px;
-            }
-            .pause-icon-css {
-                gap: 6px;
-            }
-        }
-
-        @media (max-width: 560px) {
-            .play-icon-css {
-                border-width: 9px 0 9px 16px;
-            }
-            .pause-icon-css .bar {
-                width: 5px;
-                height: 20px;
-            }
-            .pause-icon-css {
-                gap: 5px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .play-icon-css {
-                border-width: 8px 0 8px 14px;
-            }
-            .pause-icon-css .bar {
-                width: 5px;
-                height: 18px;
-            }
-            .pause-icon-css {
-                gap: 4px;
-            }
         }
 
         /* 提示气泡 */
@@ -477,9 +449,9 @@
             position: fixed;
             background: rgba(0,0,0,0.85);
             color: #fff;
-            padding: 8px 16px;
+            padding: 6px 14px;
             border-radius: 30px;
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
             font-family: monospace;
             pointer-events: none;
@@ -493,38 +465,108 @@
             opacity: 1;
         }
 
-        /* 响应式按钮高度 */
+        /* 响应式：确保手机端按钮高度合适且可见 */
         @media (max-width: 768px) {
-            .tape-button {
-                height: 60px;
-                font-size: 1.8rem;
+            body {
+                padding: 1.5vh 2vw;
             }
-            .side-badge .b { font-size: 1.5em; }
-            .side-badge .side { font-size: 1em; }
-            .c60-badge { font-size: 1.5em; }
-            .tape-song-line { font-size: clamp(12px, 4vw, 22px); }
+            .tape-button {
+                height: 58px;
+                font-size: 1.5rem;
+            }
+            .play-icon-css {
+                border-width: 10px 0 10px 18px;
+            }
+            .pause-icon-css .bar {
+                width: 5px;
+                height: 20px;
+            }
+            .pause-icon-css {
+                gap: 5px;
+            }
+            .side-badge .b { font-size: 1.3em; }
+            .side-badge .side { font-size: 0.9em; }
+            .c60-badge { font-size: 1.3em; }
+            .tape-song-line { font-size: clamp(11px, 3.8vw, 20px); }
         }
 
         @media (max-width: 560px) {
             .tape-button {
-                height: 55px;
-                font-size: 1.5rem;
+                height: 52px;
+                font-size: 1.3rem;
+                border-radius: 14px;
+            }
+            .play-icon-css {
+                border-width: 9px 0 9px 16px;
+            }
+            .pause-icon-css .bar {
+                width: 5px;
+                height: 18px;
+            }
+            .buttons-container {
+                padding: 1vh 1vw;
+            }
+            .button-bar {
+                gap: 1.5vw;
             }
         }
 
         @media (max-width: 480px) {
             .tape-button {
-                height: 50px;
-                font-size: 1.3rem;
+                height: 48px;
+                font-size: 1.2rem;
+                border-radius: 12px;
             }
-            .tape-song-line { font-size: clamp(10px, 3.5vw, 18px); }
+            .play-icon-css {
+                border-width: 8px 0 8px 14px;
+            }
+            .pause-icon-css .bar {
+                width: 4px;
+                height: 16px;
+            }
+            .pause-icon-css {
+                gap: 4px;
+            }
+            .tape-song-line { font-size: clamp(10px, 3.2vw, 18px); }
         }
 
+        /* 横屏且高度较小时，进一步压缩按钮高度，确保整体可见 */
         @media (orientation: landscape) and (max-height: 500px) {
-            .tape-button {
-                height: 48px;
-                font-size: 1.3rem;
+            body {
+                padding: 1vh 2vw;
             }
+            .cassette {
+                aspect-ratio: 1.6 / 1;
+            }
+            .tape-button {
+                height: 44px;
+                font-size: 1.2rem;
+            }
+            .play-icon-css {
+                border-width: 8px 0 8px 14px;
+            }
+            .pause-icon-css .bar {
+                width: 4px;
+                height: 16px;
+            }
+            .buttons-container {
+                padding: 0.8vh 1vw;
+                margin-top: 1vh;
+            }
+            .window-area {
+                height: 30%;
+            }
+        }
+
+        /* 确保在任何设备上底部按钮都不会被截断，body滚动条隐藏但可滚动 */
+        body {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        /* 隐藏滚动条但保留滚动功能（可选，提升美观） */
+        body::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
         }
     </style>
 </head>
@@ -548,7 +590,6 @@
                 <div class="c60-badge">HY6</div>
             </div>
 
-            <!-- 磁带窗口区域: 左右金属齿轮 + 中间直线磁带 -->
             <div class="window-area">
                 <div class="reel" id="leftReel">
                     <div class="reel-inner"></div>
@@ -798,7 +839,7 @@
             if (!targetBtn) return;
             const rect = targetBtn.getBoundingClientRect();
             tipBubble.style.left = rect.left + rect.width / 2 + 'px';
-            tipBubble.style.top = rect.top - 50 + 'px';
+            tipBubble.style.top = rect.top - 45 + 'px';
             tipBubble.style.transform = 'translateX(-50%)';
             tipBubble.textContent = message;
             tipBubble.classList.add('show');
