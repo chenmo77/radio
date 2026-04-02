@@ -78,7 +78,7 @@
         }
 
         body.dark-mode .progress-slider {
-            background: #ffffff;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 100' preserveAspectRatio='none'%3E%3Cpath d='M25,0 C40,0 50,5 50,15 C50,25 40,35 35,42 C32,46 30,48 30,50 C30,52 32,54 35,58 C40,65 50,75 50,85 C50,95 40,100 25,100 C10,100 0,95 0,85 C0,75 10,65 15,58 C18,54 20,52 20,50 C20,48 18,46 15,42 C10,35 0,25 0,15 C0,5 10,0 25,0 Z' fill='%23ffffff' stroke='%23dddddd' stroke-width='0.5'/%3E%3C/svg%3E");
         }
 
         body.dark-mode .hole-area {
@@ -374,70 +374,24 @@
             overflow: visible;
         }
 
-        /* ========== 白色滑块：顶部宽60px，中间宽20px，底部宽60px，圆弧过渡（沙漏形） ========== */
+        /* ========== 白色滑块：顶部宽50px，中间宽20px，底部宽50px，圆弧形左右两侧（像x的左右两边但圆滑） ========== */
         .progress-slider {
             position: absolute;
-            width: 60px;
+            width: 50px;
             height: 100%;
             left: 0%;
             top: 0;
             transform: translateX(0);
             transition: left 0.05s linear;
             pointer-events: none;
-            /* 使用 clip-path 实现沙漏形状：顶部宽60，中间窄20，底部宽60，圆弧过渡 */
-            clip-path: path("M 0,0 C 20,0 40,0 60,0 C 60,20 50,40 40,50 C 35,55 35,55 40,60 C 50,70 60,90 60,100 C 40,100 20,100 0,100 C 0,80 10,60 20,50 C 25,45 25,45 20,40 C 10,30 0,10 0,0 Z");
-            background: #ffffff;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-            border-radius: 0;
-        }
-        
-        /* 兼容性更好的实现：使用 SVG 背景或者更标准的 clip-path */
-        /* 由于 path 中的百分比需要适应高度，改用更可靠的方案：使用径向渐变 + 伪元素实现沙漏形状 */
-        /* 最终采用标准 clip-path 多边形 + 圆弧效果，确保在所有浏览器中正常工作 */
-        
-        /* 重新实现：使用两个半圆 + 矩形组合，或者用更精确的 clip-path 多边形模拟圆弧沙漏 */
-        .progress-slider {
-            background: #ffffff;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-            /* 使用 border-radius 和伪元素实现顶部宽、中间窄、底部宽的效果 */
-            border-radius: 50% / 20% 20% 80% 80%;
-            width: 60px;
-        }
-        
-        /* 通过径向渐变制造中间窄的视觉，同时保持顶部底部宽 */
-        .progress-slider::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 20px;
-            width: 20px;
-            height: 100%;
-            background: #ffffff;
-            border-radius: 0;
-            box-shadow: 0 0 0 1px rgba(0,0,0,0.05);
-        }
-        
-        /* 更优雅的纯沙漏形状：使用径向渐变切出中间凹陷 */
-        .progress-slider {
-            background: radial-gradient(ellipse at center, 
-                #ffffff 0%, 
-                #ffffff 35%, 
-                #e8e8e8 38%, 
-                #ffffff 42%, 
-                #ffffff 100%);
-            border-radius: 50% / 25% 25% 75% 75%;
-        }
-        
-        /* 最终方案：使用 SVG 背景图片绘制完美的沙漏形（顶部宽60，中间窄20，底部宽60，圆弧过渡） */
-        .progress-slider {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 100' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L60,0 C60,0 60,20 50,35 C45,42 40,48 40,50 C40,52 45,58 50,65 C60,80 60,100 60,100 L0,100 C0,100 0,80 10,65 C15,58 20,52 20,50 C20,48 15,42 10,35 C0,20 0,0 0,0 Z' fill='%23ffffff' stroke='%23dddddd' stroke-width='0.5'/%3E%3C/svg%3E");
+            /* 使用SVG背景绘制完美的沙漏/哑铃形，左右两侧为圆弧曲线，无尖角 */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 100' preserveAspectRatio='none'%3E%3Cpath d='M25,0 C38,0 50,6 50,16 C50,26 41,34 36,41 C33,45 31,47.5 30,50 C31,52.5 33,55 36,59 C41,66 50,74 50,84 C50,94 38,100 25,100 C12,100 0,94 0,84 C0,74 9,66 14,59 C17,55 19,52.5 20,50 C19,47.5 17,45 14,41 C9,34 0,26 0,16 C0,6 12,0 25,0 Z' fill='%23ffffff' stroke='%23cccccc' stroke-width='0.8'/%3E%3C/svg%3E");
             background-size: 100% 100%;
             background-repeat: no-repeat;
             background-position: center;
             background-color: transparent;
-            width: 60px;
-            border-radius: 0;
             box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+            border-radius: 0;
         }
         
         /* 移除所有伪元素干扰 */
@@ -583,7 +537,7 @@
             .side-badge .side { font-size: 0.9em; }
             .c60-badge { font-size: 1.3em; }
             .progress-slider {
-                width: 50px;
+                width: 42px;
             }
         }
 
@@ -599,7 +553,7 @@
                 height: 18px;
             }
             .progress-slider {
-                width: 45px;
+                width: 38px;
             }
         }
 
