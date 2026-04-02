@@ -11,6 +11,7 @@
             box-sizing: border-box;
         }
 
+        /* 根元素和body确保无滚动条，高度锁定 */
         html, body {
             width: 100%;
             height: 100%;
@@ -25,11 +26,7 @@
             font-family: 'Arial', 'MiSans', 'Microsoft YaHei', sans-serif;
             display: flex;
             flex-direction: column;
-            padding: 1.5vh 2vw;
             transition: background-color 0.3s ease;
-            overflow-y: auto;
-            overflow-x: hidden;
-            -webkit-overflow-scrolling: touch;
         }
 
         /* 深色模式样式 */
@@ -77,10 +74,6 @@
             background: linear-gradient(135deg, #5a5a5a, #3a3a3a);
         }
 
-        body.dark-mode .tape-bg {
-            background: linear-gradient(90deg, #5a3a2a 0%, #5a3a2a 45%, #ccc 45%, #ccc 55%, #5a3a2a 55%, #5a3a2a 100%);
-        }
-
         body.dark-mode .progress-bar-bg {
             background: linear-gradient(90deg, #5a3a2a, #3a2212);
             box-shadow: inset 0 0 0 1px #2a1a0a;
@@ -118,19 +111,20 @@
             background-color: #444;
         }
 
-        /* 磁带容器 */
+        /* 磁带容器 - 占整个高度的80% */
         .cassette-container {
-            flex: 1 0 auto;
+            flex: 8;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 0;
+            padding: 15px 0;
             min-height: 0;
         }
 
-        /* 磁带主体 */
+        /* 磁带主体 - 高度由容器决定，长度按比例自动调整 */
         .cassette {
-            width: min(90vw, 700px);
+            height: 100%;
+            width: auto;
             aspect-ratio: 1.4 / 1;
             background: linear-gradient(145deg, #f0ebe3, #d9d2c5);
             border-radius: 16px;
@@ -204,6 +198,7 @@
             line-height: 1;
         }
 
+        /* 音乐信息显示区域 - 固定宽度，不改变磁带长高 */
         .song-info-display {
             flex: 1;
             background-color: #fffef7;
@@ -220,11 +215,11 @@
         }
 
         .tape-song-line {
-            font-size: clamp(12px, 4.5vw, 24px);
+            font-size: clamp(12px, 4vw, 24px);
             font-weight: bold;
             color: #2c2a24;
             white-space: nowrap;
-            overflow-x: visible;
+            display: inline-block;
             font-family: "MiSans", "Microsoft YaHei", sans-serif;
             letter-spacing: 0;
             line-height: 1.3;
@@ -234,6 +229,7 @@
             color: #f0f0f0;
         }
 
+        /* 跑马灯动画 - 无限循环 */
         .marquee-text {
             display: inline-block;
             white-space: nowrap;
@@ -257,7 +253,7 @@
             font-weight: bold;
         }
 
-        /* 磁带窗口区域 - 保持原有布局，齿轮与中间磁带区域分离 */
+        /* 磁带窗口区域 */
         .window-area {
             width: 85%;
             height: 28%;
@@ -341,7 +337,7 @@
             to { transform: rotate(360deg); }
         }
 
-        /* 中间磁带区域：咖啡色背景块 + 白色滑块（宽度为原来的5倍） */
+        /* 中间进度条区域 */
         .tape-middle {
             flex: 1;
             height: 75%;
@@ -352,7 +348,6 @@
             min-width: 0;
         }
 
-        /* 咖啡色进度条背景 - 保持原来的高度和长度 */
         .progress-bar-bg {
             width: 100%;
             height: 100%;
@@ -363,7 +358,6 @@
             overflow: visible;
         }
 
-        /* 白色滑块 - 宽度为原来的5倍（原4px → 20px），高度不变 */
         .progress-slider {
             position: absolute;
             width: 20px;
@@ -402,15 +396,16 @@
             box-shadow: inset 0 0 3px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.3);
         }
 
-        /* 按键容器 */
+        /* 按键容器 - 占整个高度的20% */
         .buttons-container {
-            flex-shrink: 0;
+            flex: 2;
             width: 100%;
-            padding: 1vh 1vw;
+            padding: 1vh 2vw;
             background-color: #d9d0be;
             border-radius: 12px;
-            margin-top: 1vh;
             transition: background 0.3s ease;
+            display: flex;
+            align-items: center;
         }
 
         .button-bar {
@@ -422,7 +417,8 @@
 
         .tape-button {
             flex: 1;
-            height: 65px;
+            height: 70%;
+            min-height: 48px;
             border: none;
             border-radius: 16px;
             background-color: #c8bfae;
@@ -499,13 +495,9 @@
             opacity: 1;
         }
 
-        /* 竖屏常规 */
-        @media (max-width: 768px) and (orientation: portrait) {
-            body {
-                padding: 1.5vh 2vw;
-            }
+        /* 响应式调整按钮内边距和字体 */
+        @media (max-width: 768px) {
             .tape-button {
-                height: 58px;
                 font-size: 1.5rem;
             }
             .play-icon-css {
@@ -523,76 +515,19 @@
             }
         }
 
-        /* 横屏模式 - 保持顶端和底部与五个按钮的距离 */
-        @media (orientation: landscape) {
-            html, body {
-                overflow: hidden;
-            }
-            body {
-                padding: 0;
-                justify-content: space-between;
-            }
-            .cassette-container {
-                flex: 0 1 auto;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                padding: 15px 0 0 0;
-                margin: 0;
-                min-height: auto;
-            }
-            .cassette {
-                width: auto;
-                height: calc(100vh - 15px - 15px - 80px);
-                max-height: 70vh;
-                aspect-ratio: 1.4 / 1;
-                margin: 0 auto;
-            }
-            .cassette-container {
-                padding-left: max(2vw, calc((100vw - (calc(100vh - 110px) * 1.4)) / 2));
-                padding-right: max(2vw, calc((100vw - (calc(100vh - 110px) * 1.4)) / 2));
-            }
-            .buttons-container {
-                margin-top: 0;
-                margin-bottom: 15px;
-                padding: 0.6vh 2vw;
-            }
+        @media (max-width: 560px) {
             .tape-button {
-                height: 52px;
-                font-size: 1.4rem;
-                border-radius: 12px;
+                font-size: 1.3rem;
             }
             .play-icon-css {
                 border-width: 9px 0 9px 16px;
             }
             .pause-icon-css .bar {
                 width: 5px;
-                height: 20px;
-            }
-            .window-area {
-                height: 28%;
+                height: 18px;
             }
             .progress-slider {
-                width: 18px;
-            }
-        }
-
-        @media (orientation: landscape) and (max-height: 480px) {
-            .cassette {
-                max-height: 60vh;
-            }
-            .tape-button {
-                height: 44px;
-                font-size: 1.2rem;
-            }
-            .buttons-container {
-                margin-bottom: 10px;
-            }
-            .cassette-container {
-                padding-top: 10px;
-            }
-            .progress-slider {
-                width: 16px;
+                width: 14px;
             }
         }
 
@@ -622,7 +557,6 @@
                 <div class="c60-badge">HY6</div>
             </div>
 
-            <!-- 磁带窗口：齿轮 + 中间进度条区域分离 -->
             <div class="window-area">
                 <div class="reel" id="leftReel">
                     <div class="reel-inner"></div>
@@ -637,7 +571,6 @@
                     <div class="reel-tooth"></div>
                 </div>
                 
-                <!-- 中间进度条区域：咖啡色背景 + 白色滑块 -->
                 <div class="tape-middle">
                     <div class="progress-bar-bg" id="progressBarBg">
                         <div class="progress-slider" id="progressSlider"></div>
@@ -686,13 +619,13 @@
     <div class="tip-bubble" id="tipBubble"></div>
 
     <script>
-        // ========== 播放逻辑 + 进度滑块移动 ==========
+        // ========== 播放逻辑 + 进度滑块移动 + 跑马灯文字 ==========
         const leftReel = document.getElementById('leftReel');
         const rightReel = document.getElementById('rightReel');
         const progressSlider = document.getElementById('progressSlider');
         const progressBarBg = document.getElementById('progressBarBg');
         
-        // 更新滑块位置（百分比相对于progressBarBg宽度，并考虑滑块自身宽度）
+        // 更新滑块位置
         function updateSliderProgress() {
             if (!progressSlider || !progressBarBg) return;
             if (audio.duration && !isNaN(audio.duration) && audio.duration > 0 && isPlaying) {
@@ -705,14 +638,12 @@
             }
         }
         
-        // 重置滑块到起始位置
         function resetSliderToStart() {
             if (progressSlider) {
                 progressSlider.style.left = '0px';
             }
         }
         
-        // 监听窗口大小变化重新计算滑块位置
         let resizeTimer;
         window.addEventListener('resize', () => {
             if (resizeTimer) clearTimeout(resizeTimer);
@@ -721,6 +652,11 @@
                     updateSliderProgress();
                 } else {
                     resetSliderToStart();
+                }
+                // 重新检查跑马灯
+                const lineEl = document.getElementById('tapeSongLine');
+                if (lineEl && lineEl.currentFullText) {
+                    updateMarquee(lineEl, lineEl.currentFullText);
                 }
             }, 100);
         });
@@ -735,11 +671,14 @@
             }
         }
 
-        function setScrollingText(lineElement, fullText) {
+        // 跑马灯逻辑 - 无限循环，不改变磁带尺寸
+        function updateMarquee(lineElement, fullText) {
             lineElement.style.whiteSpace = 'nowrap';
             lineElement.style.animation = 'none';
             lineElement.innerHTML = fullText;
-            const checkMarquee = () => {
+            lineElement.currentFullText = fullText;
+            
+            const checkAndStartMarquee = () => {
                 const parent = lineElement.parentElement;
                 if (!parent) return;
                 const isOverflow = lineElement.scrollWidth > parent.clientWidth;
@@ -751,8 +690,17 @@
                     lineElement.style.animation = 'none';
                 }
             };
-            setTimeout(checkMarquee, 30);
-            const resizeHandler = () => { setTimeout(checkMarquee, 100); };
+            setTimeout(checkAndStartMarquee, 20);
+        }
+
+        function setScrollingText(lineElement, fullText) {
+            updateMarquee(lineElement, fullText);
+            // 监听父容器大小变化重新评估
+            const resizeHandler = () => {
+                if (lineElement.currentFullText === fullText) {
+                    updateMarquee(lineElement, fullText);
+                }
+            };
             window.addEventListener('resize', resizeHandler);
             if (window.lastResizeHandler) window.removeEventListener('resize', window.lastResizeHandler);
             window.lastResizeHandler = resizeHandler;
@@ -955,6 +903,7 @@
             
             const lineEl = document.getElementById('tapeSongLine');
             lineEl.innerText = '欢迎收听 HellYell Radio';
+            lineEl.currentFullText = '欢迎收听 HellYell Radio';
             setTimeout(() => {
                 const parent = lineEl.parentElement;
                 if (parent && lineEl.scrollWidth > parent.clientWidth) {
