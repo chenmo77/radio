@@ -78,7 +78,7 @@
         }
 
         body.dark-mode .progress-slider {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 100' preserveAspectRatio='none'%3E%3Cpath d='M25,0 C40,0 50,5 50,15 C50,25 40,35 35,42 C32,46 30,48 30,50 C30,52 32,54 35,58 C40,65 50,75 50,85 C50,95 40,100 25,100 C10,100 0,95 0,85 C0,75 10,65 15,58 C18,54 20,52 20,50 C20,48 18,46 15,42 C10,35 0,25 0,15 C0,5 10,0 25,0 Z' fill='%23ffffff' stroke='%23dddddd' stroke-width='0.5'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 100' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L50,0 L50,20 C35,20 30,40 25,50 C30,60 35,80 50,80 L50,100 L0,100 L0,80 C15,80 20,60 25,50 C20,40 15,20 0,20 Z' fill='%23ffffff' stroke='%23cccccc' stroke-width='0.5'/%3E%3C/svg%3E");
         }
 
         body.dark-mode .hole-area {
@@ -374,7 +374,7 @@
             overflow: visible;
         }
 
-        /* ========== 白色滑块：顶部宽50px，中间宽20px，底部宽50px，圆弧形左右两侧（像x的左右两边但圆滑） ========== */
+        /* ========== 白色滑块：上下平直宽50px，左右向内凹1/5圆弧，最窄处25px ========== */
         .progress-slider {
             position: absolute;
             width: 50px;
@@ -384,8 +384,11 @@
             transform: translateX(0);
             transition: left 0.05s linear;
             pointer-events: none;
-            /* 使用SVG背景绘制完美的沙漏/哑铃形，左右两侧为圆弧曲线，无尖角 */
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 100' preserveAspectRatio='none'%3E%3Cpath d='M25,0 C38,0 50,6 50,16 C50,26 41,34 36,41 C33,45 31,47.5 30,50 C31,52.5 33,55 36,59 C41,66 50,74 50,84 C50,94 38,100 25,100 C12,100 0,94 0,84 C0,74 9,66 14,59 C17,55 19,52.5 20,50 C19,47.5 17,45 14,41 C9,34 0,26 0,16 C0,6 12,0 25,0 Z' fill='%23ffffff' stroke='%23cccccc' stroke-width='0.8'/%3E%3C/svg%3E");
+            /* 使用SVG绘制精确形状：
+               上边平直50px，左边向右凹的1/5圆弧，最窄处25px，右边向左凹的1/5圆弧，下边平直50px
+               圆弧半径为12.5px（因为从50px收缩到25px，差25px，1/5圆弧意味着弧深为半径的1/5？实际用贝塞尔曲线实现平滑内凹）
+            */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 100' preserveAspectRatio='none'%3E%3Cpath d='M0,0 L50,0 L50,0 C50,0 50,0 50,0 L50,20 C42,20 35,35 25,50 C35,65 42,80 50,80 L50,100 L0,100 L0,80 C8,80 15,65 25,50 C15,35 8,20 0,20 Z' fill='%23ffffff' stroke='%23dddddd' stroke-width='0.5'/%3E%3C/svg%3E");
             background-size: 100% 100%;
             background-repeat: no-repeat;
             background-position: center;
