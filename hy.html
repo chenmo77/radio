@@ -121,7 +121,7 @@
             position: relative;
         }
 
-        /* 磁带主体 - 尺寸完全由网页高宽和边距决定，固定不变，绝对不随歌曲信息调整 */
+        /* 磁带主体 - 尺寸完全由网页高宽和边距决定，固定不变 */
         .cassette {
             background: linear-gradient(145deg, #f0ebe3, #d9d2c5);
             border-radius: 16px;
@@ -133,7 +133,6 @@
             justify-content: space-between;
             transition: background 0.3s ease;
             border: 1px solid #c8bfae;
-            /* 关键：防止内容撑开 */
             overflow: hidden;
         }
 
@@ -198,7 +197,6 @@
             gap: 2%;
             transition: background 0.3s ease;
             box-shadow: inset 0 0 0 1px #e0d5c0, 0 2px 4px rgba(0,0,0,0.05);
-            /* 防止溢出 */
             overflow: hidden;
         }
 
@@ -240,7 +238,6 @@
             height: 100%;
             min-height: 0;
             box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
-            /* 关键：防止内容撑开父容器 */
             min-width: 0;
         }
 
@@ -253,7 +250,6 @@
             font-family: "MiSans", "Microsoft YaHei", sans-serif;
             letter-spacing: 0;
             line-height: 1.3;
-            /* 确保不换行 */
             max-width: 100%;
         }
 
@@ -392,30 +388,43 @@
             overflow: visible;
         }
 
-        /* 白色滑块 - 凸面镜形状：中间凸起，两侧内收，纯白色渐变 */
+        /* 白色滑块 - 顶和底边宽、中间窄的弧线形状（沙漏形/工字形弧线版） */
         .progress-slider {
             position: absolute;
-            width: 20px;
+            width: 22px;
             height: 100%;
-            background: radial-gradient(ellipse at center, #ffffff, #f0f0f0);
-            border-radius: 50% / 40% 40% 60% 60%;
+            background: #ffffff;
             left: 0%;
             top: 0;
             transform: translateX(0);
             transition: left 0.05s linear;
             pointer-events: none;
             box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-            border: none;
+            /* 使用clip-path实现顶部宽、中间窄、底部宽的弧线沙漏形状 */
+            clip-path: polygon(0% 0%, 100% 0%, 75% 30%, 75% 70%, 100% 100%, 0% 100%, 25% 70%, 25% 30%);
+            border-radius: 4px;
         }
-        /* 增强凸面镜效果：中间亮，边缘稍暗 */
+        /* 增加内阴影让弧线更自然，并添加微小高光 */
         .progress-slider::before {
             content: '';
             position: absolute;
-            top: 10%;
-            left: 10%;
-            width: 80%;
-            height: 40%;
+            top: 2%;
+            left: 20%;
+            width: 60%;
+            height: 20%;
             background: radial-gradient(ellipse at center, rgba(255,255,255,0.9), rgba(255,255,255,0.3));
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        /* 增加底部高光，强化立体感 */
+        .progress-slider::after {
+            content: '';
+            position: absolute;
+            bottom: 2%;
+            left: 20%;
+            width: 60%;
+            height: 20%;
+            background: radial-gradient(ellipse at center, rgba(255,255,255,0.7), rgba(255,255,255,0.1));
             border-radius: 50%;
             pointer-events: none;
         }
@@ -560,7 +569,7 @@
             .side-badge .side { font-size: 0.9em; }
             .c60-badge { font-size: 1.3em; }
             .progress-slider {
-                width: 16px;
+                width: 18px;
             }
         }
 
@@ -576,7 +585,7 @@
                 height: 18px;
             }
             .progress-slider {
-                width: 14px;
+                width: 16px;
             }
         }
 
@@ -744,7 +753,6 @@
 
         function setScrollingText(lineElement, fullText) {
             updateMarquee(lineElement, fullText);
-            // 监听父容器大小变化重新评估，但不改变外部尺寸
             const resizeHandler = () => {
                 if (lineElement.currentFullText === fullText) {
                     updateMarquee(lineElement, fullText);
