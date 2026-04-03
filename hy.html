@@ -115,7 +115,7 @@
         }
 
         body.dark-mode .tape-button.play-btn {
-            background-color: rgba(255, 255, 255, 0.15);
+            background-color: rgba(255, 255, 255, 0.1);
         }
 
         body.dark-mode .tape-button.play-btn.paused-state {
@@ -483,7 +483,7 @@
             height: 100%;
         }
 
-        /* 老式录音机矩形按钮样式 - 高度占底部区域的90%，宽度跟随总体网页宽度变化，等宽，顶边对齐 */
+        /* 老式录音机矩形按钮样式 - 高度占底部区域的90%，图标占按钮高度的50% */
         .tape-button {
             flex: 1;
             height: 90%;
@@ -499,12 +499,20 @@
             align-items: center;
             justify-content: center;
             -webkit-tap-highlight-color: transparent;
-            font-weight: 500;
-            font-size: 28px;
-            letter-spacing: 0;
             backdrop-filter: blur(4px);
             margin-top: 0;
             align-self: flex-start;
+        }
+
+        /* 所有按钮（包括暂停状态）背景色统一 */
+        .tape-button.play-btn {
+            background-color: rgba(255, 255, 255, 0.12);
+        }
+
+        /* 播放时的暂停状态用红色区分（播放中显示暂停图标时按钮变红） */
+        .tape-button.play-btn.paused-state {
+            background-color: #E60012;
+            box-shadow: 0 2px 5px #8a0008;
         }
 
         /* 悬停发光效果 */
@@ -514,53 +522,80 @@
             box-shadow: 0 0 16px rgba(255, 255, 255, 0.6), 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
-        .tape-button:active {
-            transform: translateY(1px);
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        /* 播放按钮特殊状态 */
-        .tape-button.play-btn {
-            background-color: rgba(255, 255, 255, 0.18);
-        }
-
-        .tape-button.play-btn.paused-state {
-            background-color: #E60012;
-            box-shadow: 0 2px 8px rgba(230, 0, 18, 0.5);
-        }
-
         .tape-button.play-btn.paused-state:hover {
             background-color: #ff1a2e;
             box-shadow: 0 0 20px rgba(230, 0, 18, 0.8);
             transform: translateY(-2px);
         }
 
-        /* 图标大小统一28px */
+        .tape-button:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 图标容器 - 高度占按钮高度的50%，宽度自适应，flex居中 */
+        .button-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 50%;
+            width: auto;
+        }
+
+        /* 播放图标 - 三角形，高度100%自适应 */
+        .play-icon-css {
+            display: inline-block;
+            width: 0;
+            height: 100%;
+            border-style: solid;
+            border-width: 0 0 0 0;
+            border-color: transparent transparent transparent currentColor;
+        }
+        /* 动态设置三角形大小，通过js或内联样式？使用百分比无法精确控制三角形，改用em相对父元素高度 */
+        /* 改用相对高度：使用vw或rem，但为了精确自适应，使用clamp + 视口单位 */
+        
+        /* 重新设计：图标使用svg或纯CSS相对高度，由于三角形用border需要固定px，改用inline-svg方案更好 */
+        /* 为了简化且保证图标高度占按钮50%，使用内联SVG或font-size相对高度 */
+        /* 使用font-size相对按钮高度：设置font-size为按钮高度的50%，图标用字符或特殊符号 */
+        /* 最简单：图标直接用Unicode字符，font-size设为按钮高度的50% */
+        .tape-button {
+            font-size: clamp(16px, 5vh, 32px);
+            font-weight: normal;
+        }
+        
+        /* 播放/暂停图标特殊处理：使用CSS绘制的三角形和双竖线，大小通过transform scale相对父元素 */
         .play-icon-css {
             display: inline-block;
             width: 0;
             height: 0;
             border-style: solid;
-            border-width: 14px 0 14px 24px;
+            border-width: 0.7em 0 0.7em 1.2em;
             border-color: transparent transparent transparent currentColor;
         }
 
         .pause-icon-css {
             display: inline-flex;
-            gap: 8px;
+            gap: 0.3em;
             align-items: center;
             justify-content: center;
         }
         .pause-icon-css .bar {
-            width: 6px;
-            height: 28px;
+            width: 0.25em;
+            height: 1.2em;
             background-color: currentColor;
-            border-radius: 2px;
+            border-radius: 1px;
         }
 
-        /* 其他按钮图标大小 */
+        /* 其他按钮图标使用标准字符，font-size控制大小 */
+        #volMinusBtn, #volPlusBtn, #nextBtn, #themeToggleBtn {
+            font-size: 1.8em;
+            font-weight: normal;
+            line-height: 1;
+        }
+
+        /* 确保图标垂直居中 */
         .tape-button {
-            font-size: 28px;
+            line-height: 1;
         }
 
         .tip-bubble {
@@ -586,41 +621,36 @@
         /* 响应式调整 */
         @media (max-width: 768px) {
             .tape-button {
-                font-size: 22px;
+                font-size: clamp(14px, 4vh, 24px);
+            }
+            #volMinusBtn, #volPlusBtn, #nextBtn, #themeToggleBtn {
+                font-size: 1.5em;
             }
             .play-icon-css {
-                border-width: 11px 0 11px 20px;
+                border-width: 0.6em 0 0.6em 1em;
             }
             .pause-icon-css .bar {
-                width: 5px;
-                height: 22px;
+                width: 0.2em;
+                height: 1em;
             }
-            .side-badge .b { font-size: 1.3em; }
-            .side-badge .side { font-size: 0.9em; }
-            .c60-badge { font-size: 1.3em; }
         }
 
         @media (max-width: 560px) {
             .tape-button {
-                font-size: 18px;
+                font-size: clamp(12px, 3.5vh, 20px);
+            }
+            #volMinusBtn, #volPlusBtn, #nextBtn, #themeToggleBtn {
+                font-size: 1.3em;
             }
             .play-icon-css {
-                border-width: 9px 0 9px 16px;
-            }
-            .pause-icon-css .bar {
-                width: 4px;
-                height: 18px;
-                gap: 4px;
-            }
-            .button-bar {
-                gap: 4px;
+                border-width: 0.5em 0 0.5em 0.9em;
             }
         }
 
         /* 车机/平板横屏时确保按钮高度合适 */
         @media (orientation: landscape) and (min-width: 800px) {
             .tape-button {
-                font-size: 28px;
+                font-size: clamp(18px, 5vh, 32px);
             }
         }
 
