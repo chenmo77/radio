@@ -98,22 +98,39 @@
         }
 
         body.dark-mode .buttons-container {
-            background-color: #1f1f1f;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         body.dark-mode .tape-button {
-            background-color: #333;
+            background-color: rgba(255, 255, 255, 0.1);
             color: #eee;
-            box-shadow: 0 4px 0 #111;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
 
         body.dark-mode .tape-button:hover {
-            background-color: #444;
+            background-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
         }
 
-        /* 磁带容器 - 占整个高度的80%，不随内容撑开 */
+        body.dark-mode .tape-button.play-btn {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        body.dark-mode .tape-button.play-btn.paused-state {
+            background-color: #E60012;
+            box-shadow: 0 2px 5px #8a0008;
+        }
+
+        body.dark-mode .tape-button.play-btn.paused-state:hover {
+            background-color: #ff1a2e;
+            box-shadow: 0 0 12px rgba(230, 0, 18, 0.8);
+        }
+
+        /* 磁带容器 - 占整个高度的85% */
         .cassette-container {
-            flex: 8;
+            flex: 8.5;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -121,7 +138,7 @@
             position: relative;
         }
 
-        /* 磁带主体 - 尺寸完全由视口决定，绝对不受歌曲信息影响 */
+        /* 磁带主体 - 尺寸完全由视口决定 */
         .cassette {
             background: linear-gradient(145deg, #f0ebe3, #d9d2c5);
             border-radius: 16px;
@@ -133,13 +150,11 @@
             justify-content: space-between;
             transition: background 0.3s ease;
             border: 1px solid #c8bfae;
-            /* 关键：防止内容撑开，宽度和高度严格由父容器决定 */
             overflow: hidden;
             flex-shrink: 0;
         }
 
-        /* 统一规则：所有终端（手机、平板、车机、电脑）都遵循以下逻辑 */
-        /* 竖屏（高>宽）时：左右两边留出15px，磁带宽度撑满，高度按比例自动 */
+        /* 竖屏 */
         @media (orientation: portrait) {
             .cassette-container {
                 padding: 0 15px;
@@ -148,11 +163,11 @@
                 width: 100%;
                 height: auto;
                 aspect-ratio: 1.4 / 1;
-                max-height: calc(80vh - 30px);
+                max-height: calc(85vh - 30px);
             }
         }
 
-        /* 横屏（宽>高）时：上下两边留出15px，磁带高度撑满，宽度按比例自动 */
+        /* 横屏 */
         @media (orientation: landscape) {
             .cassette-container {
                 padding: 15px 0;
@@ -165,7 +180,7 @@
             }
         }
 
-        /* 针对平板和车机的特殊处理：使用更稳健的尺寸锁定 */
+        /* 平板/车机适配 */
         @media (min-width: 768px) and (max-width: 1024px) {
             .cassette-container {
                 min-height: 0;
@@ -199,7 +214,7 @@
         .screw-bottom-right { bottom: 3%; right: 3%; }
         .screw-center-bottom { bottom: 12%; left: 50%; transform: translateX(-50%); }
 
-        /* 标签区域 - 固定布局，不随内容撑开 */
+        /* 标签区域 */
         .label-area {
             width: 96%;
             margin: 2% auto;
@@ -239,7 +254,7 @@
             line-height: 1;
         }
 
-        /* 音乐信息显示区域 - 严格限制宽度，不撑开父容器 */
+        /* 音乐信息显示区域 */
         .song-info-display {
             flex: 1;
             background-color: #fffef7;
@@ -403,7 +418,7 @@
             overflow: visible;
         }
 
-        /* 白色滑块 - 简洁的25px宽白色矩形 */
+        /* 白色滑块 */
         .progress-slider {
             position: absolute;
             width: 25px;
@@ -442,85 +457,110 @@
             box-shadow: inset 0 0 3px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.3);
         }
 
-        /* 按键容器 - 占整个高度的20%，固定高度 */
+        /* ========== 底部按钮区域 - 占总体高度15%，黑色毛玻璃半透明效果 ========== */
         .buttons-container {
-            flex: 2;
+            flex: 1.5;
             width: 100%;
-            padding: 1vh 2vw;
-            background-color: #d9d0be;
-            border-radius: 12px;
-            transition: background 0.3s ease;
+            padding: 0 1.5%;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255, 255, 255, 0.25);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             flex-shrink: 0;
-            min-height: 70px;
+            margin-bottom: 0;
         }
 
         .button-bar {
             display: flex;
-            width: 100%;
-            gap: 2vw;
+            width: 97%;
+            margin: 0 auto;
+            gap: 5px;
             justify-content: space-between;
+            align-items: flex-start;
+            height: 100%;
         }
 
+        /* 老式录音机矩形按钮样式 - 高度占底部区域的90%，宽度跟随总体网页宽度变化，等宽，顶边对齐 */
         .tape-button {
             flex: 1;
-            height: 70%;
-            min-height: 48px;
+            height: 90%;
+            min-height: 0;
             border: none;
-            border-radius: 16px;
-            background-color: #c8bfae;
-            color: #3a2e22;
+            border-radius: 4px;
+            background-color: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
             cursor: pointer;
-            transition: all 0.1s ease;
-            box-shadow: 0 5px 0 #9a8e7a, 0 3px 10px rgba(0,0,0,0.2);
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
             display: flex;
             align-items: center;
             justify-content: center;
             -webkit-tap-highlight-color: transparent;
-            font-weight: bold;
-            font-size: 1.8rem;
+            font-weight: 500;
+            font-size: 28px;
+            letter-spacing: 0;
+            backdrop-filter: blur(4px);
+            margin-top: 0;
+            align-self: flex-start;
+        }
+
+        /* 悬停发光效果 */
+        .tape-button:hover {
+            background-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 0 16px rgba(255, 255, 255, 0.6), 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
         .tape-button:active {
-            transform: translateY(4px);
-            box-shadow: 0 1px 0 #9a8e7a, 0 2px 5px rgba(0,0,0,0.2);
+            transform: translateY(1px);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
         }
 
-        .tape-button:hover {
-            background-color: #b8ae9a;
-        }
-
+        /* 播放按钮特殊状态 */
         .tape-button.play-btn {
-            background-color: #c8bfae;
+            background-color: rgba(255, 255, 255, 0.18);
         }
 
         .tape-button.play-btn.paused-state {
             background-color: #E60012;
-            box-shadow: 0 5px 0 #8a0008;
-            color: #fff;
+            box-shadow: 0 2px 8px rgba(230, 0, 18, 0.5);
         }
 
+        .tape-button.play-btn.paused-state:hover {
+            background-color: #ff1a2e;
+            box-shadow: 0 0 20px rgba(230, 0, 18, 0.8);
+            transform: translateY(-2px);
+        }
+
+        /* 图标大小统一28px */
         .play-icon-css {
             display: inline-block;
             width: 0;
             height: 0;
             border-style: solid;
-            border-width: 12px 0 12px 20px;
+            border-width: 14px 0 14px 24px;
             border-color: transparent transparent transparent currentColor;
         }
 
         .pause-icon-css {
             display: inline-flex;
-            gap: 6px;
+            gap: 8px;
             align-items: center;
             justify-content: center;
         }
         .pause-icon-css .bar {
             width: 6px;
-            height: 24px;
+            height: 28px;
             background-color: currentColor;
             border-radius: 2px;
+        }
+
+        /* 其他按钮图标大小 */
+        .tape-button {
+            font-size: 28px;
         }
 
         .tip-bubble {
@@ -543,17 +583,17 @@
             opacity: 1;
         }
 
-        /* 响应式调整按钮内边距和字体 */
+        /* 响应式调整 */
         @media (max-width: 768px) {
             .tape-button {
-                font-size: 1.5rem;
+                font-size: 22px;
             }
             .play-icon-css {
-                border-width: 10px 0 10px 18px;
+                border-width: 11px 0 11px 20px;
             }
             .pause-icon-css .bar {
                 width: 5px;
-                height: 20px;
+                height: 22px;
             }
             .side-badge .b { font-size: 1.3em; }
             .side-badge .side { font-size: 0.9em; }
@@ -562,25 +602,25 @@
 
         @media (max-width: 560px) {
             .tape-button {
-                font-size: 1.3rem;
+                font-size: 18px;
             }
             .play-icon-css {
                 border-width: 9px 0 9px 16px;
             }
             .pause-icon-css .bar {
-                width: 5px;
+                width: 4px;
                 height: 18px;
+                gap: 4px;
+            }
+            .button-bar {
+                gap: 4px;
             }
         }
 
-        /* 车机/平板横屏时确保按钮高度足够 */
+        /* 车机/平板横屏时确保按钮高度合适 */
         @media (orientation: landscape) and (min-width: 800px) {
-            .buttons-container {
-                min-height: 85px;
-            }
             .tape-button {
-                min-height: 55px;
-                font-size: 2rem;
+                font-size: 28px;
             }
         }
 
