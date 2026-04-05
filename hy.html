@@ -1,995 +1,1193 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>HellYell音乐电台 - 真实磁带比例</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        /* 根元素和body确保无滚动条，高度锁定 */
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            position: fixed;
-            top: 0;
-            left: 0;
-        }
-
-        body {
-            background-color: #e2dcd5;
-            font-family: 'Arial', 'MiSans', 'Microsoft YaHei', sans-serif;
-            display: flex;
-            flex-direction: column;
-            transition: background-color 0.3s ease;
-        }
-
-        /* 深色模式样式 */
-        body.dark-mode {
-            background-color: #1a1a1a;
-        }
-
-        body.dark-mode .cassette {
-            background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
-            border: 1px solid #3a3a3a;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        body.dark-mode .label-area {
-            background-color: #1f1f1f;
-            box-shadow: inset 0 0 0 1px #3a3a3a;
-        }
-
-        body.dark-mode .song-info-display {
-            background-color: #2c2c2c;
-        }
-
-        body.dark-mode .side-badge, body.dark-mode .c60-badge {
-            background-color: #111;
-            color: #ffd966;
-        }
-
-        body.dark-mode .window-area {
-            background-color: #0a0a0a;
-        }
-
-        body.dark-mode .reel {
-            background: radial-gradient(circle at 35% 35%, #6a6a6a, #4a4a4a);
-        }
-
-        body.dark-mode .reel-inner {
-            background: radial-gradient(circle, #7a7a7a, #5a5a5a);
-        }
-
-        body.dark-mode .reel-center {
-            background: radial-gradient(circle, #c0c0c0, #9a9a9a);
-        }
-
-        body.dark-mode .reel-tooth {
-            background: linear-gradient(135deg, #5a5a5a, #3a3a3a);
-        }
-
-        body.dark-mode .progress-bar-bg {
-            background: linear-gradient(90deg, #5a3a2a, #3a2212);
-            box-shadow: inset 0 0 0 1px #2a1a0a;
-        }
-
-        body.dark-mode .progress-slider {
-            background: #ffffff;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-        }
-
-        body.dark-mode .hole-area {
-            background-color: #111;
-        }
-
-        body.dark-mode .hole {
-            background-color: #2a2a2a;
-        }
-
-        body.dark-mode .screw {
-            background-color: #222;
-            color: #aaa;
-        }
-
-        body.dark-mode .buttons-container {
-            background: rgba(0, 0, 0, 0.65);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        body.dark-mode .tape-button {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: #eee;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-        }
-
-        body.dark-mode .tape-button:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
-        }
-
-        body.dark-mode .tape-button.play-btn {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        body.dark-mode .tape-button.play-btn.paused-state {
-            background-color: #E60012;
-            box-shadow: 0 2px 5px #8a0008;
-        }
-
-        body.dark-mode .tape-button.play-btn.paused-state:hover {
-            background-color: #ff1a2e;
-            box-shadow: 0 0 12px rgba(230, 0, 18, 0.8);
-        }
-
-        /* 磁带容器 - 占总体高度的85% */
-        .cassette-container {
-            flex: 8.5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 0;
-            position: relative;
-        }
-
-        /* 磁带主体 - 严格按照真实磁带比例 101.6mm : 63.5mm = 1.6 : 1 */
-        .cassette {
-            background: linear-gradient(145deg, #f0ebe3, #d9d2c5);
-            border-radius: 4%;
-            position: relative;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.7);
-            padding: 2%;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: background 0.3s ease;
-            border: 1px solid #c8bfae;
-            overflow: visible;
-            flex-shrink: 0;
-            /* 真实磁带比例 宽高比 1.6 : 1 */
-            aspect-ratio: 1.6 / 1;
-        }
-
-        /* 竖屏模式 (高 >= 宽)：左右边距15px，宽度确定，高度按比例自动 */
-        @media (orientation: portrait) {
-            .cassette-container {
-                padding: 0 15px;
-            }
-            .cassette {
-                width: 100%;
-                height: auto;
-                max-height: calc(85vh - 30px);
-            }
-        }
-
-        /* 横屏模式 (宽 > 高)：上下边距15px，高度确定，宽度按比例自动 */
-        @media (orientation: landscape) {
-            .cassette-container {
-                padding: 15px 0;
-            }
-            .cassette {
-                height: 100%;
-                width: auto;
-                max-width: calc(100vw - 30px);
-            }
-        }
-
-        /* 平板/车机兼容：确保不会超出 */
-        @media (min-width: 768px) and (max-width: 1024px) {
-            .cassette-container {
-                min-height: 0;
-            }
-            .cassette {
-                max-width: min(85vw, 800px);
-                max-height: min(70vh, 600px);
-            }
-        }
-
-        /* ========== 磁带内部所有元素均使用百分比定位，随磁带尺寸缩放 ========== */
-        /* 螺丝装饰 */
-        .screw {
-            position: absolute;
-            width: 3.5%;
-            aspect-ratio: 1 / 1;
-            background-color: #c0b59e;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #8a7a5c;
-            font-size: 0.6em;
-            font-weight: bold;
-            box-shadow: inset 0 0 2px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.6);
-            pointer-events: none;
-        }
-
-        .screw-top-left { top: 4%; left: 4%; }
-        .screw-top-right { top: 4%; right: 4%; }
-        .screw-bottom-left { bottom: 4%; left: 4%; }
-        .screw-bottom-right { bottom: 4%; right: 4%; }
-        .screw-center-bottom { bottom: 9%; left: 50%; transform: translateX(-50%); }
-
-        /* 标签区域 */
-        .label-area {
-            width: 88%;
-            margin: 3% auto 2%;
-            background-color: #f5efdf;
-            border-radius: 6px;
-            padding: 2%;
-            display: flex;
-            align-items: center;
-            gap: 2%;
-            transition: background 0.3s ease;
-            box-shadow: inset 0 0 0 1px #e0d5c0, 0 2px 4px rgba(0,0,0,0.05);
-            overflow: hidden;
-            flex-shrink: 0;
-        }
-
-        .side-badge {
-            flex: 0 0 12%;
-            background-color: #2d2d2d;
-            color: #ffd700;
-            border-radius: 4px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2%;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
-
-        .side-badge .b {
-            font-size: 1.6em;
-            line-height: 1;
-        }
-
-        .side-badge .side {
-            font-size: 1em;
-            line-height: 1;
-        }
-
-        /* 音乐信息显示区域 */
-        .song-info-display {
-            flex: 1;
-            background-color: #fffef7;
-            border-radius: 4px;
-            padding: 0 8px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            overflow: hidden;
-            transition: background 0.3s ease;
-            height: 100%;
-            min-height: 0;
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
-            min-width: 0;
-        }
-
-        .tape-song-line {
-            font-size: clamp(10px, 3vw, 20px);
-            font-weight: bold;
-            color: #2c2a24;
-            white-space: nowrap;
-            display: inline-block;
-            font-family: "MiSans", "Microsoft YaHei", sans-serif;
-            letter-spacing: 0;
-            line-height: 1.3;
-            max-width: 100%;
-        }
-
-        body.dark-mode .tape-song-line {
-            color: #f0f0f0;
-        }
-
-        /* 跑马灯动画 */
-        .marquee-text {
-            display: inline-block;
-            white-space: nowrap;
-            animation: marqueeScroll 12s linear infinite;
-        }
-
-        @keyframes marqueeScroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-
-        .c60-badge {
-            flex: 0 0 12%;
-            background-color: #2d2d2d;
-            color: #ffd700;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.4em;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
-
-        /* 磁带窗口区域 (观察窗) - 按真实比例居中，距顶部约12% */
-        .window-area {
-            width: 70%;
-            height: 26%;
-            margin: 2% auto;
-            background-color: #1e1a14;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 6%;
-            gap: 6%;
-            box-shadow: inset 0 0 0 2px #3a2e22, 0 2px 6px rgba(0,0,0,0.2);
-            position: relative;
-            flex-shrink: 0;
-        }
-
-        /* 金属齿轮 (卷带轮) - 按真实磁带孔比例，直径约占窗口宽度的28% */
-        .reel {
-            width: 28%;
-            aspect-ratio: 1 / 1;
-            position: relative;
-            border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%, #b8b0a0, #8a7e6c);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.5);
-            flex-shrink: 0;
-        }
-
-        .reel-inner {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 55%;
-            aspect-ratio: 1 / 1;
-            background: radial-gradient(circle, #c8c0b0, #9a8e7c);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.2), 0 1px 0 rgba(255,255,255,0.4);
-        }
-
-        .reel-center {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 25%;
-            aspect-ratio: 1 / 1;
-            background: radial-gradient(circle, #e8e0d0, #b8ae9a);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: inset 0 1px 1px rgba(0,0,0,0.1), 0 1px 0 rgba(255,255,255,0.6);
-            z-index: 2;
-        }
-
-        /* 齿轮齿条 (7齿均匀分布) */
-        .reel-tooth {
-            position: absolute;
-            width: 18%;
-            height: 22%;
-            background: linear-gradient(135deg, #9a8e7c, #6a5e4c);
-            border-radius: 3px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-            transform-origin: center;
-            top: 50%;
-            left: 50%;
-            margin-left: -9%;
-            margin-top: -11%;
-        }
-        /* 7齿均匀分布 */
-        .reel-tooth:nth-child(1) { transform: rotate(0deg) translateY(-120%); }
-        .reel-tooth:nth-child(2) { transform: rotate(51.428deg) translateY(-120%); }
-        .reel-tooth:nth-child(3) { transform: rotate(102.857deg) translateY(-120%); }
-        .reel-tooth:nth-child(4) { transform: rotate(154.285deg) translateY(-120%); }
-        .reel-tooth:nth-child(5) { transform: rotate(205.714deg) translateY(-120%); }
-        .reel-tooth:nth-child(6) { transform: rotate(257.142deg) translateY(-120%); }
-        .reel-tooth:nth-child(7) { transform: rotate(308.571deg) translateY(-120%); }
-
-        .reel.spinning {
-            animation: spinReel 2.0s linear infinite;
-        }
-
-        @keyframes spinReel {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        /* 中间进度条区域 (模拟磁带带基) */
-        .tape-middle {
-            flex: 1;
-            height: 60%;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 0;
-        }
-
-        .progress-bar-bg {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, #8b5a2b, #6a3a1a);
-            border-radius: 3px;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.2);
-            position: relative;
-            overflow: visible;
-        }
-
-        /* 白色滑块 */
-        .progress-slider {
-            position: absolute;
-            width: 20px;
-            height: 100%;
-            background: #ffffff;
-            left: 0%;
-            top: 0;
-            transform: translateX(0);
-            transition: left 0.05s linear;
-            pointer-events: none;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-            border-radius: 2px;
-        }
-
-        /* 底部孔位区域 (真实磁带底部四个防误抹孔) */
-        .hole-area {
-            width: 70%;
-            height: 10%;
-            margin: 1% auto 3%;
-            background-color: #d9d0be;
-            border-radius: 4px 4px 0 0;
-            display: flex;
-            align-items: center;
-            justify-content: space-around;
-            padding: 0 8%;
-            position: relative;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
-            flex-shrink: 0;
-        }
-
-        .hole {
-            width: 8%;
-            aspect-ratio: 1 / 1;
-            background-color: #4a3e2c;
-            border-radius: 50%;
-            box-shadow: inset 0 0 3px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.3);
-        }
-
-        /* ========== 底部按钮区域 - 占总体高度15%，黑色毛玻璃半透明效果 ========== */
-        .buttons-container {
-            flex: 1.5;
-            width: 100%;
-            padding: 0 5px;
-            background: rgba(0, 0, 0, 0.55);
-            backdrop-filter: blur(12px);
-            border-top: 1px solid rgba(255, 255, 255, 0.25);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.25);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            flex-shrink: 0;
-            margin-bottom: 0;
-        }
-
-        .button-bar {
-            display: flex;
-            width: 100%;
-            margin: 0 auto;
-            gap: 5px;
-            justify-content: space-between;
-            align-items: flex-start;
-            height: 100%;
-        }
-
-        .tape-button {
-            flex: 1;
-            height: 90%;
-            min-height: 0;
-            border: none;
-            border-radius: 4px;
-            background-color: rgba(255, 255, 255, 0.12);
-            color: #ffffff;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            -webkit-tap-highlight-color: transparent;
-            backdrop-filter: blur(4px);
-            margin-top: 0;
-            align-self: flex-start;
-        }
-
-        .tape-button.play-btn {
-            background-color: rgba(255, 255, 255, 0.12);
-        }
-
-        .tape-button.play-btn.paused-state {
-            background-color: #E60012;
-            box-shadow: 0 2px 5px #8a0008;
-        }
-
-        .tape-button:hover {
-            background-color: rgba(255, 255, 255, 0.25);
-            transform: translateY(-2px);
-            box-shadow: 0 0 16px rgba(255, 255, 255, 0.6), 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .tape-button.play-btn.paused-state:hover {
-            background-color: #ff1a2e;
-            box-shadow: 0 0 20px rgba(230, 0, 18, 0.8);
-            transform: translateY(-2px);
-        }
-
-        .tape-button:active {
-            transform: translateY(1px);
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        /* 图标样式 */
-        .tape-button {
-            font-size: clamp(16px, 5vh, 32px);
-            font-weight: normal;
-        }
-        
-        .play-icon-css {
-            display: inline-block;
-            width: 0;
-            height: 0;
-            border-style: solid;
-            border-width: 0.7em 0 0.7em 1.2em;
-            border-color: transparent transparent transparent currentColor;
-        }
-
-        .pause-icon-css {
-            display: inline-flex;
-            gap: 0.3em;
-            align-items: center;
-            justify-content: center;
-        }
-        .pause-icon-css .bar {
-            width: 0.25em;
-            height: 1.2em;
-            background-color: currentColor;
-            border-radius: 1px;
-        }
-
-        #volMinusBtn, #volPlusBtn, #nextBtn, #themeToggleBtn {
-            font-size: 1.8em;
-            font-weight: normal;
-            line-height: 1;
-        }
-
-        .tape-button {
-            line-height: 1;
-        }
-
-        .tip-bubble {
-            position: fixed;
-            background: rgba(0,0,0,0.85);
-            color: #fff;
-            padding: 6px 14px;
-            border-radius: 30px;
-            font-size: 20px;
-            font-weight: bold;
-            font-family: monospace;
-            pointer-events: none;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-            white-space: nowrap;
-        }
-
-        .tip-bubble.show {
-            opacity: 1;
-        }
-
-        /* 响应式微调 */
-        @media (max-width: 768px) {
-            .tape-button {
-                font-size: clamp(14px, 4vh, 24px);
-            }
-            #volMinusBtn, #volPlusBtn, #nextBtn, #themeToggleBtn {
-                font-size: 1.5em;
-            }
-            .play-icon-css {
-                border-width: 0.6em 0 0.6em 1em;
-            }
-            .pause-icon-css .bar {
-                width: 0.2em;
-                height: 1em;
-            }
-            .side-badge .b { font-size: 1.2em; }
-            .side-badge .side { font-size: 0.8em; }
-            .c60-badge { font-size: 1.1em; }
-        }
-
-        @media (max-width: 560px) {
-            .tape-button {
-                font-size: clamp(12px, 3.5vh, 20px);
-            }
-            #volMinusBtn, #volPlusBtn, #nextBtn, #themeToggleBtn {
-                font-size: 1.3em;
-            }
-            .play-icon-css {
-                border-width: 0.5em 0 0.5em 0.9em;
-            }
-        }
-
-        @media (orientation: landscape) and (min-width: 800px) {
-            .tape-button {
-                font-size: clamp(18px, 5vh, 32px);
-            }
-        }
-
-        body::-webkit-scrollbar {
-            width: 0;
-            background: transparent;
-        }
-    </style>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+ <title>HellYell 音乐电台 - 复古珍藏版</title>
+ <style>
+ * {
+ margin: 0;
+ padding: 0;
+ box-sizing: border-box;
+ -webkit-tap-highlight-color: transparent;
+ }
+
+ html, body {
+ width: 100%;
+ height: 100%;
+ overflow: hidden;
+ position: fixed;
+ top: 0;
+ left: 0;
+ }
+
+ body {
+ background: linear-gradient(135deg, #d4c9b8 0%, #c4b5a0 50%, #b8a68e 100%);
+ font-family: 'Arial', 'MiSans', 'Microsoft YaHei', sans-serif;
+ display: flex;
+ flex-direction: column;
+ transition: background 0.5s ease;
+ }
+
+ body.dark-mode {
+ background: linear-gradient(135deg, #1a1816 0%, #2a2520 50%, #1f1c18 100%);
+ }
+
+ /* ========== 核心布局：磁带 80% + 按钮 20% ========== */
+ .main-container {
+ width: 100%;
+ height: 100%;
+ display: flex;
+ flex-direction: column;
+ }
+
+ /* ========== 磁带区域 - 占 80% 高度 ========== */
+ .cassette-area {
+ flex: 4; /* 80% 高度 */
+ width: 100%;
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ padding: 15px;
+ min-height: 0;
+ }
+
+ /* ========== 磁带主体 - 严格真实比例 1.6:1 ========== */
+ .cassette {
+ aspect-ratio: 1.6 / 1;
+ width: 100%;
+ height: 100%;
+ max-width: calc(100% - 30px);
+ max-height: calc(100% - 30px);
+ object-fit: contain;
+ background: 
+ linear-gradient(145deg, rgba(255,255,255,0.1) 0%, transparent 50%),
+ linear-gradient(to bottom, #e8dcc8 0%, #d4c5b0 50%, #c4b095 100%);
+ border-radius: 8px;
+ position: relative;
+ box-shadow: 
+ 0 25px 80px rgba(0,0,0,0.5),
+ 0 15px 40px rgba(0,0,0,0.4),
+ inset 0 2px 3px rgba(255,255,255,0.4),
+ inset 0 -2px 3px rgba(0,0,0,0.2);
+ padding: 2.5%;
+ display: flex;
+ flex-direction: column;
+ justify-content: space-between;
+ border: 3px solid #b8a488;
+ overflow: visible;
+ flex-shrink: 0;
+ }
+
+ .cassette::before {
+ content: '';
+ position: absolute;
+ top: 0; left: 0; right: 0; bottom: 0;
+ background: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+ pointer-events: none;
+ border-radius: 8px;
+ opacity: 0.6;
+ }
+
+ .cassette::after {
+ content: '';
+ position: absolute;
+ top: -3px; left: -3px; right: -3px; bottom: -3px;
+ background: linear-gradient(135deg, rgba(180,160,130,0.3) 0%, transparent 30%, transparent 70%, rgba(100,80,60,0.2) 100%);
+ border-radius: 10px;
+ pointer-events: none;
+ z-index: 10;
+ }
+
+ body.dark-mode .cassette {
+ background: 
+ linear-gradient(145deg, rgba(255,255,255,0.05) 0%, transparent 50%),
+ linear-gradient(to bottom, #3a3530 0%, #2a2520 50%, #1f1a15 100%);
+ border: 3px solid #4a4035;
+ box-shadow: 
+ 0 25px 80px rgba(0,0,0,0.7),
+ 0 15px 40px rgba(0,0,0,0.6),
+ inset 0 2px 3px rgba(255,255,255,0.1),
+ inset 0 -2px 3px rgba(0,0,0,0.4);
+ }
+
+ @keyframes vintageShake {
+ 0%, 100% { transform: translate(0, 0); }
+ 25% { transform: translate(0.3px, 0.2px); }
+ 50% { transform: translate(-0.2px, -0.3px); }
+ 75% { transform: translate(0.2px, -0.2px); }
+ }
+
+ .cassette.playing {
+ animation: vintageShake 0.15s ease-in-out infinite;
+ }
+
+ /* ========== 螺丝装饰 ========== */
+ .screw {
+ position: absolute;
+ width: 3.5%;
+ aspect-ratio: 1 / 1;
+ background: radial-gradient(circle at 30% 30%, #c8b898 0%, #a89070 40%, #887050 100%);
+ border-radius: 50%;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ color: #6a5540;
+ font-size: 0.65em;
+ font-weight: bold;
+ box-shadow: 
+ inset 0 1px 2px rgba(255,255,255,0.5),
+ inset 0 -1px 2px rgba(0,0,0,0.3),
+ 0 2px 4px rgba(0,0,0,0.4),
+ 0 1px 0 rgba(255,255,255,0.3);
+ pointer-events: none;
+ border: 1px solid #9a8060;
+ z-index: 20; /* 确保螺丝在最上层 */
+ }
+
+ body.dark-mode .screw {
+ background: radial-gradient(circle at 30% 30%, #6a6055 0%, #4a4035 40%, #3a3025 100%);
+ color: #8a7560;
+ border: 1px solid #5a5045;
+ }
+
+ .screw-top-left { top: 2.5%; left: 2.5%; }
+ .screw-top-right { top: 2.5%; right: 2.5%; }
+ .screw-bottom-left { bottom: 2.5%; left: 2.5%; }
+ .screw-bottom-right { bottom: 2.5%; right: 2.5%; }
+ .screw-center-bottom { bottom: 7%; left: 50%; transform: translateX(-50%); }
+
+ /* ========== 标签区域 ========== */
+ .label-area {
+ width: 92%;
+ margin: 1.5% auto 0.5%;
+ background: linear-gradient(to bottom, #f5eedf 0%, #e8dcc8 100%);
+ border-radius: 4px;
+ padding: 2.5% 2%;
+ display: flex;
+ align-items: center;
+ gap: 2%;
+ box-shadow: 
+ inset 0 1px 3px rgba(0,0,0,0.15),
+ 0 2px 6px rgba(0,0,0,0.2);
+ overflow: hidden;
+ flex-shrink: 0;
+ position: relative;
+ border: 1px solid #d0c0a8;
+ min-height: 0;
+ }
+
+ .label-area::before {
+ content: '';
+ position: absolute;
+ top: 0; left: 0; right: 0; bottom: 0;
+ background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paperNoise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paperNoise)' opacity='0.06'/%3E%3C/svg%3E");
+ pointer-events: none;
+ opacity: 0.5;
+ }
+
+ body.dark-mode .label-area {
+ background: linear-gradient(to bottom, #3a3530 0%, #2a2520 100%);
+ border: 1px solid #4a4035;
+ box-shadow: 
+ inset 0 1px 3px rgba(0,0,0,0.4),
+ 0 2px 6px rgba(0,0,0,0.5);
+ }
+
+ .side-badge {
+ flex: 0 0 9%;
+ min-width: 7%;
+ max-width: 11%;
+ background: linear-gradient(135deg, #2a2520 0%, #1a1815 100%);
+ color: #ffd700;
+ border-radius: 3px;
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ justify-content: center;
+ padding: 2%;
+ font-weight: bold;
+ flex-shrink: 0;
+ box-shadow: 
+ inset 0 1px 2px rgba(255,255,255,0.1),
+ 0 2px 4px rgba(0,0,0,0.4);
+ border: 1px solid #3a3025;
+ position: relative;
+ z-index: 1;
+ }
+
+ .side-badge .b {
+ font-size: clamp(11px, 2.3vw, 18px);
+ line-height: 1;
+ text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+ }
+
+ .side-badge .side {
+ font-size: clamp(5px, 1.1vw, 9px);
+ line-height: 1;
+ opacity: 0.9;
+ margin-top: 2px;
+ }
+
+ .song-info-display {
+ flex: 1;
+ min-width: 0;
+ background: linear-gradient(to bottom, #fffef7 0%, #f5f0e0 100%);
+ border-radius: 3px;
+ padding: 0 8px;
+ display: flex;
+ align-items: center;
+ justify-content: flex-start;
+ overflow: hidden;
+ height: 100%;
+ box-shadow: 
+ inset 0 2px 4px rgba(0,0,0,0.1),
+ 0 1px 2px rgba(255,255,255,0.5);
+ border: 1px solid #e0d5c0;
+ position: relative;
+ z-index: 1;
+ }
+
+ body.dark-mode .song-info-display {
+ background: linear-gradient(to bottom, #2a2520 0%, #1f1a15 100%);
+ border: 1px solid #3a3025;
+ box-shadow: 
+ inset 0 2px 4px rgba(0,0,0,0.4),
+ 0 1px 2px rgba(255,255,255,0.05);
+ }
+
+ /* 歌曲名歌手名字号 = 白色区域高度的40% */
+ .tape-song-line {
+ font-size: 0;  /* 初始为0，由JS动态计算 */
+ font-weight: bold;
+ color: #2c2a24;
+ white-space: nowrap;
+ display: inline-block;
+ font-family: "MiSans", "Microsoft YaHei", sans-serif;
+ letter-spacing: 0.5px;
+ line-height: 1.3;
+ text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+ }
+
+ body.dark-mode .tape-song-line {
+ color: #f0ebe0;
+ text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+ }
+
+ @keyframes marqueeScroll {
+ 0% { transform: translateX(0); }
+ 100% { transform: translateX(-50%); }
+ }
+
+ .c60-badge {
+ flex: 0 0 9%;
+ min-width: 7%;
+ max-width: 11%;
+ background: linear-gradient(135deg, #2a2520 0%, #1a1815 100%);
+ color: #ffd700;
+ border-radius: 3px;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-size: clamp(11px, 2.3vw, 16px);
+ font-weight: bold;
+ flex-shrink: 0;
+ box-shadow: 
+ inset 0 1px 2px rgba(255,255,255,0.1),
+ 0 2px 4px rgba(0,0,0,0.4);
+ border: 1px solid #3a3025;
+ position: relative;
+ z-index: 1;
+ }
+
+ /* ========== 磁带窗口区域 ========== */
+ .window-area {
+ width: 75%;
+ height: 32%;
+ margin: 1% auto;
+ background: linear-gradient(to bottom, #0a0806 0%, #050403 100%);
+ border-radius: 8px;
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ padding: 0 4%;
+ gap: 4%;
+ box-shadow: 
+ inset 0 4px 12px rgba(0,0,0,0.8),
+ inset 0 1px 0 rgba(255,255,255,0.15),
+ 0 4px 12px rgba(0,0,0,0.4);
+ position: relative;
+ flex-shrink: 0;
+ border: 3px solid #2a2018;
+ overflow: hidden;
+ }
+
+ .window-area::before {
+ content: '';
+ position: absolute;
+ top: 0; left: 0; right: 0; bottom: 0;
+ background: linear-gradient(135deg, 
+ rgba(255,255,255,0.08) 0%, 
+ rgba(255,255,255,0.02) 40%, 
+ transparent 50%, 
+ rgba(0,0,0,0.1) 100%);
+ border-radius: 6px;
+ pointer-events: none;
+ z-index: 5;
+ }
+
+ .window-area::after {
+ content: '';
+ position: absolute;
+ top: 2px; left: 2px; right: 2px; bottom: 2px;
+ border: 1px solid rgba(255,255,255,0.1);
+ border-radius: 6px;
+ pointer-events: none;
+ z-index: 6;
+ }
+
+ body.dark-mode .window-area {
+ background: linear-gradient(to bottom, #050403 0%, #020101 100%);
+ border: 3px solid #1a1510;
+ }
+
+ /* ========== 真实磁带齿轮转轴设计（重新绘制） ========== */
+ .reel {
+ width: 24%;
+ aspect-ratio: 1 / 1;
+ position: relative;
+ border-radius: 50%;
+ background: radial-gradient(circle at 35% 35%, #b8a888 0%, #9a8868 60%, #7a6040 100%);
+ box-shadow: 
+ 0 3px 12px rgba(0,0,0,0.6),
+ inset 0 2px 4px rgba(255,255,255,0.2),
+ inset 0 -2px 4px rgba(0,0,0,0.4);
+ flex-shrink: 0;
+ overflow: hidden;
+ border: 1px solid rgba(0,0,0,0.3);
+ }
+
+ body.dark-mode .reel {
+ background: radial-gradient(circle at 35% 35%, #6a6050 0%, #4a4030 60%, #3a3020 100%);
+ box-shadow: 
+ 0 3px 12px rgba(0,0,0,0.8),
+ inset 0 2px 4px rgba(255,255,255,0.1),
+ inset 0 -2px 4px rgba(0,0,0,0.6);
+ }
+
+ /* 齿轮外圈齿纹 - 模拟真实磁带齿轮的齿 */
+ .reel::before {
+ content: '';
+ position: absolute;
+ top: -12%; left: -12%; right: -12%; bottom: -12%;
+ background: repeating-conic-gradient(
+ from 0deg,
+ rgba(0,0,0,0) 0deg,
+ rgba(0,0,0,0) 20deg,
+ rgba(0,0,0,0.15) 20deg,
+ rgba(0,0,0,0.15) 22deg,
+ rgba(0,0,0,0) 22deg,
+ rgba(0,0,0,0) 25deg
+ );
+ border-radius: 50%;
+ pointer-events: none;
+ z-index: 1;
+ }
+
+ /* 内圈金属环 */
+ .reel-ring {
+ position: absolute;
+ top: 12%; left: 12%; right: 12%; bottom: 12%;
+ background: radial-gradient(circle at 35% 35%, #d4c8b0 0%, #b8a888 60%, #9a8868 100%);
+ border-radius: 50%;
+ box-shadow: 
+ inset 0 2px 6px rgba(0,0,0,0.3),
+ 0 1px 2px rgba(255,255,255,0.3);
+ border: 1px solid rgba(255,255,255,0.2);
+ }
+
+ body.dark-mode .reel-ring {
+ background: radial-gradient(circle at 35% 35%, #8a8070 0%, #6a6050 60%, #4a4030 100%);
+ }
+
+ /* 凹槽纹路 */
+ .reel-groove {
+ position: absolute;
+ top: 22%; left: 22%; right: 22%; bottom: 22%;
+ background: radial-gradient(circle at 35% 35%, #c8b898 0%, #a89070 80%, #887050 100%);
+ border-radius: 50%;
+ box-shadow: 
+ inset 0 2px 6px rgba(0,0,0,0.5),
+ 0 1px 2px rgba(255,255,255,0.15);
+ }
+
+ body.dark-mode .reel-groove {
+ background: radial-gradient(circle at 35% 35%, #7a7060 0%, #5a5040 80%, #3a3020 100%);
+ }
+
+ /* 中心轴孔 */
+ .reel-center-hole {
+ position: absolute;
+ top: 50%; left: 50%;
+ width: 20%; aspect-ratio: 1 / 1;
+ background: radial-gradient(circle, #1a1510 0%, #0a0806 100%);
+ border-radius: 50%;
+ transform: translate(-50%, -50%);
+ box-shadow: 
+ inset 0 2px 6px rgba(0,0,0,0.8),
+ 0 1px 2px rgba(255,255,255,0.1);
+ z-index: 3;
+ border: 1px solid #5a4a3a;
+ }
+
+ body.dark-mode .reel-center-hole {
+ background: radial-gradient(circle, #0a0806 0%, #020101 100%);
+ border: 1px solid #2a2520;
+ }
+
+ /* 中心轴内六角/十字装饰 */
+ .reel-center-hole::after {
+ content: '✚';
+ position: absolute;
+ top: 50%; left: 50%;
+ transform: translate(-50%, -50%);
+ color: #4a3a2a;
+ font-size: 50%;
+ font-weight: bold;
+ opacity: 0.6;
+ pointer-events: none;
+ }
+
+ /* 7个齿钉围绕中心 */
+ .reel-tooth {
+ position: absolute;
+ width: 12%; height: 14%;
+ background: radial-gradient(ellipse at 30% 30%, #b8a080 0%, #8a6848 100%);
+ border-radius: 30% 30% 30% 30% / 40% 40% 60% 60%;
+ box-shadow: 
+ 0 2px 3px rgba(0,0,0,0.5),
+ inset 0 1px 0 rgba(255,255,255,0.3);
+ transform-origin: center;
+ top: 50%; left: 50%;
+ margin-left: -6%; margin-top: -7%;
+ z-index: 2;
+ }
+
+ body.dark-mode .reel-tooth {
+ background: radial-gradient(ellipse at 30% 30%, #5a5040 0%, #3a3020 100%);
+ }
+
+ /* 7齿均匀分布（模拟真实磁带主轴齿轮） */
+ .reel-tooth:nth-child(1) { transform: rotate(0deg) translateY(-115%); }
+ .reel-tooth:nth-child(2) { transform: rotate(51.428deg) translateY(-115%); }
+ .reel-tooth:nth-child(3) { transform: rotate(102.857deg) translateY(-115%); }
+ .reel-tooth:nth-child(4) { transform: rotate(154.285deg) translateY(-115%); }
+ .reel-tooth:nth-child(5) { transform: rotate(205.714deg) translateY(-115%); }
+ .reel-tooth:nth-child(6) { transform: rotate(257.142deg) translateY(-115%); }
+ .reel-tooth:nth-child(7) { transform: rotate(308.571deg) translateY(-115%); }
+
+ .reel.spinning { animation: spinReel 2.0s linear infinite; }
+ @keyframes spinReel { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+ .tape-middle {
+ flex: 1;
+ height: 50%;
+ position: relative;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ min-width: 0;
+ }
+
+ .progress-bar-bg {
+ width: 100%; height: 100%;
+ background: linear-gradient(90deg, #6a4a2a 0%, #8b5a2b 50%, #6a4a2a 100%);
+ border-radius: 3px;
+ box-shadow: 
+ inset 0 3px 8px rgba(0,0,0,0.6),
+ 0 1px 0 rgba(255,255,255,0.1);
+ position: relative; overflow: visible;
+ border: 1px solid #4a3520;
+ }
+
+ body.dark-mode .progress-bar-bg {
+ background: linear-gradient(90deg, #4a3520 0%, #5a4028 50%, #4a3520 100%);
+ border: 1px solid #3a2818;
+ }
+
+ .progress-slider {
+ position: absolute;
+ width: 16px; height: 100%;
+ background: linear-gradient(180deg, #ffffff 0%, #e8dcc8 50%, #d0c0a8 100%);
+ left: 0%; top: 0;
+ transform: translateX(0);
+ transition: left 0.05s linear;
+ pointer-events: none;
+ box-shadow: 
+ 0 2px 6px rgba(0,0,0,0.5),
+ inset 0 1px 0 rgba(255,255,255,0.8),
+ 0 0 0 1px rgba(180,160,130,0.3);
+ border-radius: 2px;
+ }
+
+ body.dark-mode .progress-slider {
+ background: linear-gradient(180deg, #6a6050 0%, #4a4030 50%, #3a3020 100%);
+ box-shadow: 
+ 0 2px 6px rgba(0,0,0,0.7),
+ inset 0 1px 0 rgba(255,255,255,0.1);
+ }
+
+ .hole-area {
+ width: 72%; height: 7%;
+ margin: 1.5% auto 1.5%;
+ background: linear-gradient(to bottom, #d4c5b0 0%, #c4b095 100%);
+ border-radius: 2px 2px 0 0;
+ display: flex;
+ align-items: center;
+ justify-content: space-around;
+ padding: 0 5%;
+ position: relative;
+ box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+ flex-shrink: 0;
+ border: 1px solid #b8a488;
+ border-bottom: none;
+ }
+
+ body.dark-mode .hole-area {
+ background: linear-gradient(to bottom, #3a3530 0%, #2a2520 100%);
+ border: 1px solid #4a4035;
+ border-bottom: none;
+ }
+
+ .hole {
+ width: 6%; aspect-ratio: 1 / 1;
+ background: radial-gradient(circle, #2a2015 0%, #1a1510 100%);
+ border-radius: 50%;
+ box-shadow: 
+ inset 0 2px 4px rgba(0,0,0,0.7),
+ 0 1px 0 rgba(255,255,255,0.1);
+ }
+
+ /* ========== 底部按钮区域 - 占 20% 高度，按钮占满整个区域 ========== */
+ .buttons-area {
+ flex: 1; /* 20% 高度 */
+ width: 100%;
+ min-height: 0;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ background: linear-gradient(180deg, rgba(30,25,20,0.85) 0%, rgba(20,18,15,0.9) 50%, rgba(15,12,10,0.95) 100%);
+ backdrop-filter: blur(15px);
+ border-top: 2px solid rgba(180,160,130,0.3);
+ border-bottom: 2px solid rgba(100,80,60,0.4);
+ box-shadow: 0 -5px 20px rgba(0,0,0,0.4), inset 0 2px 3px rgba(255,255,255,0.1);
+ position: relative;
+ padding: 6px 6px 6px 6px;
+ }
+
+ body.dark-mode .buttons-area {
+ background: linear-gradient(180deg, rgba(15,12,10,0.95) 0%, rgba(10,8,6,0.98) 50%, rgba(5,4,3,1) 100%);
+ border-top: 2px solid rgba(80,70,60,0.4);
+ border-bottom: 2px solid rgba(40,35,30,0.6);
+ }
+
+ .button-bar {
+ display: flex;
+ width: 100%;
+ gap: 6px;
+ justify-content: space-between;
+ align-items: center;
+ height: 100%;
+ }
+
+ .tape-button {
+ flex: 1;
+ height: 100%;
+ min-height: 0;
+ border: none;
+ border-radius: 4px;
+ background: linear-gradient(180deg, #4a4035 0%, #3a3025 40%, #2a2520 100%);
+ color: #e8dcc8;
+ cursor: pointer;
+ transition: all 0.08s ease;
+ box-shadow: 0 4px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.3), 0 0 0 1px rgba(180,160,130,0.1);
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ position: relative;
+ overflow: hidden;
+ font-size: clamp(20px, 6vh, 36px);
+ line-height: 1;
+ }
+
+ .tape-button::before {
+ content: '';
+ position: absolute;
+ top: 0; left: 0; right: 0; bottom: 0;
+ background: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='btnNoise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23btnNoise)' opacity='0.05'/%3E%3C/svg%3E");
+ pointer-events: none;
+ opacity: 0.4;
+ }
+
+ .tape-button::after {
+ content: '';
+ position: absolute;
+ top: 0; left: 0; right: 0;
+ height: 40%;
+ background: linear-gradient(to bottom, rgba(255,255,255,0.1) 0%, transparent 100%);
+ pointer-events: none;
+ border-radius: 4px 4px 0 0;
+ }
+
+ .tape-button:hover {
+ background: linear-gradient(180deg, #5a5045 0%, #4a4035 40%, #3a3025 100%);
+ transform: translateY(-2px);
+ box-shadow: 0 6px 12px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -1px 0 rgba(0,0,0,0.3), 0 0 0 1px rgba(200,180,150,0.2), 0 0 20px rgba(232,220,200,0.3);
+ }
+
+ .tape-button:active, .tape-button.pressed {
+ transform: translateY(3px) scale(0.98);
+ box-shadow: 0 1px 2px rgba(0,0,0,0.5), inset 0 3px 8px rgba(0,0,0,0.6), inset 0 1px 0 rgba(0,0,0,0.4), 0 0 0 1px rgba(100,80,60,0.3);
+ }
+
+ .tape-button.play-btn {
+ background: linear-gradient(180deg, #5a4030 0%, #4a3020 40%, #3a2518 100%);
+ }
+
+ .tape-button.play-btn.paused-state {
+ background: linear-gradient(180deg, #c41010 0%, #a40808 40%, #840000 100%);
+ box-shadow: 0 4px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,80,80,0.3), inset 0 -1px 0 rgba(0,0,0,0.4), 0 0 0 1px rgba(200,50,50,0.3), 0 0 15px rgba(230,0,18,0.4);
+ }
+
+ .tape-button.play-btn.paused-state:hover {
+ background: linear-gradient(180deg, #d42020 0%, #b41010 40%, #940505 100%);
+ box-shadow: 0 6px 12px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,100,100,0.4), inset 0 -1px 0 rgba(0,0,0,0.4), 0 0 0 1px rgba(220,60,60,0.4), 0 0 25px rgba(230,0,18,0.6);
+ }
+
+ .tape-button.play-btn.paused-state:active, .tape-button.play-btn.paused-state.pressed {
+ transform: translateY(3px) scale(0.98);
+ box-shadow: 0 1px 2px rgba(0,0,0,0.5), inset 0 3px 8px rgba(0,0,0,0.7), inset 0 1px 0 rgba(0,0,0,0.5);
+ }
+
+ .play-icon-css {
+ display: inline-block;
+ width: 0; height: 0;
+ border-style: solid;
+ border-width: 0.5em 0 0.5em 0.85em;
+ border-color: transparent transparent transparent currentColor;
+ filter: drop-shadow(0 1px 1px rgba(0,0,0,0.5));
+ }
+
+ .pause-icon-css { display: inline-flex; gap: 0.25em; align-items: center; justify-content: center; }
+ .pause-icon-css .bar { width: 0.2em; height: 0.9em; background-color: currentColor; border-radius: 1px; box-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+
+ #volMinusBtn, #volPlusBtn, #nextBtn, #themeToggleBtn {
+ font-size: 1.9em;
+ font-weight: normal;
+ line-height: 1;
+ text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+ }
+
+ .tip-bubble {
+ position: fixed;
+ background: rgba(30,25,20,0.95);
+ color: #f0e8d8;
+ padding: 8px 16px;
+ border-radius: 30px;
+ font-size: 18px;
+ font-weight: bold;
+ font-family: monospace;
+ pointer-events: none;
+ z-index: 1000;
+ opacity: 0;
+ transition: opacity 0.2s ease;
+ white-space: nowrap;
+ box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+ border: 1px solid rgba(180,160,130,0.2);
+ }
+
+ .tip-bubble.show { opacity: 1; }
+
+ /* ========== 响应式 ========== */
+ @media (max-width: 768px) {
+ .tape-button { font-size: clamp(18px, 5.5vh, 30px); }
+ #volMinusBtn, #volPlusBtn, #nextBtn, #themeToggleBtn { font-size: 1.7em; }
+ .play-icon-css { border-width: 0.45em 0 0.45em 0.75em; }
+ .pause-icon-css .bar { width: 0.18em; height: 0.8em; }
+ .side-badge .b { font-size: clamp(10px, 2vw, 16px); }
+ .side-badge .side { font-size: clamp(5px, 1vw, 8px); }
+ .c60-badge { font-size: clamp(10px, 2vw, 14px); }
+ }
+
+ @media (max-width: 560px) {
+ .tape-button { font-size: clamp(16px, 5vh, 26px); }
+ #volMinusBtn, #volPlusBtn, #nextBtn, #themeToggleBtn { font-size: 1.5em; }
+ .play-icon-css { border-width: 0.4em 0 0.4em 0.65em; }
+ .buttons-area { padding: 4px 4px 4px 4px; }
+ }
+
+ @media (orientation: landscape) and (min-width: 800px) {
+ .tape-button { font-size: clamp(22px, 6.5vh, 40px); }
+ }
+
+ body::-webkit-scrollbar { width: 0; background: transparent; }
+ </style>
 </head>
 <body>
-    <div class="cassette-container">
-        <div class="cassette">
-            <div class="screw screw-top-left">✚</div>
-            <div class="screw screw-top-right">✚</div>
-            <div class="screw screw-bottom-left">✚</div>
-            <div class="screw screw-bottom-right">✚</div>
-            <div class="screw screw-center-bottom">✚</div>
+ <div class="main-container">
+ <div class="cassette-area">
+ <div class="cassette" id="cassette">
+ <div class="screw screw-top-left">✚</div>
+ <div class="screw screw-top-right">✚</div>
+ <div class="screw screw-bottom-left">✚</div>
+ <div class="screw screw-bottom-right">✚</div>
+ <div class="screw screw-center-bottom">✚</div>
 
-            <div class="label-area">
-                <div class="side-badge">
-                    <span class="b">A</span>
-                    <span class="side">SIDE</span>
-                </div>
-                <div class="song-info-display" id="songInfoArea">
-                    <div class="tape-song-line" id="tapeSongLine">欢迎收听 HellYell Radio</div>
-                </div>
-                <div class="c60-badge">HY6</div>
-            </div>
+ <div class="label-area">
+ <div class="side-badge">
+ <span class="b">A</span>
+ <span class="side">SIDE</span>
+ </div>
+ <div class="song-info-display" id="songInfoArea">
+ <div class="tape-song-line" id="tapeSongLine">欢迎收听 HellYell Radio</div>
+ </div>
+ <div class="c60-badge">HY6</div>
+ </div>
 
-            <div class="window-area">
-                <div class="reel" id="leftReel">
-                    <div class="reel-inner"></div>
-                    <div class="reel-center"></div>
-                    <div class="reel-tooth"></div>
-                    <div class="reel-tooth"></div>
-                    <div class="reel-tooth"></div>
-                    <div class="reel-tooth"></div>
-                    <div class="reel-tooth"></div>
-                    <div class="reel-tooth"></div>
-                    <div class="reel-tooth"></div>
-                </div>
-                
-                <div class="tape-middle">
-                    <div class="progress-bar-bg" id="progressBarBg">
-                        <div class="progress-slider" id="progressSlider"></div>
-                    </div>
-                </div>
-                
-                <div class="reel" id="rightReel">
-                    <div class="reel-inner"></div>
-                    <div class="reel-center"></div>
-                    <div class="reel-tooth"></div>
-                    <div class="reel-tooth"></div>
-                    <div class="reel-tooth"></div>
-                    <div class="reel-tooth"></div>
-                    <div class="reel-tooth"></div>
-                    <div class="reel-tooth"></div>
-                    <div class="reel-tooth"></div>
-                </div>
-            </div>
+ <div class="window-area">
+ <div class="reel" id="leftReel">
+ <div class="reel-ring"></div>
+ <div class="reel-groove"></div>
+ <div class="reel-tooth"></div>
+ <div class="reel-tooth"></div>
+ <div class="reel-tooth"></div>
+ <div class="reel-tooth"></div>
+ <div class="reel-tooth"></div>
+ <div class="reel-tooth"></div>
+ <div class="reel-tooth"></div>
+ <div class="reel-center-hole"></div>
+ </div>
+ 
+ <div class="tape-middle">
+ <div class="progress-bar-bg" id="progressBarBg">
+ <div class="progress-slider" id="progressSlider"></div>
+ </div>
+ </div>
+ 
+ <div class="reel" id="rightReel">
+ <div class="reel-ring"></div>
+ <div class="reel-groove"></div>
+ <div class="reel-tooth"></div>
+ <div class="reel-tooth"></div>
+ <div class="reel-tooth"></div>
+ <div class="reel-tooth"></div>
+ <div class="reel-tooth"></div>
+ <div class="reel-tooth"></div>
+ <div class="reel-tooth"></div>
+ <div class="reel-center-hole"></div>
+ </div>
+ </div>
 
-            <div class="hole-area">
-                <div class="hole"></div>
-                <div class="hole"></div>
-                <div class="hole"></div>
-                <div class="hole"></div>
-            </div>
-        </div>
-    </div>
+ <div class="hole-area">
+ <div class="hole"></div>
+ <div class="hole"></div>
+ <div class="hole"></div>
+ <div class="hole"></div>
+ </div>
+ </div>
+ </div>
 
-    <div class="buttons-container">
-        <div class="button-bar">
-            <button class="tape-button" id="volMinusBtn">−</button>
-            <button class="tape-button" id="themeToggleBtn">◐</button>
-            <button class="tape-button play-btn paused-state" id="playBtn">
-                <span id="playIcon" class="play-icon-css"></span>
-                <span id="pauseIcon" class="pause-icon-css" style="display:none;">
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                </span>
-            </button>
-            <button class="tape-button" id="nextBtn">⏭</button>
-            <button class="tape-button" id="volPlusBtn">+</button>
-        </div>
-    </div>
+ <div class="buttons-area">
+ <div class="button-bar">
+ <button class="tape-button" id="volMinusBtn">−</button>
+ <button class="tape-button" id="themeToggleBtn">◐</button>
+ <button class="tape-button play-btn paused-state" id="playBtn">
+ <span id="playIcon" class="play-icon-css"></span>
+ <span id="pauseIcon" class="pause-icon-css" style="display:none;">
+ <span class="bar"></span>
+ <span class="bar"></span>
+ </span>
+ </button>
+ <button class="tape-button" id="nextBtn">⏭</button>
+ <button class="tape-button" id="volPlusBtn">+</button>
+ </div>
+ </div>
+ </div>
 
-    <div class="tip-bubble" id="tipBubble"></div>
+ <div class="tip-bubble" id="tipBubble"></div>
 
-    <script>
-        // ========== 播放逻辑与UI更新 ==========
-        const leftReel = document.getElementById('leftReel');
-        const rightReel = document.getElementById('rightReel');
-        const progressSlider = document.getElementById('progressSlider');
-        const progressBarBg = document.getElementById('progressBarBg');
-        
-        function updateSliderProgress() {
-            if (!progressSlider || !progressBarBg) return;
-            if (audio.duration && !isNaN(audio.duration) && audio.duration > 0 && isPlaying) {
-                const percent = Math.min(1, Math.max(0, audio.currentTime / audio.duration));
-                const containerWidth = progressBarBg.clientWidth;
-                const sliderWidth = progressSlider.clientWidth;
-                const maxLeft = containerWidth - sliderWidth;
-                const newLeft = percent * maxLeft;
-                progressSlider.style.left = newLeft + 'px';
-            }
-        }
-        
-        function resetSliderToStart() {
-            if (progressSlider) progressSlider.style.left = '0px';
-        }
-        
-        let resizeTimer;
-        window.addEventListener('resize', () => {
-            if (resizeTimer) clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(() => {
-                if (audio.duration && !isNaN(audio.duration) && audio.duration > 0 && isPlaying) updateSliderProgress();
-                else resetSliderToStart();
-                const lineEl = document.getElementById('tapeSongLine');
-                if (lineEl && lineEl.currentFullText) updateMarquee(lineEl, lineEl.currentFullText);
-            }, 100);
-        });
-        
-        function updateWheelSpin() {
-            if (isPlaying) {
-                leftReel.classList.add('spinning');
-                rightReel.classList.add('spinning');
-            } else {
-                leftReel.classList.remove('spinning');
-                rightReel.classList.remove('spinning');
-            }
-        }
+ <script>
+ const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+ 
+ function playClickSound() {
+ const oscillator = audioContext.createOscillator();
+ const gainNode = audioContext.createGain();
+ oscillator.connect(gainNode);
+ gainNode.connect(audioContext.destination);
+ oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+ oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.05);
+ gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+ gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+ oscillator.start(audioContext.currentTime);
+ oscillator.stop(audioContext.currentTime + 0.05);
+ }
 
-        function updateMarquee(lineElement, fullText) {
-            lineElement.style.whiteSpace = 'nowrap';
-            lineElement.style.animation = 'none';
-            lineElement.innerHTML = fullText;
-            lineElement.currentFullText = fullText;
-            const checkAndStartMarquee = () => {
-                const parent = lineElement.parentElement;
-                if (!parent) return;
-                if (lineElement.scrollWidth > parent.clientWidth) {
-                    lineElement.innerHTML = fullText + fullText;
-                    lineElement.style.animation = 'marqueeScroll 12s linear infinite';
-                } else {
-                    lineElement.innerHTML = fullText;
-                    lineElement.style.animation = 'none';
-                }
-            };
-            setTimeout(checkAndStartMarquee, 20);
-        }
+ function playStartSound() {
+ const oscillator = audioContext.createOscillator();
+ const gainNode = audioContext.createGain();
+ oscillator.connect(gainNode);
+ gainNode.connect(audioContext.destination);
+ oscillator.type = 'sawtooth';
+ oscillator.frequency.setValueAtTime(150, audioContext.currentTime);
+ oscillator.frequency.linearRampToValueAtTime(100, audioContext.currentTime + 0.15);
+ gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+ gainNode.gain.linearRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+ oscillator.start(audioContext.currentTime);
+ oscillator.stop(audioContext.currentTime + 0.15);
+ }
 
-        function setScrollingText(lineElement, fullText) {
-            updateMarquee(lineElement, fullText);
-            const resizeHandler = () => {
-                if (lineElement.currentFullText === fullText) updateMarquee(lineElement, fullText);
-            };
-            window.addEventListener('resize', resizeHandler);
-            if (window.lastResizeHandler) window.removeEventListener('resize', window.lastResizeHandler);
-            window.lastResizeHandler = resizeHandler;
-        }
+ // 动态调整歌曲名字号：为其所在白色区域高度的40%（并实时响应窗口变化）
+ function adjustSongFontSize() {
+ const songInfoDisplay = document.getElementById('songInfoArea');
+ const tapeSongLine = document.getElementById('tapeSongLine');
+ if (songInfoDisplay && tapeSongLine) {
+ const containerHeight = songInfoDisplay.clientHeight;
+ if (containerHeight > 0) {
+ const fontSize = containerHeight * 0.4;
+ tapeSongLine.style.fontSize = fontSize + 'px';
+ }
+ }
+ }
+ 
+ // 监听resize、旋转和初始加载时调整字号
+ window.addEventListener('resize', () => {
+ adjustSongFontSize();
+ });
+ 
+ // 使用 ResizeObserver 确保白色区域高度变化时也能实时调整（更精确）
+ const resizeObserver = new ResizeObserver(() => {
+ adjustSongFontSize();
+ });
+ const songInfoArea = document.getElementById('songInfoArea');
+ if (songInfoArea) {
+ resizeObserver.observe(songInfoArea);
+ }
+ 
+ const leftReel = document.getElementById('leftReel');
+ const rightReel = document.getElementById('rightReel');
+ const progressSlider = document.getElementById('progressSlider');
+ const progressBarBg = document.getElementById('progressBarBg');
+ const cassette = document.getElementById('cassette');
+ 
+ function updateSliderProgress() {
+ if (!progressSlider || !progressBarBg) return;
+ if (audio.duration && !isNaN(audio.duration) && audio.duration > 0 && isPlaying) {
+ const percent = Math.min(1, Math.max(0, audio.currentTime / audio.duration));
+ const containerWidth = progressBarBg.clientWidth;
+ const sliderWidth = progressSlider.clientWidth;
+ const maxLeft = containerWidth - sliderWidth;
+ const newLeft = percent * maxLeft;
+ progressSlider.style.left = newLeft + 'px';
+ }
+ }
+ 
+ function resetSliderToStart() {
+ if (progressSlider) progressSlider.style.left = '0px';
+ }
+ 
+ let resizeTimer;
+ window.addEventListener('resize', () => {
+ if (resizeTimer) clearTimeout(resizeTimer);
+ resizeTimer = setTimeout(() => {
+ if (audio.duration && !isNaN(audio.duration) && audio.duration > 0 && isPlaying) updateSliderProgress();
+ else resetSliderToStart();
+ const lineEl = document.getElementById('tapeSongLine');
+ if (lineEl && lineEl.currentFullText) updateMarquee(lineEl, lineEl.currentFullText);
+ adjustSongFontSize();
+ }, 100);
+ });
+ 
+ function updateWheelSpin() {
+ if (isPlaying) {
+ leftReel.classList.add('spinning');
+ rightReel.classList.add('spinning');
+ cassette.classList.add('playing');
+ } else {
+ leftReel.classList.remove('spinning');
+ rightReel.classList.remove('spinning');
+ cassette.classList.remove('playing');
+ }
+ }
 
-        function updateUINew(song) {
-            const lineEl = document.getElementById('tapeSongLine');
-            const container = document.getElementById('songInfoArea');
-            container.style.transition = 'opacity 0.2s';
-            container.style.opacity = '0';
-            setTimeout(() => {
-                setScrollingText(lineEl, song.name);
-                container.style.opacity = '1';
-            }, 150);
-            document.title = song.name;
-        }
+ function updateMarquee(lineElement, fullText) {
+ lineElement.style.whiteSpace = 'nowrap';
+ lineElement.style.animation = 'none';
+ lineElement.innerHTML = fullText;
+ lineElement.currentFullText = fullText;
+ const checkAndStartMarquee = () => {
+ const parent = lineElement.parentElement;
+ if (!parent) return;
+ if (lineElement.scrollWidth > parent.clientWidth) {
+ lineElement.innerHTML = fullText + fullText;
+ lineElement.style.animation = 'marqueeScroll 12s linear infinite';
+ } else {
+ lineElement.innerHTML = fullText;
+ lineElement.style.animation = 'none';
+ }
+ };
+ setTimeout(checkAndStartMarquee, 20);
+ }
 
-        const audio = new Audio();
-        audio.preload = "auto";
-        let allSongs = [];
-        let currentSong = null;
-        let isPlaying = false;
-        let normalCount = 0;
-        let hasStarted = false;
-        let isSwitching = false;
-        let loadTimer = null;
-        let volume = 0.6;
-        const promoSong = { name: "HellYell Radio - 欢迎收听", url: "https://radio.hellyell.com/hy.mp3" };
+ function setScrollingText(lineElement, fullText) {
+ updateMarquee(lineElement, fullText);
+ const resizeHandler = () => {
+ if (lineElement.currentFullText === fullText) updateMarquee(lineElement, fullText);
+ };
+ window.addEventListener('resize', resizeHandler);
+ if (window.lastResizeHandler) window.removeEventListener('resize', window.lastResizeHandler);
+ window.lastResizeHandler = resizeHandler;
+ }
 
-        function clearLoadTimer() { if (loadTimer) { clearTimeout(loadTimer); loadTimer = null; } }
-        function getNextSong() {
-            if (normalCount === 7) { normalCount = 0; return promoSong; }
-            if (allSongs.length === 0) return promoSong;
-            const randomIndex = Math.floor(Math.random() * allSongs.length);
-            return allSongs[randomIndex];
-        }
+ function updateUINew(song) {
+ const lineEl = document.getElementById('tapeSongLine');
+ const container = document.getElementById('songInfoArea');
+ container.style.transition = 'opacity 0.2s';
+ container.style.opacity = '0';
+ setTimeout(() => {
+ setScrollingText(lineEl, song.name);
+ container.style.opacity = '1';
+ adjustSongFontSize(); // 更新完文字后重新调整字号
+ }, 150);
+ document.title = song.name;
+ }
 
-        function playSong(song, autoPlay = true) {
-            if (isSwitching) return;
-            isSwitching = true;
-            clearLoadTimer();
-            currentSong = song;
-            updateUINew(song);
-            audio.pause();
-            audio.src = song.url;
-            audio.volume = volume;
-            if (autoPlay && isPlaying) {
-                loadTimer = setTimeout(() => { if (isPlaying && !isSwitching) nextSong(); }, 6000);
-                audio.play().then(() => {
-                    clearLoadTimer();
-                    isSwitching = false;
-                    updateWheelSpin();
-                    resetSliderToStart();
-                }).catch(err => {
-                    console.error('播放失败:', err);
-                    clearLoadTimer();
-                    isSwitching = false;
-                    setTimeout(() => nextSong(), 500);
-                });
-            } else {
-                isSwitching = false;
-                updateWheelSpin();
-                if (!autoPlay) resetSliderToStart();
-            }
-        }
+ const audio = new Audio();
+ audio.preload = "auto";
+ let allSongs = [];
+ let currentSong = null;
+ let isPlaying = false;
+ let normalCount = 0;
+ let hasStarted = false;
+ let isSwitching = false;
+ let loadTimer = null;
+ let volume = 0.6;
+ const promoSong = { name: "HellYell Radio - 欢迎收听", url: "https://radio.hellyell.com/hy.mp3" };
 
-        function nextSong() {
-            if (isSwitching) return;
-            clearLoadTimer();
-            const next = getNextSong();
-            if (next !== promoSong) normalCount++;
-            playSong(next, isPlaying);
-        }
+ function clearLoadTimer() { if (loadTimer) { clearTimeout(loadTimer); loadTimer = null; } }
+ function getNextSong() {
+ if (normalCount === 7) { normalCount = 0; return promoSong; }
+ if (allSongs.length === 0) return promoSong;
+ const randomIndex = Math.floor(Math.random() * allSongs.length);
+ return allSongs[randomIndex];
+ }
 
-        function togglePlay() {
-            const playBtn = document.getElementById('playBtn');
-            const playIconSpan = document.getElementById('playIcon');
-            const pauseIconSpan = document.getElementById('pauseIcon');
-            if (isPlaying) {
-                audio.pause();
-                clearLoadTimer();
-                isPlaying = false;
-                playIconSpan.style.display = 'inline-flex';
-                pauseIconSpan.style.display = 'none';
-                playBtn.classList.add('paused-state');
-                updateWheelSpin();
-            } else {
-                isPlaying = true;
-                playIconSpan.style.display = 'none';
-                pauseIconSpan.style.display = 'inline-flex';
-                playBtn.classList.remove('paused-state');
-                updateWheelSpin();
-                if (!hasStarted) {
-                    hasStarted = true;
-                    normalCount = 0;
-                    playSong(promoSong, true);
-                } else if (currentSong) {
-                    clearLoadTimer();
-                    loadTimer = setTimeout(() => { if (isPlaying && !isSwitching) nextSong(); }, 6000);
-                    audio.play().then(() => {
-                        clearLoadTimer();
-                        updateWheelSpin();
-                        resetSliderToStart();
-                    }).catch(err => {
-                        console.error('恢复播放失败:', err);
-                        clearLoadTimer();
-                        nextSong();
-                    });
-                } else {
-                    playSong(promoSong, true);
-                }
-            }
-        }
+ function playSong(song, autoPlay = true) {
+ if (isSwitching) return;
+ isSwitching = true;
+ clearLoadTimer();
+ currentSong = song;
+ updateUINew(song);
+ audio.pause();
+ audio.src = song.url;
+ audio.volume = volume;
+ if (autoPlay && isPlaying) {
+ loadTimer = setTimeout(() => { if (isPlaying && !isSwitching) nextSong(); }, 6000);
+ audio.play().then(() => {
+ clearLoadTimer();
+ isSwitching = false;
+ updateWheelSpin();
+ resetSliderToStart();
+ }).catch(err => {
+ console.error('播放失败:', err);
+ clearLoadTimer();
+ isSwitching = false;
+ setTimeout(() => nextSong(), 500);
+ });
+ } else {
+ isSwitching = false;
+ updateWheelSpin();
+ if (!autoPlay) resetSliderToStart();
+ }
+ }
 
-        function volumeUp() {
-            let newVol = volume + 0.1;
-            if (newVol > 1) { if (volume >= 0.9) showTip('最大', document.getElementById('volPlusBtn')); return; }
-            volume = newVol;
-            audio.volume = volume;
-            let val = Math.round(volume * 10);
-            showTip(val.toString(), document.getElementById('volPlusBtn'));
-        }
-        function volumeDown() {
-            let newVol = volume - 0.1;
-            if (newVol < 0) { if (volume <= 0.1) showTip('最小', document.getElementById('volMinusBtn')); return; }
-            volume = newVol;
-            audio.volume = volume;
-            let val = Math.round(volume * 10);
-            showTip(val.toString(), document.getElementById('volMinusBtn'));
-        }
+ function nextSong() {
+ if (isSwitching) return;
+ clearLoadTimer();
+ const next = getNextSong();
+ if (next !== promoSong) normalCount++;
+ playSong(next, isPlaying);
+ }
 
-        const themeToggleBtn = document.getElementById('themeToggleBtn');
-        function setTheme(theme) {
-            if (theme === 'dark') {
-                document.body.classList.add('dark-mode');
-                themeToggleBtn.innerHTML = '◑';
-                localStorage.setItem('radioTheme', 'dark');
-            } else {
-                document.body.classList.remove('dark-mode');
-                themeToggleBtn.innerHTML = '◐';
-                localStorage.setItem('radioTheme', 'light');
-            }
-        }
-        function toggleTheme() {
-            const isDark = document.body.classList.contains('dark-mode');
-            if (isDark) { setTheme('light'); showTip('浅色', themeToggleBtn); }
-            else { setTheme('dark'); showTip('深色', themeToggleBtn); }
-        }
-        const savedTheme = localStorage.getItem('radioTheme');
-        if (savedTheme === 'dark') setTheme('dark');
-        else setTheme('light');
+ function togglePlay() {
+ const playBtn = document.getElementById('playBtn');
+ const playIconSpan = document.getElementById('playIcon');
+ const pauseIconSpan = document.getElementById('pauseIcon');
+ 
+ if (isPlaying) {
+ audio.pause();
+ clearLoadTimer();
+ isPlaying = false;
+ playIconSpan.style.display = 'inline-flex';
+ pauseIconSpan.style.display = 'none';
+ playBtn.classList.add('paused-state');
+ updateWheelSpin();
+ } else {
+ if (audioContext.state === 'suspended') {
+ audioContext.resume();
+ }
+ 
+ isPlaying = true;
+ playIconSpan.style.display = 'none';
+ pauseIconSpan.style.display = 'inline-flex';
+ playBtn.classList.remove('paused-state');
+ updateWheelSpin();
+ 
+ if (!hasStarted) {
+ hasStarted = true;
+ normalCount = 0;
+ playStartSound();
+ playSong(promoSong, true);
+ } else if (currentSong) {
+ clearLoadTimer();
+ loadTimer = setTimeout(() => { if (isPlaying && !isSwitching) nextSong(); }, 6000);
+ audio.play().then(() => {
+ clearLoadTimer();
+ updateWheelSpin();
+ resetSliderToStart();
+ }).catch(err => {
+ console.error('恢复播放失败:', err);
+ clearLoadTimer();
+ nextSong();
+ });
+ } else {
+ playStartSound();
+ playSong(promoSong, true);
+ }
+ }
+ }
 
-        const tipBubble = document.getElementById('tipBubble');
-        function showTip(message, targetBtn) {
-            if (!targetBtn) return;
-            const rect = targetBtn.getBoundingClientRect();
-            tipBubble.style.left = rect.left + rect.width / 2 + 'px';
-            tipBubble.style.top = rect.top - 45 + 'px';
-            tipBubble.style.transform = 'translateX(-50%)';
-            tipBubble.textContent = message;
-            tipBubble.classList.add('show');
-            setTimeout(() => tipBubble.classList.remove('show'), 600);
-        }
+ function volumeUp() {
+ let newVol = volume + 0.1;
+ if (newVol > 1) { if (volume >= 0.9) showTip('最大', document.getElementById('volPlusBtn')); return; }
+ volume = newVol;
+ audio.volume = volume;
+ let val = Math.round(volume * 10);
+ showTip(val.toString(), document.getElementById('volPlusBtn'));
+ }
+ function volumeDown() {
+ let newVol = volume - 0.1;
+ if (newVol < 0) { if (volume <= 0.1) showTip('最小', document.getElementById('volMinusBtn')); return; }
+ volume = newVol;
+ audio.volume = volume;
+ let val = Math.round(volume * 10);
+ showTip(val.toString(), document.getElementById('volMinusBtn'));
+ }
 
-        audio.addEventListener('ended', () => { if (!isSwitching && isPlaying) nextSong(); });
-        audio.addEventListener('error', () => { if (!isSwitching && isPlaying) { clearLoadTimer(); nextSong(); } });
-        audio.addEventListener('timeupdate', () => { if (isPlaying && audio.duration && !isNaN(audio.duration)) updateSliderProgress(); });
-        audio.addEventListener('play', () => { setTimeout(() => { if (isPlaying) updateSliderProgress(); }, 50); });
+ const themeToggleBtn = document.getElementById('themeToggleBtn');
+ function setTheme(theme) {
+ if (theme === 'dark') {
+ document.body.classList.add('dark-mode');
+ themeToggleBtn.innerHTML = '◑';
+ localStorage.setItem('radioTheme', 'dark');
+ } else {
+ document.body.classList.remove('dark-mode');
+ themeToggleBtn.innerHTML = '◐';
+ localStorage.setItem('radioTheme', 'light');
+ }
+ }
+ function toggleTheme() {
+ const isDark = document.body.classList.contains('dark-mode');
+ if (isDark) { setTheme('light'); showTip('浅色', themeToggleBtn); }
+ else { setTheme('dark'); showTip('深色', themeToggleBtn); }
+ }
+ const savedTheme = localStorage.getItem('radioTheme');
+ if (savedTheme === 'dark') setTheme('dark');
+ else setTheme('light');
 
-        async function init() {
-            try {
-                const [hj, qc] = await Promise.all([
-                    fetch('https://radio.hellyell.com/huaijiu-musiclist.json').then(r => r.json()),
-                    fetch('https://radio.hellyell.com/qiche-musiclist.json').then(r => r.json())
-                ]);
-                const all = [...hj, ...qc];
-                allSongs = all.filter(item => {
-                    const singer = item.name.split(' - ')[0];
-                    return singer !== 'HellYell怀旧电台' && singer !== 'HellYell汽车电台' && item.url && item.url.startsWith('http');
-                });
-                console.log(`加载了 ${allSongs.length} 首歌曲`);
-            } catch(e) { console.error('加载失败', e); allSongs = []; }
-            
-            const lineEl = document.getElementById('tapeSongLine');
-            lineEl.innerText = '欢迎收听 HellYell Radio';
-            lineEl.currentFullText = '欢迎收听 HellYell Radio';
-            setTimeout(() => {
-                const parent = lineEl.parentElement;
-                if (parent && lineEl.scrollWidth > parent.clientWidth) {
-                    lineEl.innerHTML = '欢迎收听 HellYell Radio欢迎收听 HellYell Radio';
-                    lineEl.style.animation = 'marqueeScroll 12s linear infinite';
-                }
-            }, 50);
-            
-            hasStarted = false;
-            isPlaying = false;
-            currentSong = null;
-            normalCount = 0;
-            audio.volume = volume;
-            
-            document.getElementById('playBtn').onclick = togglePlay;
-            document.getElementById('nextBtn').onclick = () => { if (!isSwitching) nextSong(); };
-            document.getElementById('volMinusBtn').onclick = volumeDown;
-            document.getElementById('volPlusBtn').onclick = volumeUp;
-            themeToggleBtn.onclick = toggleTheme;
-            
-            updateWheelSpin();
-            setTimeout(resetSliderToStart, 100);
-        }
+ const tipBubble = document.getElementById('tipBubble');
+ function showTip(message, targetBtn) {
+ if (!targetBtn) return;
+ const rect = targetBtn.getBoundingClientRect();
+ tipBubble.style.left = rect.left + rect.width / 2 + 'px';
+ tipBubble.style.top = rect.top - 45 + 'px';
+ tipBubble.style.transform = 'translateX(-50%)';
+ tipBubble.textContent = message;
+ tipBubble.classList.add('show');
+ setTimeout(() => tipBubble.classList.remove('show'), 600);
+ }
 
-        window.onload = init;
-    </script>
+ audio.addEventListener('ended', () => { if (!isSwitching && isPlaying) nextSong(); });
+ audio.addEventListener('error', () => { if (!isSwitching && isPlaying) { clearLoadTimer(); nextSong(); } });
+ audio.addEventListener('timeupdate', () => { if (isPlaying && audio.duration && !isNaN(audio.duration)) updateSliderProgress(); });
+ audio.addEventListener('play', () => { setTimeout(() => { if (isPlaying) updateSliderProgress(); }, 50); });
+
+ document.getElementById('volMinusBtn').addEventListener('click', () => {
+ playClickSound();
+ volumeDown();
+ });
+ 
+ document.getElementById('volPlusBtn').addEventListener('click', () => {
+ playClickSound();
+ volumeUp();
+ });
+ 
+ document.getElementById('nextBtn').addEventListener('click', () => {
+ playClickSound();
+ if (!isSwitching) nextSong();
+ });
+ 
+ document.getElementById('themeToggleBtn').addEventListener('click', () => {
+ playClickSound();
+ toggleTheme();
+ });
+ 
+ document.getElementById('playBtn').addEventListener('click', () => {
+ playClickSound();
+ togglePlay();
+ });
+
+ async function init() {
+ try {
+ const [hj, qc] = await Promise.all([
+ fetch('https://radio.hellyell.com/huaijiu-musiclist.json').then(r => r.json()),
+ fetch('https://radio.hellyell.com/qiche-musiclist.json').then(r => r.json())
+ ]);
+ const all = [...hj, ...qc];
+ // 剔除 HellYell 怀旧电台 和 HellYell 汽车电台 两个MP3
+ allSongs = all.filter(item => {
+ const singer = item.name.split(' - ')[0];
+ return singer !== 'HellYell 怀旧电台' && 
+        singer !== 'HellYell 汽车电台' && 
+        singer !== 'HellYell怀旧电台' && 
+        singer !== 'HellYell汽车电台' && 
+        item.url && item.url.startsWith('http');
+ });
+ console.log(`加载了 ${allSongs.length} 首歌曲`);
+ } catch(e) { console.error('加载失败', e); allSongs = []; }
+ 
+ const lineEl = document.getElementById('tapeSongLine');
+ lineEl.innerText = '欢迎收听 HellYell Radio';
+ lineEl.currentFullText = '欢迎收听 HellYell Radio';
+ setTimeout(() => {
+ const parent = lineEl.parentElement;
+ if (parent && lineEl.scrollWidth > parent.clientWidth) {
+ lineEl.innerHTML = '欢迎收听 HellYell Radio 欢迎收听 HellYell Radio';
+ lineEl.style.animation = 'marqueeScroll 12s linear infinite';
+ }
+ adjustSongFontSize();
+ }, 50);
+ 
+ hasStarted = false;
+ isPlaying = false;
+ currentSong = null;
+ normalCount = 0;
+ audio.volume = volume;
+ 
+ updateWheelSpin();
+ setTimeout(resetSliderToStart, 100);
+ }
+
+ window.onload = init;
+ </script>
 </body>
 </html>
