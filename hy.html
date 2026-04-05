@@ -48,18 +48,12 @@
  display: flex;
  justify-content: center;
  align-items: center;
- padding: 15px;
  min-height: 0;
+ /* 移除固定padding，由JS动态控制磁带的边距和尺寸 */
  }
 
- /* ========== 磁带主体 - 严格真实比例 1.6:1 ========== */
+ /* ========== 磁带主体 - 严格真实比例 1.6:1，尺寸由JS动态计算并设置内联样式 ========== */
  .cassette {
- aspect-ratio: 1.6 / 1;
- width: 100%;
- height: 100%;
- max-width: calc(100% - 30px);
- max-height: calc(100% - 30px);
- object-fit: contain;
  background: 
  linear-gradient(145deg, rgba(255,255,255,0.1) 0%, transparent 50%),
  linear-gradient(to bottom, #e8dcc8 0%, #d4c5b0 50%, #c4b095 100%);
@@ -77,6 +71,7 @@
  border: 3px solid #b8a488;
  overflow: visible;
  flex-shrink: 0;
+ /* 宽高由JS动态设置，不在此处定义固定宽高或aspect-ratio */
  }
 
  .cassette::before {
@@ -351,7 +346,7 @@
  border: 3px solid #1a1510;
  }
 
- /* ========== 真实磁带齿轮转轴设计（重新绘制） ========== */
+ /* ========== 真实磁带齿轮转轴设计 ========== */
  .reel {
  width: 24%;
  aspect-ratio: 1 / 1;
@@ -375,7 +370,6 @@
  inset 0 -2px 4px rgba(0,0,0,0.6);
  }
 
- /* 齿轮外圈齿纹 - 模拟真实磁带齿轮的齿 */
  .reel::before {
  content: '';
  position: absolute;
@@ -394,7 +388,6 @@
  z-index: 1;
  }
 
- /* 内圈金属环 */
  .reel-ring {
  position: absolute;
  top: 12%; left: 12%; right: 12%; bottom: 12%;
@@ -410,7 +403,6 @@
  background: radial-gradient(circle at 35% 35%, #8a8070 0%, #6a6050 60%, #4a4030 100%);
  }
 
- /* 凹槽纹路 */
  .reel-groove {
  position: absolute;
  top: 22%; left: 22%; right: 22%; bottom: 22%;
@@ -425,7 +417,6 @@
  background: radial-gradient(circle at 35% 35%, #7a7060 0%, #5a5040 80%, #3a3020 100%);
  }
 
- /* 中心轴孔 */
  .reel-center-hole {
  position: absolute;
  top: 50%; left: 50%;
@@ -445,7 +436,6 @@
  border: 1px solid #2a2520;
  }
 
- /* 中心轴内六角/十字装饰 */
  .reel-center-hole::after {
  content: '✚';
  position: absolute;
@@ -458,7 +448,6 @@
  pointer-events: none;
  }
 
- /* 7个齿钉围绕中心 */
  .reel-tooth {
  position: absolute;
  width: 12%; height: 14%;
@@ -477,7 +466,6 @@
  background: radial-gradient(ellipse at 30% 30%, #5a5040 0%, #3a3020 100%);
  }
 
- /* 7齿均匀分布（模拟真实磁带主轴齿轮） */
  .reel-tooth:nth-child(1) { transform: rotate(0deg) translateY(-115%); }
  .reel-tooth:nth-child(2) { transform: rotate(51.428deg) translateY(-115%); }
  .reel-tooth:nth-child(3) { transform: rotate(102.857deg) translateY(-115%); }
@@ -568,7 +556,7 @@
  0 1px 0 rgba(255,255,255,0.1);
  }
 
- /* ========== 底部按钮区域 - 占 20% 高度，按钮占满整个区域 ========== */
+ /* ========== 底部按钮区域 - 占 20% 高度 ========== */
  .buttons-area {
  flex: 1; /* 20% 高度 */
  width: 100%;
@@ -817,6 +805,85 @@
  <div class="tip-bubble" id="tipBubble"></div>
 
  <script>
+ // ========== 磁带尺寸自适应核心逻辑 ==========
+ function updateCassetteSize() {
+ const cassetteArea = document.querySelector('.cassette-area');
+ const cassette = document.getElementById('cassette');
+ if (!cassetteArea || !cassette) return;
+ 
+ const areaRect = cassetteArea.getBoundingClientRect();
+ const areaWidth = areaRect.width;
+ const areaHeight = areaRect.height;
+ const aspectRatio = 1.6; // 宽高比 宽:高 = 1.6:1
+ 
+ let cassetteWidth, cassetteHeight;
+ 
+ // 判断网页宽高比（使用视口宽高）
+ const viewportWidth = window.innerWidth;
+ const viewportHeight = window.innerHeight;
+ 
+ if (viewportWidth >= viewportHeight) {
+ // 横屏模式：磁带上下边距离边缘15px，先确定高度，宽度 = 高度 × 1.6
+ cassetteHeight = areaHeight - 30; // 上下各15px边距
+ if (cassetteHeight < 0) cassetteHeight = areaHeight;
+ cassetteWidth = cassetteHeight * aspectRatio;
+ // 确保宽度不超过区域宽度
+ if (cassetteWidth > areaWidth) {
+ cassetteWidth = areaWidth - 30;
+ cassetteHeight = cassetteWidth / aspectRatio;
+ }
+ } else {
+ // 竖屏模式：磁带左右边距离边缘15px，先确定宽度，高度 = 宽度 ÷ 1.6
+ cassetteWidth = areaWidth - 30; // 左右各15px边距
+ if (cassetteWidth < 0) cassetteWidth = areaWidth;
+ cassetteHeight = cassetteWidth / aspectRatio;
+ // 确保高度不超过区域高度
+ if (cassetteHeight > areaHeight) {
+ cassetteHeight = areaHeight - 30;
+ cassetteWidth = cassetteHeight * aspectRatio;
+ }
+ }
+ 
+ // 应用尺寸
+ cassette.style.width = cassetteWidth + 'px';
+ cassette.style.height = cassetteHeight + 'px';
+ 
+ // 调整文字字号
+ adjustSongFontSize();
+ }
+ 
+ // 动态调整歌曲名字号：为其所在白色区域高度的40%
+ function adjustSongFontSize() {
+ const songInfoDisplay = document.getElementById('songInfoArea');
+ const tapeSongLine = document.getElementById('tapeSongLine');
+ if (songInfoDisplay && tapeSongLine) {
+ const containerHeight = songInfoDisplay.clientHeight;
+ if (containerHeight > 0) {
+ const fontSize = containerHeight * 0.4;
+ tapeSongLine.style.fontSize = fontSize + 'px';
+ }
+ }
+ }
+ 
+ // 监听resize和orientation变化
+ let sizeTimer;
+ window.addEventListener('resize', () => {
+ if (sizeTimer) clearTimeout(sizeTimer);
+ sizeTimer = setTimeout(() => {
+ updateCassetteSize();
+ // 更新进度条位置
+ if (audio.duration && !isNaN(audio.duration) && audio.duration > 0 && isPlaying) updateSliderProgress();
+ else resetSliderToStart();
+ const lineEl = document.getElementById('tapeSongLine');
+ if (lineEl && lineEl.currentFullText) updateMarquee(lineEl, lineEl.currentFullText);
+ }, 50);
+ });
+ 
+ // 监听屏幕旋转
+ window.addEventListener('orientationchange', () => {
+ setTimeout(updateCassetteSize, 30);
+ });
+ 
  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
  
  function playClickSound() {
@@ -845,26 +912,8 @@
  oscillator.start(audioContext.currentTime);
  oscillator.stop(audioContext.currentTime + 0.15);
  }
-
- // 动态调整歌曲名字号：为其所在白色区域高度的40%（并实时响应窗口变化）
- function adjustSongFontSize() {
- const songInfoDisplay = document.getElementById('songInfoArea');
- const tapeSongLine = document.getElementById('tapeSongLine');
- if (songInfoDisplay && tapeSongLine) {
- const containerHeight = songInfoDisplay.clientHeight;
- if (containerHeight > 0) {
- const fontSize = containerHeight * 0.4;
- tapeSongLine.style.fontSize = fontSize + 'px';
- }
- }
- }
  
- // 监听resize、旋转和初始加载时调整字号
- window.addEventListener('resize', () => {
- adjustSongFontSize();
- });
- 
- // 使用 ResizeObserver 确保白色区域高度变化时也能实时调整（更精确）
+ // 使用 ResizeObserver 确保白色区域高度变化时也能实时调整
  const resizeObserver = new ResizeObserver(() => {
  adjustSongFontSize();
  });
@@ -894,18 +943,6 @@
  function resetSliderToStart() {
  if (progressSlider) progressSlider.style.left = '0px';
  }
- 
- let resizeTimer;
- window.addEventListener('resize', () => {
- if (resizeTimer) clearTimeout(resizeTimer);
- resizeTimer = setTimeout(() => {
- if (audio.duration && !isNaN(audio.duration) && audio.duration > 0 && isPlaying) updateSliderProgress();
- else resetSliderToStart();
- const lineEl = document.getElementById('tapeSongLine');
- if (lineEl && lineEl.currentFullText) updateMarquee(lineEl, lineEl.currentFullText);
- adjustSongFontSize();
- }, 100);
- });
  
  function updateWheelSpin() {
  if (isPlaying) {
@@ -956,7 +993,7 @@
  setTimeout(() => {
  setScrollingText(lineEl, song.name);
  container.style.opacity = '1';
- adjustSongFontSize(); // 更新完文字后重新调整字号
+ adjustSongFontSize();
  }, 150);
  document.title = song.name;
  }
@@ -1153,7 +1190,7 @@
  fetch('https://radio.hellyell.com/qiche-musiclist.json').then(r => r.json())
  ]);
  const all = [...hj, ...qc];
- // 剔除 HellYell 怀旧电台 和 HellYell 汽车电台 两个MP3
+ // 剔除 HellYell 怀旧电台 和 HellYell 汽车电台
  allSongs = all.filter(item => {
  const singer = item.name.split(' - ')[0];
  return singer !== 'HellYell 怀旧电台' && 
@@ -1185,6 +1222,9 @@
  
  updateWheelSpin();
  setTimeout(resetSliderToStart, 100);
+ 
+ // 初始化磁带尺寸
+ updateCassetteSize();
  }
 
  window.onload = init;
