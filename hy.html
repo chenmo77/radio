@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>HellYell 音乐电台</title>
+    <!-- 汇文明朝体字体 -->
+    <link href="https://fontsapi.zeoseven.com/256/main/result.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        body {
+            background: #1a1a1a;
+            font-family: "Huiwen-mincho", 'Arial', 'MiSans', 'Microsoft YaHei', serif;
+            font-weight: normal;
+            display: flex;
+            flex-direction: column;
+            transition: background 0.3s ease;
+        }
+
+        /* ========== 浅色模式样式 ========== */
+        body.light-mode {
+            background: #f5f5f0;
+        }
+        body.light-mode .song-name {
+            color: #cc3333;
+            text-shadow: 0 0 4px rgba(204,51,51,0.2);
+        }
+        body.light-mode .artist-name {
+            color: #000000;
+        }
+        body.light-mode .btn-circle {
+            border-color: #666666;
+        }
+        body.light-mode .btn-circle:hover {
+            border-color: #000000;
+            box-shadow: 0 0 16px rgba(0,0,0,0.3);
+        }
+        body.light-mode .next-icon {
+            color: #666666;
+        }
+        body.light-mode .btn-circle:hover .next-icon {
+            color: #000000;
+        }
+        body.light-mode .theme-icon {
+            color: #666666;
+        }
+        body.light-mode .btn-circle.theme-btn:hover .theme-icon {
+            color: #000000;
+        }
+        body.light-mode .pause-icon .bar {
+            background: #666666;
+        }
+        body.light-mode .btn-circle:hover .pause-icon .bar {
+            background: #000000;
+        }
+        body.light-mode .play-icon {
+            border-color: transparent transparent transparent #cc3333;
+        }
+        body.light-mode .volume-slider-horizontal {
+            background: rgba(0,0,0,0.15);
+        }
+        body.light-mode .volume-fill-horizontal {
+            background: #666666;
+        }
+        body.light-mode .volume-knob-horizontal {
+            background: #666666;
+            box-shadow: 0 0 4px rgba(0,0,0,0.3);
+        }
+        body.light-mode .volume-slider-horizontal:hover .volume-fill-horizontal {
+            background: #000000;
+        }
+        body.light-mode .volume-slider-horizontal:hover .volume-knob-horizontal {
+            background: #000000;
+        }
+        body.light-mode .progress-bar-container {
+            background: rgba(0,0,0,0.1);
+        }
+        body.light-mode .progress-fill {
+            background: #cc3333;
+        }
+        body.light-mode .tip-bubble {
+            background: rgba(30,25,20,0.9);
+            color: #f0e8d8;
+            border-color: rgba(0,0,0,0.2);
+        }
+
+        /* ========== 深色模式样式 ========== */
+        body.dark-mode .btn-circle {
+            border-color: #888888;
+        }
+        body.dark-mode .btn-circle:hover {
+            border-color: #ffffff;
+            box-shadow: 0 0 16px rgba(255,255,255,0.5);
+        }
+        
+        /* 下一首图标 */
+        body.dark-mode .next-icon {
+            color: #888888;
+        }
+        body.dark-mode .btn-circle:hover .next-icon {
+            color: #ffffff;
+        }
+        
+        /* 深浅色切换图标 */
+        body.dark-mode .theme-icon {
+            color: #888888;
+        }
+        body.dark-mode .btn-circle.theme-btn:hover .theme-icon {
+            color: #ffffff;
+        }
+        
+        /* ===== 暂停图标 - 深色模式下与按钮圆环颜色一致 (#888888) ===== */
+        /* 必须使用 !important 并且直接针对 .bar 元素 */
+        body.dark-mode .pause-icon .bar {
+            background-color: #888888 !important;
+        }
+        body.dark-mode .btn-circle:hover .pause-icon .bar {
+            background-color: #ffffff !important;
+        }
+        
+        /* 播放图标保持红色 */
+        body.dark-mode .play-icon {
+            border-color: transparent transparent transparent #ff4444 !important;
+        }
+        
+        /* 音量滑块 */
+        body.dark-mode .volume-slider-horizontal {
+            background: rgba(255,255,255,0.15);
+        }
+        body.dark-mode .volume-fill-horizontal {
+            background: #888888;
+        }
+        body.dark-mode .volume-knob-horizontal {
+            background: #888888;
+            box-shadow: 0 0 4px rgba(255,255,255,0.3);
+        }
+        body.dark-mode .volume-slider-horizontal:hover .volume-fill-horizontal {
+            background: #ffffff;
+        }
+        body.dark-mode .volume-slider-horizontal:hover .volume-knob-horizontal {
+            background: #ffffff;
+        }
+        
+        /* 进度条 */
+        body.dark-mode .progress-bar-container {
+            background: rgba(255,255,255,0.15);
+        }
+        body.dark-mode .progress-fill {
+            background: #ff4444;
+        }
+
+        /* ========== 通用布局样式 ========== */
+        .main-container {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .unified-layout {
+            display: flex;
+            flex: 1;
+            width: 100%;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .top-section {
+            height: 70%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            gap: 15px;
+        }
+        .song-name {
+            font-size: clamp(30px, 9vh, 72px);
+            font-weight: normal;
+            color: #ff4444;
+            text-align: center;
+            word-break: break-word;
+            width: 100%;
+            text-shadow: 0 0 8px rgba(255,68,68,0.3);
+            line-height: 1.3;
+            font-family: "Huiwen-mincho", serif;
+        }
+        .artist-name {
+            font-size: clamp(24px, 6vh, 48px);
+            font-weight: normal;
+            color: #ffffff;
+            text-align: center;
+            word-break: break-word;
+            width: 100%;
+            opacity: 0.9;
+            line-height: 1.3;
+            font-family: "Huiwen-mincho", serif;
+        }
+
+        .bottom-section {
+            height: 30%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            padding: 15px;
+        }
+
+        .btn-circle {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 8px solid rgba(255,255,255,0.8);
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .btn-circle:hover {
+            transform: scale(1.05);
+        }
+        
+        .play-icon {
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 14px 0 14px 24px;
+            border-color: transparent transparent transparent #ff4444;
+            margin-left: 6px;
+        }
+        
+        .pause-icon {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            justify-content: center;
+        }
+        .pause-icon .bar {
+            width: 6px;
+            height: 28px;
+            border-radius: 2px;
+            transition: background 0.2s ease;
+        }
+        
+        /* 默认模式（深色模式的基础值） */
+        .next-icon {
+            font-size: 38px;
+            line-height: 1;
+            transition: color 0.2s ease;
+            font-weight: normal;
+            color: rgba(255,255,255,0.8);
+        }
+        .theme-icon {
+            font-size: 32px;
+            line-height: 1;
+            transition: transform 0.2s ease, color 0.2s ease;
+            font-weight: normal;
+            color: rgba(255,255,255,0.8);
+        }
+        .btn-circle.theme-btn:hover .theme-icon {
+            transform: rotate(15deg);
+        }
+        
+        /* 默认模式暂停图标的默认颜色（深色模式下会显示这个） */
+        .pause-icon .bar {
+            background: rgba(255,255,255,0.8);
+        }
+        
+        .volume-slider-horizontal {
+            width: 140px;
+            height: 8px;
+            border-radius: 4px;
+            position: relative;
+            cursor: pointer;
+            background: rgba(255,255,255,0.2);
+        }
+        .volume-fill-horizontal {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 60%;
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.05s linear, background 0.2s ease;
+            background: rgba(255,255,255,0.8);
+        }
+        .volume-knob-horizontal {
+            position: absolute;
+            left: 60%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: left 0.05s linear, background 0.2s ease;
+            background: rgba(255,255,255,0.9);
+            box-shadow: 0 0 6px rgba(255,255,255,0.5);
+        }
+
+        .progress-bar-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            z-index: 100;
+            background: rgba(0,0,0,0.1);
+        }
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            border-radius: 0 4px 4px 0;
+            transition: width 0.05s linear;
+            background: #ff4444;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .btn-circle { width: 55px; height: 55px; border-width: 6px; }
+            .play-icon { border-width: 10px 0 10px 18px; }
+            .pause-icon .bar { width: 5px; height: 22px; gap: 5px; }
+            .next-icon { font-size: 30px; }
+            .theme-icon { font-size: 26px; }
+            .volume-slider-horizontal { width: 110px; height: 6px; }
+            .volume-knob-horizontal { width: 14px; height: 14px; }
+            .song-name { font-size: clamp(24px, 7vh, 56px); }
+            .artist-name { font-size: clamp(18px, 5vh, 40px); }
+        }
+
+        @media (max-width: 560px) {
+            .btn-circle { width: 48px; height: 48px; border-width: 5px; }
+            .play-icon { border-width: 9px 0 9px 16px; }
+            .pause-icon .bar { width: 4px; height: 18px; gap: 4px; }
+            .next-icon { font-size: 26px; }
+            .theme-icon { font-size: 22px; }
+            .volume-slider-horizontal { width: 90px; height: 5px; }
+            .volume-knob-horizontal { width: 12px; height: 12px; }
+            .song-name { font-size: clamp(20px, 6vh, 42px); }
+            .artist-name { font-size: clamp(16px, 4vh, 32px); }
+        }
+
+        @media (max-width: 480px) {
+            .bottom-section { gap: 15px; padding: 10px; }
+            .btn-circle { width: 42px; height: 42px; border-width: 4px; }
+            .play-icon { border-width: 8px 0 8px 14px; }
+            .pause-icon .bar { width: 3px; height: 16px; gap: 3px; }
+            .next-icon { font-size: 22px; }
+            .theme-icon { font-size: 18px; }
+            .volume-slider-horizontal { width: 70px; }
+        }
+
+        .tip-bubble {
+            position: fixed;
+            background: rgba(30,25,20,0.95);
+            color: #f0e8d8;
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            font-family: monospace;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            border: 1px solid rgba(180,160,130,0.2);
+        }
+        .tip-bubble.show { opacity: 1; }
+    </style>
+</head>
+<body>
+<div class="main-container">
+    <div class="unified-layout">
+        <div class="top-section">
+            <div class="song-name" id="songName">欢迎收听</div>
+            <div class="artist-name" id="artistName">HellYell Radio</div>
+        </div>
+        <div class="bottom-section">
+            <div class="btn-circle" id="playBtn">
+                <span id="playIcon" class="play-icon"></span>
+                <span id="pauseIcon" class="pause-icon" style="display:none;">
+                    <span class="bar"></span><span class="bar"></span>
+                </span>
+            </div>
+            <div class="btn-circle" id="nextBtn">
+                <span class="next-icon">⏭</span>
+            </div>
+            <div class="btn-circle theme-btn" id="themeBtn">
+                <span class="theme-icon" id="themeIcon">◐</span>
+            </div>
+            <div class="volume-slider-horizontal" id="volumeSliderHorizontal">
+                <div class="volume-fill-horizontal" id="volumeFillHorizontal"></div>
+                <div class="volume-knob-horizontal" id="volumeKnobHorizontal"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="progress-bar-container" id="progressBarContainer">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+</div>
+
+<div class="tip-bubble" id="tipBubble"></div>
+
+<script>
+    const audio = new Audio();
+    audio.preload = "auto";
+    let allSongs = [];
+    let currentSong = null;
+    let isPlaying = false;
+    let normalCount = 0;
+    let hasStarted = false;
+    let isSwitching = false;
+    let loadTimer = null;
+    let volume = 0.6;
+    const promoSong = { name: "HellYell Radio - 欢迎收听", url: "https://radio.hellyell.com/hy.mp3" };
+    const BUFFER_TIMEOUT = 5000;
+
+    function setTheme(theme) {
+        if (theme === 'light') {
+            document.body.classList.add('light-mode');
+            const icons = document.querySelectorAll('.theme-icon');
+            icons.forEach(icon => icon.textContent = '◑');
+            localStorage.setItem('radioTheme', 'light');
+        } else {
+            document.body.classList.remove('light-mode');
+            const icons = document.querySelectorAll('.theme-icon');
+            icons.forEach(icon => icon.textContent = '◐');
+            localStorage.setItem('radioTheme', 'dark');
+        }
+    }
+    
+    function toggleTheme() {
+        const isLight = document.body.classList.contains('light-mode');
+        if (isLight) setTheme('dark');
+        else setTheme('light');
+    }
+    
+    const savedTheme = localStorage.getItem('radioTheme');
+    if (savedTheme === 'light') setTheme('light');
+    else setTheme('dark');
+
+    function playClickSound() {}
+    function playStartSound() {}
+
+    function updateUINew(song) {
+        const parts = song.name.split(' - ');
+        const singer = parts[0] || '';
+        const music = parts.slice(1).join(' - ') || song.name;
+        document.getElementById('songName').innerText = music;
+        document.getElementById('artistName').innerText = singer;
+        document.title = `${music} - ${singer}`;
+    }
+
+    function updateProgress() {
+        const progressFill = document.getElementById('progressFill');
+        if (audio.duration && !isNaN(audio.duration)) {
+            const percent = (audio.currentTime / audio.duration) * 100;
+            progressFill.style.width = percent + '%';
+        }
+    }
+    
+    function resetProgress() {
+        document.getElementById('progressFill').style.width = '0%';
+    }
+
+    function updateVolumeUI() {
+        const percent = volume * 100;
+        const fillH = document.getElementById('volumeFillHorizontal');
+        const knobH = document.getElementById('volumeKnobHorizontal');
+        if (fillH) fillH.style.width = percent + '%';
+        if (knobH) knobH.style.left = percent + '%';
+    }
+
+    function setVolume(value) {
+        volume = Math.min(1, Math.max(0, value));
+        audio.volume = volume;
+        updateVolumeUI();
+    }
+
+    function clearLoadTimer() {
+        if (loadTimer) { clearTimeout(loadTimer); loadTimer = null; }
+    }
+
+    function playSong(song, autoPlay = true) {
+        if (isSwitching) return;
+        isSwitching = true;
+        clearLoadTimer();
+        currentSong = song;
+        updateUINew(song);
+        audio.pause();
+        audio.src = song.url;
+        audio.volume = volume;
+        
+        if (autoPlay && isPlaying) {
+            loadTimer = setTimeout(() => {
+                if (isPlaying && !isSwitching) nextSong();
+            }, BUFFER_TIMEOUT);
+            
+            audio.play().then(() => {
+                clearLoadTimer();
+                isSwitching = false;
+                resetProgress();
+            }).catch(err => {
+                console.error('播放失败:', err);
+                clearLoadTimer();
+                isSwitching = false;
+                setTimeout(() => nextSong(), 500);
+            });
+        } else {
+            isSwitching = false;
+            if (!autoPlay) resetProgress();
+        }
+    }
+
+    function nextSong() {
+        if (isSwitching) return;
+        clearLoadTimer();
+        const next = getNextSong();
+        if (next !== promoSong) normalCount++;
+        playSong(next, isPlaying);
+    }
+
+    function getNextSong() {
+        if (normalCount === 7) { normalCount = 0; return promoSong; }
+        if (allSongs.length === 0) return promoSong;
+        const randomIndex = Math.floor(Math.random() * allSongs.length);
+        return allSongs[randomIndex];
+    }
+
+    function togglePlay() {
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        
+        if (isPlaying) {
+            audio.pause();
+            clearLoadTimer();
+            isPlaying = false;
+            playIcon.style.display = 'inline-flex';
+            pauseIcon.style.display = 'none';
+        } else {
+            isPlaying = true;
+            playIcon.style.display = 'none';
+            pauseIcon.style.display = 'inline-flex';
+            
+            if (!hasStarted) {
+                hasStarted = true;
+                normalCount = 0;
+                playStartSound();
+                playSong(promoSong, true);
+            } else if (currentSong) {
+                clearLoadTimer();
+                loadTimer = setTimeout(() => {
+                    if (isPlaying && !isSwitching) nextSong();
+                }, BUFFER_TIMEOUT);
+                audio.play().catch(err => {
+                    console.error('恢复播放失败:', err);
+                    clearLoadTimer();
+                    nextSong();
+                });
+            } else {
+                playStartSound();
+                playSong(promoSong, true);
+            }
+        }
+    }
+
+    const tipBubble = document.getElementById('tipBubble');
+    function showTip(message, targetBtn) {
+        if (targetBtn && targetBtn.classList && targetBtn.classList.contains('theme-btn')) return;
+        tipBubble.style.left = '50%';
+        tipBubble.style.top = '20%';
+        tipBubble.style.transform = 'translateX(-50%)';
+        tipBubble.textContent = message;
+        tipBubble.classList.add('show');
+        setTimeout(() => tipBubble.classList.remove('show'), 600);
+    }
+
+    function initVolumeControls() {
+        const volSliderH = document.getElementById('volumeSliderHorizontal');
+        
+        const handleHorizontalMove = (e) => {
+            const rect = volSliderH.getBoundingClientRect();
+            let x = (e.clientX - rect.left) / rect.width;
+            x = Math.min(1, Math.max(0, x));
+            setVolume(x);
+        };
+        
+        if (volSliderH) {
+            volSliderH.addEventListener('click', handleHorizontalMove);
+            const knobH = document.getElementById('volumeKnobHorizontal');
+            knobH.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                const onMouseMove = (moveEvent) => {
+                    const rect = volSliderH.getBoundingClientRect();
+                    let x = (moveEvent.clientX - rect.left) / rect.width;
+                    x = Math.min(1, Math.max(0, x));
+                    setVolume(x);
+                };
+                const onMouseUp = () => {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                };
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            });
+        }
+    }
+
+    function initProgressBar() {
+        const progressContainer = document.getElementById('progressBarContainer');
+        progressContainer.addEventListener('click', (e) => {
+            if (audio.duration && !isNaN(audio.duration)) {
+                const rect = progressContainer.getBoundingClientRect();
+                const percent = (e.clientX - rect.left) / rect.width;
+                audio.currentTime = percent * audio.duration;
+            }
+        });
+    }
+
+    function bindButtons() {
+        document.getElementById('playBtn').onclick = () => togglePlay();
+        document.getElementById('nextBtn').onclick = () => { if (!isSwitching) nextSong(); };
+        document.getElementById('themeBtn').onclick = () => toggleTheme();
+    }
+
+    audio.addEventListener('ended', () => { if (!isSwitching && isPlaying) nextSong(); });
+    audio.addEventListener('error', () => { if (!isSwitching && isPlaying) { clearLoadTimer(); nextSong(); } });
+    audio.addEventListener('timeupdate', () => { if (isPlaying) updateProgress(); });
+    audio.addEventListener('play', () => { setTimeout(() => updateProgress(), 50); });
+
+    async function init() {
+        try {
+            const [hj, qc] = await Promise.all([
+                fetch('https://radio.hellyell.com/huaijiu-musiclist.json').then(r => r.json()),
+                fetch('https://radio.hellyell.com/qiche-musiclist.json').then(r => r.json())
+            ]);
+            const all = [...hj, ...qc];
+            allSongs = all.filter(item => {
+                const singer = item.name.split(' - ')[0];
+                return singer !== 'HellYell 怀旧电台' && 
+                       singer !== 'HellYell 汽车电台' && 
+                       singer !== 'HellYell怀旧电台' && 
+                       singer !== 'HellYell汽车电台' && 
+                       item.url && item.url.startsWith('http');
+            });
+            console.log(`加载了 ${allSongs.length} 首歌曲`);
+        } catch(e) { console.error('加载失败', e); allSongs = []; }
+        
+        updateUINew(promoSong);
+        hasStarted = false;
+        isPlaying = false;
+        currentSong = null;
+        normalCount = 0;
+        audio.volume = volume;
+        updateVolumeUI();
+        bindButtons();
+        initVolumeControls();
+        initProgressBar();
+    }
+    
+    window.onload = init;
+</script>
+</body>
+</html>
