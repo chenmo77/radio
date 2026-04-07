@@ -210,7 +210,6 @@
  z-index: 1;
  }
 
- /* 让 HY6 的布局与 A SIDE 保持一致 */
  .c60-badge {
  font-size: clamp(11px, 2.3vw, 16px);
  }
@@ -279,7 +278,7 @@
  100% { transform: translateX(-50%); }
  }
 
- /* ========== 磁带窗口区域 - 保留原有美观设计，调整齿轮比例 ========== */
+ /* ========== 磁带窗口区域 ========== */
  .window-area {
  width: 75%;
  margin: 1% auto;
@@ -330,7 +329,7 @@
  border: 3px solid #1a1510;
  }
 
- /* ========== 磁带齿轮 - 真实磁带比例：齿轮直径约为观察窗宽度的28%，两齿轮间距适中 ========== */
+ /* ========== 磁带齿轮 ========== */
  .reel {
  position: relative;
  border-radius: 50%;
@@ -460,10 +459,9 @@
  .reel.spinning { animation: spinReel 2.0s linear infinite; }
  @keyframes spinReel { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
+ /* ========== 进度条区域 - 根据齿轮半径和圆心距精确计算宽度 ========== */
  .tape-middle {
- flex: 1;
- height: 50%;
- position: relative;
+ position: absolute;
  display: flex;
  align-items: center;
  justify-content: center;
@@ -471,14 +469,15 @@
  }
 
  .progress-bar-bg {
- width: 100%; height: 100%;
  background: linear-gradient(90deg, #6a4a2a 0%, #8b5a2b 50%, #6a4a2a 100%);
  border-radius: 3px;
  box-shadow: 
  inset 0 3px 8px rgba(0,0,0,0.6),
  0 1px 0 rgba(255,255,255,0.1);
- position: relative; overflow: visible;
+ position: relative;
+ overflow: visible;
  border: 1px solid #4a3520;
+ /* 宽高由JS动态设置 */
  }
 
  body.dark-mode .progress-bar-bg {
@@ -488,9 +487,11 @@
 
  .progress-slider {
  position: absolute;
- width: 16px; height: 100%;
+ width: 16px;
+ height: 100%;
  background: linear-gradient(180deg, #ffffff 0%, #e8dcc8 50%, #d0c0a8 100%);
- left: 0%; top: 0;
+ left: 0%;
+ top: 0;
  transform: translateX(0);
  transition: left 0.05s linear;
  pointer-events: none;
@@ -733,7 +734,7 @@
  <div class="reel-center-hole"></div>
  </div>
  
- <div class="tape-middle">
+ <div class="tape-middle" id="tapeMiddle">
  <div class="progress-bar-bg" id="progressBarBg">
  <div class="progress-slider" id="progressSlider"></div>
  </div>
@@ -818,15 +819,11 @@
  cassette.style.width = cassetteWidth + 'px';
  cassette.style.height = cassetteHeight + 'px';
  
- // 更新标签区域内部元素高度（A SIDE、白色区域、HY6 三者等高）
  updateLabelAreaHeight();
- // 更新观察窗和齿轮尺寸（真实磁带比例）
  updateWindowAndReelSize();
- // 调整文字字号
  adjustSongFontSize();
  }
  
- // 让歌曲信息白色区域和 HY6 的高度与 side-badge 保持一致
  function updateLabelAreaHeight() {
  const sideBadge = document.getElementById('sideBadge');
  const songInfoDisplay = document.getElementById('songInfoArea');
@@ -843,24 +840,21 @@
  }
  }
  
- // 根据观察窗尺寸设置齿轮直径（真实磁带比例：齿轮直径约为观察窗宽度的28%，保持视觉舒适）
+ // 根据观察窗尺寸设置齿轮直径
  function updateWindowAndReelSize() {
  const windowArea = document.getElementById('windowArea');
  const leftReel = document.getElementById('leftReel');
  const rightReel = document.getElementById('rightReel');
  if (!windowArea || !leftReel || !rightReel) return;
  
- // 先重置窗口高度为auto，以便获取正确的高度
  windowArea.style.height = 'auto';
  const windowWidth = windowArea.clientWidth;
  const windowHeight = windowArea.clientHeight;
  
  if (windowWidth > 0 && windowHeight > 0) {
- // 真实磁带中齿轮直径约占观察窗宽度的28%，同时不超过观察窗高度的80%
  let reelSize = windowWidth * 0.28;
  const maxReelSize = windowHeight * 0.8;
  if (reelSize > maxReelSize) reelSize = maxReelSize;
- // 确保齿轮不会太大也不会太小
  if (reelSize < windowHeight * 0.3) reelSize = windowHeight * 0.4;
  
  leftReel.style.width = reelSize + 'px';
@@ -868,9 +862,62 @@
  rightReel.style.width = reelSize + 'px';
  rightReel.style.height = reelSize + 'px';
  }
+ 
+ updateProgressBarPositionAndWidth();
  }
  
- // 动态调整歌曲名字号：为其所在白色区域高度的40%
+ // 根据两个转轴圆心之间的距离和齿轮半径精确计算进度条宽度和位置
+ // 公式：进度条宽度 = 两圆心距离 - 2 × 齿轮半径 - 20px
+ function updateProgressBarPositionAndWidth() {
+ const leftReel = document.getElementById('leftReel');
+ const rightReel = document.getElementById('rightReel');
+ const tapeMiddle = document.getElementById('tapeMiddle');
+ const progressBarBg = document.getElementById('progressBarBg');
+ const windowArea = document.getElementById('windowArea');
+ 
+ if (!leftReel || !rightReel || !tapeMiddle || !progressBarBg || !windowArea) return;
+ 
+ // 获取左右齿轮的中心点坐标和半径
+ const leftRect = leftReel.getBoundingClientRect();
+ const rightRect = rightReel.getBoundingClientRect();
+ const windowRect = windowArea.getBoundingClientRect();
+ 
+ const leftCenterX = leftRect.left + leftRect.width / 2;
+ const rightCenterX = rightRect.left + rightRect.width / 2;
+ const reelRadius = leftRect.width / 2; // 齿轮半径（像素）
+ 
+ // 两圆心之间的距离
+ const distanceBetweenCenters = rightCenterX - leftCenterX;
+ 
+ // 进度条宽度 = 两圆心距离 - 2 × 齿轮半径 - 20px
+ let barWidth = distanceBetweenCenters - (2 * reelRadius) - 20;
+ if (barWidth < 20) barWidth = 20; // 最小宽度保护
+ 
+ // 进度条高度为观察窗高度的40%
+ const barHeight = windowArea.clientHeight * 0.4;
+ 
+ // 进度条起始X坐标 = 左齿轮圆心X + 齿轮半径 + 10px
+ const startX = leftCenterX - windowRect.left + reelRadius + 10;
+ 
+ // 设置进度条容器的位置和尺寸
+ tapeMiddle.style.position = 'absolute';
+ tapeMiddle.style.left = startX + 'px';
+ tapeMiddle.style.top = (windowArea.clientHeight - barHeight) / 2 + 'px';
+ tapeMiddle.style.width = barWidth + 'px';
+ tapeMiddle.style.height = barHeight + 'px';
+ 
+ // 设置进度条背景
+ progressBarBg.style.width = '100%';
+ progressBarBg.style.height = '100%';
+ 
+ // 重新调整滑块位置
+ if (audio.duration && !isNaN(audio.duration) && audio.duration > 0 && isPlaying) {
+ updateSliderProgress();
+ } else {
+ resetSliderToStart();
+ }
+ }
+ 
  function adjustSongFontSize() {
  const songInfoDisplay = document.getElementById('songInfoArea');
  const tapeSongLine = document.getElementById('tapeSongLine');
@@ -883,26 +930,30 @@
  }
  }
  
- // 使用 ResizeObserver 监听 side-badge 高度变化
+ // 监听side-badge高度变化
  const sideBadgeObserver = new ResizeObserver(() => {
  updateLabelAreaHeight();
  adjustSongFontSize();
  });
  const sideBadge = document.getElementById('sideBadge');
- if (sideBadge) {
- sideBadgeObserver.observe(sideBadge);
- }
+ if (sideBadge) sideBadgeObserver.observe(sideBadge);
  
- // 使用 ResizeObserver 监听观察窗尺寸变化，更新齿轮尺寸
+ // 监听观察窗尺寸变化
  const windowObserver = new ResizeObserver(() => {
  updateWindowAndReelSize();
  });
- const windowArea = document.getElementById('windowArea');
- if (windowArea) {
- windowObserver.observe(windowArea);
- }
+ const windowAreaEl = document.getElementById('windowArea');
+ if (windowAreaEl) windowObserver.observe(windowAreaEl);
  
- // 监听resize和orientation变化
+ // 监听左右齿轮尺寸变化（齿轮尺寸变化会影响进度条位置）
+ const reelObserver = new ResizeObserver(() => {
+ updateProgressBarPositionAndWidth();
+ });
+ const leftReelEl = document.getElementById('leftReel');
+ const rightReelEl = document.getElementById('rightReel');
+ if (leftReelEl) reelObserver.observe(leftReelEl);
+ if (rightReelEl) reelObserver.observe(rightReelEl);
+ 
  let sizeTimer;
  window.addEventListener('resize', () => {
  if (sizeTimer) clearTimeout(sizeTimer);
@@ -948,17 +999,17 @@
  oscillator.stop(audioContext.currentTime + 0.15);
  }
  
- const leftReel = document.getElementById('leftReel');
- const rightReel = document.getElementById('rightReel');
+ const leftReelSpin = document.getElementById('leftReel');
+ const rightReelSpin = document.getElementById('rightReel');
  const progressSlider = document.getElementById('progressSlider');
- const progressBarBg = document.getElementById('progressBarBg');
- const cassette = document.getElementById('cassette');
+ const progressBarBgEl = document.getElementById('progressBarBg');
+ const cassetteEl = document.getElementById('cassette');
  
  function updateSliderProgress() {
- if (!progressSlider || !progressBarBg) return;
+ if (!progressSlider || !progressBarBgEl) return;
  if (audio.duration && !isNaN(audio.duration) && audio.duration > 0 && isPlaying) {
  const percent = Math.min(1, Math.max(0, audio.currentTime / audio.duration));
- const containerWidth = progressBarBg.clientWidth;
+ const containerWidth = progressBarBgEl.clientWidth;
  const sliderWidth = progressSlider.clientWidth;
  const maxLeft = containerWidth - sliderWidth;
  const newLeft = percent * maxLeft;
@@ -972,13 +1023,13 @@
  
  function updateWheelSpin() {
  if (isPlaying) {
- leftReel.classList.add('spinning');
- rightReel.classList.add('spinning');
- cassette.classList.add('playing');
+ leftReelSpin.classList.add('spinning');
+ rightReelSpin.classList.add('spinning');
+ cassetteEl.classList.add('playing');
  } else {
- leftReel.classList.remove('spinning');
- rightReel.classList.remove('spinning');
- cassette.classList.remove('playing');
+ leftReelSpin.classList.remove('spinning');
+ rightReelSpin.classList.remove('spinning');
+ cassetteEl.classList.remove('playing');
  }
  }
 
@@ -1095,16 +1146,12 @@
  playBtn.classList.add('paused-state');
  updateWheelSpin();
  } else {
- if (audioContext.state === 'suspended') {
- audioContext.resume();
- }
- 
+ if (audioContext.state === 'suspended') audioContext.resume();
  isPlaying = true;
  playIconSpan.style.display = 'none';
  pauseIconSpan.style.display = 'inline-flex';
  playBtn.classList.remove('paused-state');
  updateWheelSpin();
- 
  if (!hasStarted) {
  hasStarted = true;
  normalCount = 0;
@@ -1184,30 +1231,11 @@
  audio.addEventListener('timeupdate', () => { if (isPlaying && audio.duration && !isNaN(audio.duration)) updateSliderProgress(); });
  audio.addEventListener('play', () => { setTimeout(() => { if (isPlaying) updateSliderProgress(); }, 50); });
 
- document.getElementById('volMinusBtn').addEventListener('click', () => {
- playClickSound();
- volumeDown();
- });
- 
- document.getElementById('volPlusBtn').addEventListener('click', () => {
- playClickSound();
- volumeUp();
- });
- 
- document.getElementById('nextBtn').addEventListener('click', () => {
- playClickSound();
- if (!isSwitching) nextSong();
- });
- 
- document.getElementById('themeToggleBtn').addEventListener('click', () => {
- playClickSound();
- toggleTheme();
- });
- 
- document.getElementById('playBtn').addEventListener('click', () => {
- playClickSound();
- togglePlay();
- });
+ document.getElementById('volMinusBtn').addEventListener('click', () => { playClickSound(); volumeDown(); });
+ document.getElementById('volPlusBtn').addEventListener('click', () => { playClickSound(); volumeUp(); });
+ document.getElementById('nextBtn').addEventListener('click', () => { playClickSound(); if (!isSwitching) nextSong(); });
+ document.getElementById('themeToggleBtn').addEventListener('click', () => { playClickSound(); toggleTheme(); });
+ document.getElementById('playBtn').addEventListener('click', () => { playClickSound(); togglePlay(); });
 
  async function init() {
  try {
@@ -1247,7 +1275,6 @@
  
  updateWheelSpin();
  setTimeout(resetSliderToStart, 100);
- 
  updateCassetteSize();
  }
 
