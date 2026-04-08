@@ -67,7 +67,7 @@
             border-color: transparent transparent transparent #cc3333;
         }
         body.light-mode .progress-bar-container {
-            background: rgba(0,0,0,0.1);
+            background: rgba(0,0,0,0.15);
         }
         body.light-mode .progress-fill {
             background: #cc3333;
@@ -77,7 +77,6 @@
             color: #f0e8d8;
             border-color: rgba(0,0,0,0.2);
         }
-        /* 浅色模式下月亮图标颜色 */
         body.light-mode .moon-icon {
             color: #666666;
         }
@@ -121,12 +120,11 @@
             border-color: transparent transparent transparent #ff4444 !important;
         }
         body.dark-mode .progress-bar-container {
-            background: rgba(255,255,255,0.2) !important;
+            background: rgba(255,255,255,0.2);
         }
         body.dark-mode .progress-fill {
-            background: #ff4444 !important;
+            background: #ff4444;
         }
-        /* 深色模式下太阳图标颜色 */
         body.dark-mode .sun-icon {
             color: #888888;
         }
@@ -141,6 +139,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            position: relative;
         }
 
         /* 统一布局：上中下3行 */
@@ -164,6 +163,18 @@
             gap: 8px;
             overflow-y: auto;
         }
+        
+        /* 歌曲信息渐隐渐显动画容器 */
+        .fade-text {
+            transition: opacity 0.35s ease-in-out;
+            opacity: 1;
+            width: 100%;
+            text-align: center;
+        }
+        .fade-text.fade-out {
+            opacity: 0;
+        }
+        
         .song-name {
             font-weight: normal;
             color: #ff4444;
@@ -192,6 +203,7 @@
             align-items: center;
             gap: 40px;
             padding: 0 20px;
+            position: relative;
         }
 
         /* 按钮样式 */
@@ -207,6 +219,7 @@
             justify-content: center;
             transition: all 0.2s ease;
             flex-shrink: 0;
+            position: relative;
         }
         .btn-circle:hover {
             transform: scale(1.05);
@@ -245,7 +258,7 @@
             color: rgba(255,255,255,0.8);
         }
         
-        /* ===== 太阳图标 - 使用SVG确保任意尺寸不变形 ===== */
+        /* ===== 太阳图标 ===== */
         .sun-icon {
             width: 60%;
             height: 60%;
@@ -259,7 +272,7 @@
             display: block;
         }
         
-        /* ===== 月亮图标 - 使用SVG确保任意尺寸不变形 ===== */
+        /* ===== 月亮图标 ===== */
         .moon-icon {
             width: 60%;
             height: 60%;
@@ -278,7 +291,71 @@
             transform: rotate(15deg);
         }
 
-        /* 全局进度条 */
+        /* ========== 波纹特效优化版 ========== */
+        /* 波纹容器：与播放按钮大小一致，位于按钮正下方 */
+        .wave-ripple-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        /* 波纹圈：起始大小与播放按钮外边缘一致 */
+        .wave-ripple {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid rgba(204, 51, 51, 0.6);
+            opacity: 0;
+            animation: waveExpand 2.2s ease-out infinite;
+            pointer-events: none;
+            display: none;
+            box-sizing: border-box;
+        }
+        
+        /* 播放状态时显示波纹 */
+        .playing-ripple .wave-ripple {
+            display: block;
+        }
+        
+        /* 三层波纹的不同延迟 */
+        .wave-ripple:nth-child(1) {
+            animation-delay: 0s;
+        }
+        .wave-ripple:nth-child(2) {
+            animation-delay: 0.7s;
+        }
+        .wave-ripple:nth-child(3) {
+            animation-delay: 1.4s;
+        }
+        
+        /* 关键帧：从原始大小（贴合按钮边缘）向外扩散 */
+        @keyframes waveExpand {
+            0% {
+                transform: scale(1);
+                opacity: 0.7;
+                border-width: 2px;
+            }
+            100% {
+                transform: scale(2.2);
+                opacity: 0;
+                border-width: 1px;
+            }
+        }
+        
+        /* 深色模式波纹颜色适配 */
+        body.dark-mode .wave-ripple {
+            border-color: rgba(255, 68, 68, 0.7);
+        }
+        
+        /* ========== 底部进度条 ========== */
         .progress-bar-container {
             position: fixed;
             bottom: 0;
@@ -294,6 +371,13 @@
             border-radius: 0 5px 5px 0;
             transition: width 0.05s linear;
         }
+        
+        /* 确保按钮内部图标在波纹之上 */
+        .btn-circle > .play-icon,
+        .btn-circle > .pause-icon {
+            position: relative;
+            z-index: 2;
+        }
 
         /* 响应式调整 */
         @media (max-width: 768px) {
@@ -303,6 +387,7 @@
             .pause-icon .bar { width: 8px; height: 36px; }
             .next-icon { font-size: 48px; }
             .middle-section { gap: 30px; }
+            .wave-ripple { border-width: 1.5px; }
         }
 
         @media (max-width: 560px) {
@@ -347,10 +432,14 @@
 <body>
 <div class="main-container">
     <div class="unified-layout">
-        <!-- 上行：歌曲信息 -->
+        <!-- 上行：歌曲信息（带渐隐渐显动画） -->
         <div class="top-section">
-            <div class="song-name" id="songName">欢迎收听</div>
-            <div class="artist-name" id="artistName">HellYell Radio</div>
+            <div class="fade-text" id="songNameWrapper">
+                <div class="song-name" id="songName">欢迎收听</div>
+            </div>
+            <div class="fade-text" id="artistNameWrapper">
+                <div class="artist-name" id="artistName">HellYell Radio</div>
+            </div>
         </div>
         
         <!-- 中行：按钮区域 -->
@@ -362,7 +451,15 @@
                     </svg>
                 </div>
             </div>
-            <div class="btn-circle" id="playBtn">
+            <!-- 播放按钮容器，波纹特效从按钮边缘向外扩散 -->
+            <div class="btn-circle" id="playBtn" style="position: relative; overflow: visible;">
+                <!-- 波纹特效层：三个波纹圈，从按钮边缘开始扩散 -->
+                <div class="wave-ripple-container" id="waveRippleContainer">
+                    <div class="wave-ripple"></div>
+                    <div class="wave-ripple"></div>
+                    <div class="wave-ripple"></div>
+                </div>
+                <!-- 按钮原有图标 -->
                 <span id="playIcon" class="play-icon"></span>
                 <span id="pauseIcon" class="pause-icon" style="display:none;">
                     <span class="bar"></span><span class="bar"></span>
@@ -374,7 +471,7 @@
         </div>
     </div>
 
-    <!-- 下行：全局进度条 -->
+    <!-- 下行：全局进度条（固定在底部） -->
     <div class="progress-bar-container" id="progressBarContainer">
         <div class="progress-fill" id="progressFill"></div>
     </div>
@@ -416,14 +513,12 @@
         }
     }
 
-    // 主题切换 - 默认浅色模式，显示月亮图标（表示可以切换到深色模式）
-    // 点击月亮进入深色模式，显示太阳图标；点击太阳返回浅色模式，显示月亮图标
+    // 主题切换
     function setTheme(theme) {
         const themeIcon = document.getElementById('themeIcon');
         if (theme === 'dark') {
             document.body.classList.add('dark-mode');
             document.body.classList.remove('light-mode');
-            // 深色模式：显示太阳图标（点击后返回浅色模式）
             themeIcon.className = 'sun-icon';
             themeIcon.innerHTML = `
                 <svg viewBox="0 0 100 100" fill="currentColor">
@@ -442,7 +537,6 @@
         } else {
             document.body.classList.remove('dark-mode');
             document.body.classList.add('light-mode');
-            // 浅色模式：显示月亮图标（点击后进入深色模式）
             themeIcon.className = 'moon-icon';
             themeIcon.innerHTML = `
                 <svg viewBox="0 0 100 100" fill="currentColor">
@@ -464,26 +558,65 @@
     
     const savedTheme = localStorage.getItem('radioTheme');
     if (savedTheme === 'dark') setTheme('dark');
-    else setTheme('light');  // 默认浅色模式
+    else setTheme('light');
 
     function playClickSound() {}
     function playStartSound() {}
 
-    function updateUINew(song) {
+    // ========== 歌曲信息渐显渐隐动画 ==========
+    let isUpdatingText = false;
+    let pendingUpdate = null;
+    
+    function updateUINewWithFade(song) {
         const parts = song.name.split(' - ');
         const singer = parts[0] || '';
         const music = parts.slice(1).join(' - ') || song.name;
         
-        document.getElementById('songName').innerText = music;
-        document.getElementById('artistName').innerText = singer;
-        document.title = `${music} - ${singer}`;
+        const songNameEl = document.getElementById('songName');
+        const artistNameEl = document.getElementById('artistName');
+        const songWrapper = document.getElementById('songNameWrapper');
+        const artistWrapper = document.getElementById('artistNameWrapper');
         
-        setTimeout(adjustFontSize, 10);
+        if (!songNameEl || !artistNameEl) return;
+        
+        if (isUpdatingText) {
+            pendingUpdate = { music, singer };
+            return;
+        }
+        
+        isUpdatingText = true;
+        
+        if (songWrapper) songWrapper.classList.add('fade-out');
+        if (artistWrapper) artistWrapper.classList.add('fade-out');
+        
+        setTimeout(() => {
+            songNameEl.innerText = music;
+            artistNameEl.innerText = singer;
+            document.title = `${music} - ${singer}`;
+            
+            if (songWrapper) songWrapper.classList.remove('fade-out');
+            if (artistWrapper) artistWrapper.classList.remove('fade-out');
+            
+            setTimeout(() => {
+                isUpdatingText = false;
+                adjustFontSize();
+                if (pendingUpdate) {
+                    const next = pendingUpdate;
+                    pendingUpdate = null;
+                    const fakeSong = { name: `${next.singer} - ${next.music}` };
+                    updateUINewWithFade(fakeSong);
+                }
+            }, 50);
+        }, 200);
+    }
+    
+    function updateUINew(song) {
+        updateUINewWithFade(song);
     }
 
     function updateProgress() {
         const progressFill = document.getElementById('progressFill');
-        if (audio.duration && !isNaN(audio.duration)) {
+        if (audio.duration && !isNaN(audio.duration) && isPlaying) {
             const percent = (audio.currentTime / audio.duration) * 100;
             progressFill.style.width = percent + '%';
         }
@@ -500,6 +633,17 @@
 
     function clearLoadTimer() {
         if (loadTimer) { clearTimeout(loadTimer); loadTimer = null; }
+    }
+
+    // 波纹特效控制
+    function updateWaveRipple(playing) {
+        const playBtn = document.getElementById('playBtn');
+        if (!playBtn) return;
+        if (playing) {
+            playBtn.classList.add('playing-ripple');
+        } else {
+            playBtn.classList.remove('playing-ripple');
+        }
     }
 
     function playSong(song, autoPlay = true) {
@@ -521,6 +665,7 @@
                 clearLoadTimer();
                 isSwitching = false;
                 resetProgress();
+                updateWaveRipple(true);
             }).catch(err => {
                 console.error('播放失败:', err);
                 clearLoadTimer();
@@ -558,10 +703,12 @@
             isPlaying = false;
             playIcon.style.display = 'inline-flex';
             pauseIcon.style.display = 'none';
+            updateWaveRipple(false);
         } else {
             isPlaying = true;
             playIcon.style.display = 'none';
             pauseIcon.style.display = 'inline-flex';
+            updateWaveRipple(true);
             
             if (!hasStarted) {
                 hasStarted = true;
@@ -603,12 +750,16 @@
                 const rect = progressContainer.getBoundingClientRect();
                 const percent = (e.clientX - rect.left) / rect.width;
                 audio.currentTime = percent * audio.duration;
+                updateProgress();
             }
         });
     }
 
     function bindButtons() {
-        document.getElementById('playBtn').onclick = () => togglePlay();
+        document.getElementById('playBtn').onclick = (e) => {
+            e.stopPropagation();
+            togglePlay();
+        };
         document.getElementById('nextBtn').onclick = () => { if (!isSwitching) nextSong(); };
         document.getElementById('themeBtn').onclick = () => toggleTheme();
     }
@@ -617,6 +768,13 @@
     audio.addEventListener('error', () => { if (!isSwitching && isPlaying) { clearLoadTimer(); nextSong(); } });
     audio.addEventListener('timeupdate', () => { if (isPlaying) updateProgress(); });
     audio.addEventListener('play', () => { setTimeout(() => updateProgress(), 50); });
+    
+    audio.addEventListener('play', () => {
+        if (isPlaying) updateWaveRipple(true);
+    });
+    audio.addEventListener('pause', () => {
+        if (!isPlaying) updateWaveRipple(false);
+    });
 
     window.addEventListener('resize', () => {
         setTimeout(adjustFontSize, 50);
@@ -657,6 +815,7 @@
         bindButtons();
         initProgressBar();
         adjustFontSize();
+        updateWaveRipple(false);
     }
     
     window.onload = init;
