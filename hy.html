@@ -72,21 +72,15 @@
         body.light-mode .play-icon {
             border-color: transparent transparent transparent #cc3333;
         }
-        body.light-mode .volume-slider-horizontal {
-            background: rgba(0,0,0,0.15);
+        body.light-mode .volume-slider-container {
+            background: rgba(0,0,0,0.1);
         }
-        body.light-mode .volume-fill-horizontal {
+        body.light-mode .volume-fill {
             background: #666666;
         }
-        body.light-mode .volume-knob-horizontal {
+        body.light-mode .volume-knob {
             background: #666666;
             box-shadow: 0 0 4px rgba(0,0,0,0.3);
-        }
-        body.light-mode .volume-slider-horizontal:hover .volume-fill-horizontal {
-            background: #000000;
-        }
-        body.light-mode .volume-slider-horizontal:hover .volume-knob-horizontal {
-            background: #000000;
         }
         body.light-mode .progress-bar-container {
             background: rgba(0,0,0,0.1);
@@ -108,56 +102,37 @@
             border-color: #ffffff;
             box-shadow: 0 0 16px rgba(255,255,255,0.5);
         }
-        
-        /* 下一首图标 */
         body.dark-mode .next-icon {
             color: #888888;
         }
         body.dark-mode .btn-circle:hover .next-icon {
             color: #ffffff;
         }
-        
-        /* 深浅色切换图标 */
         body.dark-mode .theme-icon {
             color: #888888;
         }
         body.dark-mode .btn-circle.theme-btn:hover .theme-icon {
             color: #ffffff;
         }
-        
-        /* ===== 暂停图标 - 深色模式下与按钮圆环颜色一致 (#888888) ===== */
-        /* 必须使用 !important 并且直接针对 .bar 元素 */
         body.dark-mode .pause-icon .bar {
             background-color: #888888 !important;
         }
         body.dark-mode .btn-circle:hover .pause-icon .bar {
             background-color: #ffffff !important;
         }
-        
-        /* 播放图标保持红色 */
         body.dark-mode .play-icon {
             border-color: transparent transparent transparent #ff4444 !important;
         }
-        
-        /* 音量滑块 */
-        body.dark-mode .volume-slider-horizontal {
+        body.dark-mode .volume-slider-container {
             background: rgba(255,255,255,0.15);
         }
-        body.dark-mode .volume-fill-horizontal {
+        body.dark-mode .volume-fill {
             background: #888888;
         }
-        body.dark-mode .volume-knob-horizontal {
+        body.dark-mode .volume-knob {
             background: #888888;
             box-shadow: 0 0 4px rgba(255,255,255,0.3);
         }
-        body.dark-mode .volume-slider-horizontal:hover .volume-fill-horizontal {
-            background: #ffffff;
-        }
-        body.dark-mode .volume-slider-horizontal:hover .volume-knob-horizontal {
-            background: #ffffff;
-        }
-        
-        /* 进度条 */
         body.dark-mode .progress-bar-container {
             background: rgba(255,255,255,0.15);
         }
@@ -165,7 +140,7 @@
             background: #ff4444;
         }
 
-        /* ========== 通用布局样式 ========== */
+        /* ========== 主容器 ========== */
         .main-container {
             flex: 1;
             width: 100%;
@@ -174,25 +149,28 @@
             overflow: hidden;
         }
 
+        /* 统一布局：上中下底四行 */
         .unified-layout {
             display: flex;
             flex: 1;
             width: 100%;
             flex-direction: column;
             min-height: 0;
+            gap: 5px;
         }
 
+        /* 上行：歌曲信息（占总高62%-4px） */
         .top-section {
-            height: 70%;
+            height: calc(62% - 4px);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             padding: 20px;
-            gap: 15px;
+            gap: 8px;
+            overflow-y: auto;
         }
         .song-name {
-            font-size: clamp(30px, 9vh, 72px);
             font-weight: normal;
             color: #ff4444;
             text-align: center;
@@ -203,7 +181,6 @@
             font-family: "Huiwen-mincho", serif;
         }
         .artist-name {
-            font-size: clamp(24px, 6vh, 48px);
             font-weight: normal;
             color: #ffffff;
             text-align: center;
@@ -214,20 +191,33 @@
             font-family: "Huiwen-mincho", serif;
         }
 
-        .bottom-section {
-            height: 30%;
+        /* 中行：音量滑块（占总高18%-3px） */
+        .middle-section {
+            height: calc(18% - 3px);
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 25px;
-            padding: 15px;
+            padding: 0 20px;
         }
 
+        /* 下行：按钮区域（占总高20%-3px） */
+        .bottom-section {
+            height: calc(20% - 3px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            padding: 0 20px;
+        }
+
+        /* 底行：进度条（固定10px）由独立容器实现，不在此布局内 */
+
+        /* 按钮样式 */
         .btn-circle {
-            width: 70px;
-            height: 70px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
-            border: 8px solid rgba(255,255,255,0.8);
+            border: 6px solid rgba(255,255,255,0.8);
             background: transparent;
             cursor: pointer;
             display: flex;
@@ -244,34 +234,34 @@
             width: 0;
             height: 0;
             border-style: solid;
-            border-width: 14px 0 14px 24px;
+            border-width: 12px 0 12px 20px;
             border-color: transparent transparent transparent #ff4444;
-            margin-left: 6px;
+            margin-left: 5px;
         }
         
         .pause-icon {
             display: flex;
-            gap: 6px;
+            gap: 12px;
             align-items: center;
             justify-content: center;
         }
         .pause-icon .bar {
-            width: 6px;
-            height: 28px;
+            width: 5px;
+            height: 24px;
             border-radius: 2px;
             transition: background 0.2s ease;
         }
         
-        /* 默认模式（深色模式的基础值） */
         .next-icon {
-            font-size: 38px;
+            font-size: 32px;
             line-height: 1;
             transition: color 0.2s ease;
             font-weight: normal;
             color: rgba(255,255,255,0.8);
         }
+        
         .theme-icon {
-            font-size: 32px;
+            font-size: 28px;
             line-height: 1;
             transition: transform 0.2s ease, color 0.2s ease;
             font-weight: normal;
@@ -280,95 +270,88 @@
         .btn-circle.theme-btn:hover .theme-icon {
             transform: rotate(15deg);
         }
-        
-        /* 默认模式暂停图标的默认颜色（深色模式下会显示这个） */
-        .pause-icon .bar {
-            background: rgba(255,255,255,0.8);
-        }
-        
-        .volume-slider-horizontal {
-            width: 140px;
-            height: 8px;
-            border-radius: 4px;
+
+        /* 音量滑块 */
+        .volume-slider-container {
+            width: 100%;
+            max-width: 300px;
+            height: 6px;
+            border-radius: 3px;
             position: relative;
             cursor: pointer;
-            background: rgba(255,255,255,0.2);
         }
-        .volume-fill-horizontal {
+        .volume-fill {
             position: absolute;
             left: 0;
             top: 0;
-            width: 60%;
+            width: 50%;
             height: 100%;
-            border-radius: 4px;
+            border-radius: 3px;
             transition: width 0.05s linear, background 0.2s ease;
-            background: rgba(255,255,255,0.8);
         }
-        .volume-knob-horizontal {
+        .volume-knob {
             position: absolute;
-            left: 60%;
+            left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
             cursor: pointer;
             transition: left 0.05s linear, background 0.2s ease;
-            background: rgba(255,255,255,0.9);
-            box-shadow: 0 0 6px rgba(255,255,255,0.5);
+            box-shadow: 0 0 4px rgba(0,0,0,0.3);
         }
 
+        /* 全局进度条 - 底行 */
         .progress-bar-container {
             position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 8px;
+            height: 10px;
             cursor: pointer;
             z-index: 100;
-            background: rgba(0,0,0,0.1);
         }
         .progress-fill {
             width: 0%;
             height: 100%;
-            border-radius: 0 4px 4px 0;
+            border-radius: 0 5px 5px 0;
             transition: width 0.05s linear;
-            background: #ff4444;
         }
 
-        /* 响应式调整 */
+        /* 响应式调整按钮大小 */
         @media (max-width: 768px) {
-            .btn-circle { width: 55px; height: 55px; border-width: 6px; }
-            .play-icon { border-width: 10px 0 10px 18px; }
-            .pause-icon .bar { width: 5px; height: 22px; gap: 5px; }
-            .next-icon { font-size: 30px; }
-            .theme-icon { font-size: 26px; }
-            .volume-slider-horizontal { width: 110px; height: 6px; }
-            .volume-knob-horizontal { width: 14px; height: 14px; }
-            .song-name { font-size: clamp(24px, 7vh, 56px); }
-            .artist-name { font-size: clamp(18px, 5vh, 40px); }
+            .btn-circle { width: 50px; height: 50px; border-width: 5px; }
+            .play-icon { border-width: 10px 0 10px 17px; }
+            .pause-icon { gap: 10px; }
+            .pause-icon .bar { width: 4px; height: 20px; }
+            .next-icon { font-size: 28px; }
+            .theme-icon { font-size: 24px; }
+            .volume-slider-container { max-width: 250px; }
+            .volume-knob { width: 14px; height: 14px; }
         }
 
         @media (max-width: 560px) {
-            .btn-circle { width: 48px; height: 48px; border-width: 5px; }
-            .play-icon { border-width: 9px 0 9px 16px; }
-            .pause-icon .bar { width: 4px; height: 18px; gap: 4px; }
-            .next-icon { font-size: 26px; }
-            .theme-icon { font-size: 22px; }
-            .volume-slider-horizontal { width: 90px; height: 5px; }
-            .volume-knob-horizontal { width: 12px; height: 12px; }
-            .song-name { font-size: clamp(20px, 6vh, 42px); }
-            .artist-name { font-size: clamp(16px, 4vh, 32px); }
+            .btn-circle { width: 44px; height: 44px; border-width: 4px; }
+            .play-icon { border-width: 8px 0 8px 14px; }
+            .pause-icon { gap: 8px; }
+            .pause-icon .bar { width: 3px; height: 16px; }
+            .next-icon { font-size: 24px; }
+            .theme-icon { font-size: 20px; }
+            .volume-slider-container { max-width: 200px; }
+            .volume-knob { width: 12px; height: 12px; }
+            .top-section { padding: 15px; }
         }
 
         @media (max-width: 480px) {
-            .bottom-section { gap: 15px; padding: 10px; }
-            .btn-circle { width: 42px; height: 42px; border-width: 4px; }
-            .play-icon { border-width: 8px 0 8px 14px; }
-            .pause-icon .bar { width: 3px; height: 16px; gap: 3px; }
-            .next-icon { font-size: 22px; }
+            .bottom-section { gap: 20px; }
+            .btn-circle { width: 40px; height: 40px; border-width: 4px; }
+            .play-icon { border-width: 7px 0 7px 12px; }
+            .pause-icon { gap: 6px; }
+            .pause-icon .bar { width: 3px; height: 14px; }
+            .next-icon { font-size: 20px; }
             .theme-icon { font-size: 18px; }
-            .volume-slider-horizontal { width: 70px; }
+            .volume-slider-container { max-width: 160px; }
         }
 
         .tip-bubble {
@@ -394,11 +377,25 @@
 <body>
 <div class="main-container">
     <div class="unified-layout">
+        <!-- 上行：歌曲信息 -->
         <div class="top-section">
             <div class="song-name" id="songName">欢迎收听</div>
             <div class="artist-name" id="artistName">HellYell Radio</div>
         </div>
+        
+        <!-- 中行：音量滑块 -->
+        <div class="middle-section">
+            <div class="volume-slider-container" id="volumeSliderContainer">
+                <div class="volume-fill" id="volumeFill"></div>
+                <div class="volume-knob" id="volumeKnob"></div>
+            </div>
+        </div>
+        
+        <!-- 下行：按钮区域 -->
         <div class="bottom-section">
+            <div class="btn-circle theme-btn" id="themeBtn">
+                <span class="theme-icon" id="themeIcon">◐</span>
+            </div>
             <div class="btn-circle" id="playBtn">
                 <span id="playIcon" class="play-icon"></span>
                 <span id="pauseIcon" class="pause-icon" style="display:none;">
@@ -408,16 +405,10 @@
             <div class="btn-circle" id="nextBtn">
                 <span class="next-icon">⏭</span>
             </div>
-            <div class="btn-circle theme-btn" id="themeBtn">
-                <span class="theme-icon" id="themeIcon">◐</span>
-            </div>
-            <div class="volume-slider-horizontal" id="volumeSliderHorizontal">
-                <div class="volume-fill-horizontal" id="volumeFillHorizontal"></div>
-                <div class="volume-knob-horizontal" id="volumeKnobHorizontal"></div>
-            </div>
         </div>
     </div>
 
+    <!-- 底行：全局进度条 -->
     <div class="progress-bar-container" id="progressBarContainer">
         <div class="progress-fill" id="progressFill"></div>
     </div>
@@ -426,6 +417,7 @@
 <div class="tip-bubble" id="tipBubble"></div>
 
 <script>
+    // ========== 音频核心逻辑 ==========
     const audio = new Audio();
     audio.preload = "auto";
     let allSongs = [];
@@ -435,10 +427,35 @@
     let hasStarted = false;
     let isSwitching = false;
     let loadTimer = null;
-    let volume = 0.5;
+    let volume = 0.5;  // 默认音量大小改为0.5
     const promoSong = { name: "HellYell Radio - 欢迎收听", url: "https://radio.hellyell.com/hy.mp3" };
     const BUFFER_TIMEOUT = 50000;
 
+    // ========== 字体大小自适应 ==========
+    // 规则：无论横竖屏，歌曲名字号 = 其所在区域实际宽度 × 0.1，歌手名 = 歌曲名 - 12px
+    function adjustFontSize() {
+        const topSection = document.querySelector('.top-section');
+        const songNameEl = document.getElementById('songName');
+        const artistNameEl = document.getElementById('artistName');
+        
+        if (!topSection || !songNameEl || !artistNameEl) return;
+        
+        // 获取上行区域的实际宽度
+        const sectionWidth = topSection.clientWidth;
+        if (sectionWidth > 0) {
+            // 歌曲名字号 = 区域宽度 × 0.1
+            let songFontSize = sectionWidth * 0.1;
+            // 限制最小和最大字号
+            songFontSize = Math.min(Math.max(songFontSize, 16), 60);
+            // 歌手名字号 = 歌曲名字号 - 12px
+            let artistFontSize = Math.max(songFontSize - 12, 12);
+            
+            songNameEl.style.fontSize = songFontSize + 'px';
+            artistNameEl.style.fontSize = artistFontSize + 'px';
+        }
+    }
+
+    // 主题切换
     function setTheme(theme) {
         if (theme === 'light') {
             document.body.classList.add('light-mode');
@@ -466,15 +483,21 @@
     function playClickSound() {}
     function playStartSound() {}
 
+    // 更新UI显示歌曲信息
     function updateUINew(song) {
         const parts = song.name.split(' - ');
         const singer = parts[0] || '';
         const music = parts.slice(1).join(' - ') || song.name;
+        
         document.getElementById('songName').innerText = music;
         document.getElementById('artistName').innerText = singer;
         document.title = `${music} - ${singer}`;
+        
+        // 更新字体大小
+        setTimeout(adjustFontSize, 10);
     }
 
+    // 进度条更新
     function updateProgress() {
         const progressFill = document.getElementById('progressFill');
         if (audio.duration && !isNaN(audio.duration)) {
@@ -487,12 +510,13 @@
         document.getElementById('progressFill').style.width = '0%';
     }
 
+    // 音量控制
     function updateVolumeUI() {
         const percent = volume * 100;
-        const fillH = document.getElementById('volumeFillHorizontal');
-        const knobH = document.getElementById('volumeKnobHorizontal');
-        if (fillH) fillH.style.width = percent + '%';
-        if (knobH) knobH.style.left = percent + '%';
+        const fill = document.getElementById('volumeFill');
+        const knob = document.getElementById('volumeKnob');
+        if (fill) fill.style.width = percent + '%';
+        if (knob) knob.style.left = percent + '%';
     }
 
     function setVolume(value) {
@@ -599,23 +623,24 @@
         setTimeout(() => tipBubble.classList.remove('show'), 600);
     }
 
+    // 音量滑块事件绑定
     function initVolumeControls() {
-        const volSliderH = document.getElementById('volumeSliderHorizontal');
+        const volContainer = document.getElementById('volumeSliderContainer');
         
-        const handleHorizontalMove = (e) => {
-            const rect = volSliderH.getBoundingClientRect();
+        const handleMove = (e) => {
+            const rect = volContainer.getBoundingClientRect();
             let x = (e.clientX - rect.left) / rect.width;
             x = Math.min(1, Math.max(0, x));
             setVolume(x);
         };
         
-        if (volSliderH) {
-            volSliderH.addEventListener('click', handleHorizontalMove);
-            const knobH = document.getElementById('volumeKnobHorizontal');
-            knobH.addEventListener('mousedown', (e) => {
+        if (volContainer) {
+            volContainer.addEventListener('click', handleMove);
+            const knob = document.getElementById('volumeKnob');
+            knob.addEventListener('mousedown', (e) => {
                 e.preventDefault();
                 const onMouseMove = (moveEvent) => {
-                    const rect = volSliderH.getBoundingClientRect();
+                    const rect = volContainer.getBoundingClientRect();
                     let x = (moveEvent.clientX - rect.left) / rect.width;
                     x = Math.min(1, Math.max(0, x));
                     setVolume(x);
@@ -630,6 +655,7 @@
         }
     }
 
+    // 进度条点击
     function initProgressBar() {
         const progressContainer = document.getElementById('progressBarContainer');
         progressContainer.addEventListener('click', (e) => {
@@ -641,17 +667,34 @@
         });
     }
 
+    // 按钮事件绑定
     function bindButtons() {
         document.getElementById('playBtn').onclick = () => togglePlay();
         document.getElementById('nextBtn').onclick = () => { if (!isSwitching) nextSong(); };
         document.getElementById('themeBtn').onclick = () => toggleTheme();
     }
 
+    // 音频事件
     audio.addEventListener('ended', () => { if (!isSwitching && isPlaying) nextSong(); });
     audio.addEventListener('error', () => { if (!isSwitching && isPlaying) { clearLoadTimer(); nextSong(); } });
     audio.addEventListener('timeupdate', () => { if (isPlaying) updateProgress(); });
     audio.addEventListener('play', () => { setTimeout(() => updateProgress(), 50); });
 
+    // 窗口尺寸变化时重新调整字体
+    window.addEventListener('resize', () => {
+        setTimeout(adjustFontSize, 50);
+    });
+    
+    // 使用ResizeObserver监听上行区域尺寸变化
+    const resizeObserver = new ResizeObserver(() => {
+        adjustFontSize();
+    });
+    const topSection = document.querySelector('.top-section');
+    if (topSection) {
+        resizeObserver.observe(topSection);
+    }
+
+    // 初始化加载歌曲列表
     async function init() {
         try {
             const [hj, qc] = await Promise.all([
@@ -680,6 +723,7 @@
         bindButtons();
         initVolumeControls();
         initProgressBar();
+        adjustFontSize();
     }
     
     window.onload = init;
