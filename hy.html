@@ -19,7 +19,7 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
-html, body { width: 100vw; height: 100vh; overflow: hidden; font-family: "Huiwen-mincho", serif; }
+html, body { width: 100%; height: 100%; overflow: hidden; font-family: "Huiwen-mincho", serif; position: fixed; top: 0; left: 0; }
 
 /* ========== 背景与玻璃底座 ========== */
 body.light-mode { background: linear-gradient(135deg, #d0d0d0, #b0b0b0); }
@@ -41,52 +41,56 @@ body.dark-mode .glass-base {
     border: 1px solid rgba(255,255,255,0.05); 
 }
 
-.main-container { width: 100%; height: 100%; display: flex; }
+.main-container { width: 100%; height: 100%; display: flex; position: relative; }
 
-/* ========== 横屏布局 (宽 >= 高) ========== */
+/* ========== 横屏布局 (宽 >= 高) 使用视口单位确保完美显示 ========== */
 @media (min-aspect-ratio: 1/1) {
     .main-container { flex-direction: row; }
     
-    /* 左列：90% 宽度 */
+    /* 左列：唱片区域占剩余宽度，自动适配 */
     .vinyl-section {
-        flex: 0 0 90vw; width: 90vw; height: 100vh;
-        display: flex; justify-content: center; align-items: center; position: relative;
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        min-width: 0;
     }
     
-    /* 右列：10% 宽度 - 完全透明融合玻璃底座 */
+    /* 右列：固定宽度使用 vw，确保按钮可见 */
     .controls-section {
-        flex: 0 0 10vw; width: 10vw; height: 100vh;
-        display: flex; flex-direction: column;
+        width: 12vw;
+        min-width: 56px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
         background: transparent; 
         border: none;
         gap: 0;
         justify-content: space-between;
         align-items: center;
-        padding: 0;
+        padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0;
+        flex-shrink: 0;
     }
     
-    /* 精致透明按钮 - 各占整体网页高度的三分之一 */
+    /* 精致透明按钮 - 各占整体网页高度的三分之一（考虑安全区域） */
     .ctrl-btn {
         width: 100%;
         flex: 1;
         min-height: 0;
-        border: none; outline: none; cursor: pointer;
-        display: flex; justify-content: center; align-items: center;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         background: transparent;
         transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
         position: relative;
         border-radius: 0;
     }
     
-    /* 第一个按钮顶部圆角，第三个按钮底部圆角 */
-    .ctrl-btn:first-child {
-        border-radius: 0 0 0 0;
-    }
-    .ctrl-btn:last-child {
-        border-radius: 0 0 0 0;
-    }
-    
-    /* 按钮悬停/点击效果 - 精致光晕 */
+    /* 按钮悬停/点击效果 */
     .ctrl-btn::before {
         content: ''; position: absolute; inset: 0;
         background: transparent;
@@ -106,7 +110,6 @@ body.dark-mode .glass-base {
         background: rgba(255, 255, 255, 0.25);
     }
     
-    /* 深色模式悬停效果 */
     body.dark-mode .ctrl-btn:hover::before {
         background: rgba(255, 255, 255, 0.08);
     }
@@ -114,31 +117,44 @@ body.dark-mode .glass-base {
         background: rgba(255, 255, 255, 0.15);
     }
     
-    /* 唱片尺寸 */
-    .vinyl-wrapper { width: 75vh; height: 75vh; }
+    /* 唱片尺寸 - 使用视口最小边长的百分比确保完全显示 */
+    .vinyl-wrapper { 
+        width: min(75vh, 75vw); 
+        height: min(75vh, 75vw);
+        max-width: calc(100% - 20px);
+        max-height: calc(100% - 20px);
+    }
 }
 
-/* ========== 竖屏布局 (宽 < 高) ========== */
+/* ========== 竖屏布局 (宽 < 高) 使用视口单位确保完美显示 ========== */
 @media (max-aspect-ratio: 1/1) {
     .main-container { flex-direction: column; }
     
-    /* 上行：80% 高度 */
+    /* 上行：唱片区域占剩余高度，自动适配 */
     .vinyl-section {
-        flex: 0 0 80vh; width: 100vw; height: 80vh;
-        display: flex; justify-content: center; align-items: center; position: relative;
-        border: none;
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        min-height: 0;
     }
     
-    /* 下行：20% 高度 - 透明融合 */
+    /* 下行：固定高度使用 vh，确保按钮可见且不贴底 */
     .controls-section {
-        flex: 0 0 20vh; width: 100vw; height: 20vh;
-        display: flex; flex-direction: row;
+        height: 14vh;
+        min-height: 60px;
+        width: 100%;
+        display: flex;
+        flex-direction: row;
         background: transparent;
         border: none;
         gap: 0;
         justify-content: space-between;
         align-items: center;
-        padding: 0;
+        padding: 0 env(safe-area-inset-left) 0 env(safe-area-inset-right);
+        flex-shrink: 0;
+        margin-bottom: env(safe-area-inset-bottom);
     }
     
     /* 精致透明按钮 - 各占整体网页宽度的三分之一 */
@@ -146,20 +162,16 @@ body.dark-mode .glass-base {
         height: 100%;
         flex: 1;
         min-width: 0;
-        border: none; outline: none; cursor: pointer;
-        display: flex; justify-content: center; align-items: center;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         background: transparent;
         transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
         position: relative;
         border-radius: 0;
-    }
-    
-    /* 第一个按钮左侧圆角，第三个按钮右侧圆角 */
-    .ctrl-btn:first-child {
-        border-radius: 0 0 0 0;
-    }
-    .ctrl-btn:last-child {
-        border-radius: 0 0 0 0;
     }
     
     .ctrl-btn::before {
@@ -188,8 +200,28 @@ body.dark-mode .glass-base {
         background: rgba(255, 255, 255, 0.15);
     }
     
-    /* 唱片尺寸 */
-    .vinyl-wrapper { width: 75vw; height: 75vw; }
+    /* 唱片尺寸 - 使用视口最小边长的百分比确保完全显示 */
+    .vinyl-wrapper { 
+        width: min(70vw, 70vh); 
+        height: min(70vw, 70vh);
+        max-width: calc(100% - 20px);
+        max-height: calc(100% - 20px);
+    }
+}
+
+/* 小屏手机进一步优化 */
+@media (max-width: 480px) and (max-aspect-ratio: 1/1) {
+    .controls-section {
+        height: 12vh;
+        min-height: 55px;
+    }
+}
+
+@media (max-width: 360px) and (max-aspect-ratio: 1/1) {
+    .controls-section {
+        height: 11vh;
+        min-height: 50px;
+    }
 }
 
 /* ========== 黑胶唱片与进度环 ========== */
