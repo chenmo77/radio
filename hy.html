@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>HellYell 音乐电台 - Turntable Edition</title>
+<!-- 汇文明朝体字体 -->
+<link href="https://fontsapi.zeoseven.com/256/main/result.css" rel="stylesheet">
+<style>
+:root {
+    --label-red: #cc3333;
+    --progress-red: #cc3333;
+    --glass-light: rgba(150, 150, 150, 0.2);
+    --glass-dark: rgba(35, 35, 35, 0.8);
+    
+    /* 按钮全新精致透明风格 */
+    --btn-glow-light: rgba(255, 255, 255, 0.5);
+    --btn-glow-dark: rgba(255, 255, 255, 0.2);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+html, body { width: 100vw; height: 100vh; overflow: hidden; font-family: "Huiwen-mincho", serif; }
+
+/* ========== 背景与玻璃底座 ========== */
+body.light-mode { background: linear-gradient(135deg, #d0d0d0, #b0b0b0); }
+body.dark-mode { background: linear-gradient(135deg, #2a2a2a, #111111); }
+
+.glass-base {
+    position: absolute; inset: 0; z-index: -1;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    transition: background 0.5s ease;
+}
+body.light-mode .glass-base { 
+    background: var(--glass-light); 
+    box-shadow: inset 0 0 30px rgba(255,255,255,0.4); 
+    border: 1px solid rgba(255,255,255,0.3); 
+}
+body.dark-mode .glass-base { 
+    background: var(--glass-dark); 
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.6); 
+    border: 1px solid rgba(255,255,255,0.05); 
+}
+
+.main-container { width: 100%; height: 100%; display: flex; }
+
+/* ========== 横屏布局 (宽 >= 高) ========== */
+@media (min-aspect-ratio: 1/1) {
+    .main-container { flex-direction: row; }
+    
+    /* 左列：90% 宽度 */
+    .vinyl-section {
+        flex: 0 0 90vw; width: 90vw; height: 100vh;
+        display: flex; justify-content: center; align-items: center; position: relative;
+    }
+    
+    /* 右列：10% 宽度 - 完全透明融合玻璃底座 */
+    .controls-section {
+        flex: 0 0 10vw; width: 10vw; height: 100vh;
+        display: flex; flex-direction: column;
+        background: transparent; 
+        border: none;
+        gap: 0;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0;
+    }
+    
+    /* 精致透明按钮 - 各占整体网页高度的三分之一 */
+    .ctrl-btn {
+        width: 100%;
+        flex: 1;
+        min-height: 0;
+        border: none; outline: none; cursor: pointer;
+        display: flex; justify-content: center; align-items: center;
+        background: transparent;
+        transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        position: relative;
+        border-radius: 0;
+    }
+    
+    /* 第一个按钮顶部圆角，第三个按钮底部圆角 */
+    .ctrl-btn:first-child {
+        border-radius: 0 0 0 0;
+    }
+    .ctrl-btn:last-child {
+        border-radius: 0 0 0 0;
+    }
+    
+    /* 按钮悬停/点击效果 - 精致光晕 */
+    .ctrl-btn::before {
+        content: ''; position: absolute; inset: 0;
+        background: transparent;
+        transition: all 0.2s ease;
+        pointer-events: none;
+    }
+    
+    .ctrl-btn:hover::before {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(4px);
+    }
+    
+    .ctrl-btn:active {
+        transform: scale(0.98);
+    }
+    .ctrl-btn:active::before {
+        background: rgba(255, 255, 255, 0.25);
+    }
+    
+    /* 深色模式悬停效果 */
+    body.dark-mode .ctrl-btn:hover::before {
+        background: rgba(255, 255, 255, 0.08);
+    }
+    body.dark-mode .ctrl-btn:active::before {
+        background: rgba(255, 255, 255, 0.15);
+    }
+    
+    /* 唱片尺寸 */
+    .vinyl-wrapper { width: 75vh; height: 75vh; }
+}
+
+/* ========== 竖屏布局 (宽 < 高) ========== */
+@media (max-aspect-ratio: 1/1) {
+    .main-container { flex-direction: column; }
+    
+    /* 上行：80% 高度 */
+    .vinyl-section {
+        flex: 0 0 80vh; width: 100vw; height: 80vh;
+        display: flex; justify-content: center; align-items: center; position: relative;
+        border: none;
+    }
+    
+    /* 下行：20% 高度 - 透明融合 */
+    .controls-section {
+        flex: 0 0 20vh; width: 100vw; height: 20vh;
+        display: flex; flex-direction: row;
+        background: transparent;
+        border: none;
+        gap: 0;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0;
+    }
+    
+    /* 精致透明按钮 - 各占整体网页宽度的三分之一 */
+    .ctrl-btn {
+        height: 100%;
+        flex: 1;
+        min-width: 0;
+        border: none; outline: none; cursor: pointer;
+        display: flex; justify-content: center; align-items: center;
+        background: transparent;
+        transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        position: relative;
+        border-radius: 0;
+    }
+    
+    /* 第一个按钮左侧圆角，第三个按钮右侧圆角 */
+    .ctrl-btn:first-child {
+        border-radius: 0 0 0 0;
+    }
+    .ctrl-btn:last-child {
+        border-radius: 0 0 0 0;
+    }
+    
+    .ctrl-btn::before {
+        content: ''; position: absolute; inset: 0;
+        background: transparent;
+        transition: all 0.2s ease;
+        pointer-events: none;
+    }
+    
+    .ctrl-btn:hover::before {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(4px);
+    }
+    
+    .ctrl-btn:active {
+        transform: scale(0.98);
+    }
+    .ctrl-btn:active::before {
+        background: rgba(255, 255, 255, 0.25);
+    }
+    
+    body.dark-mode .ctrl-btn:hover::before {
+        background: rgba(255, 255, 255, 0.08);
+    }
+    body.dark-mode .ctrl-btn:active::before {
+        background: rgba(255, 255, 255, 0.15);
+    }
+    
+    /* 唱片尺寸 */
+    .vinyl-wrapper { width: 75vw; height: 75vw; }
+}
+
+/* ========== 黑胶唱片与进度环 ========== */
+.vinyl-wrapper {
+    position: relative; border-radius: 50%;
+    background: conic-gradient(var(--progress-red) 0deg, transparent 0deg);
+    display: flex; justify-content: center; align-items: center;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.45);
+    transition: background 0.1s linear;
+}
+
+.vinyl-disc {
+    width: 94%; height: 94%; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.06) 0%, transparent 40%),
+                repeating-radial-gradient(#111 0, #111 2px, #1a1a1a 3px, #1a1a1a 4px);
+    display: flex; justify-content: center; align-items: center;
+    box-shadow: 0 0 20px rgba(0,0,0,0.85);
+}
+
+/* 唱片中心红色标签 */
+.vinyl-label {
+    width: 35%; height: 35%; 
+    background: var(--label-red); 
+    border-radius: 50%;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    color: #fff; 
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.6); 
+    border: 2px solid #fff;
+    position: relative; 
+    overflow: hidden; 
+    text-align: center; 
+    line-height: 1.2;
+}
+
+/* 动态文字样式 - 字号放大4px */
+.label-text { 
+    font-weight: bold; 
+    white-space: nowrap; 
+    font-size: clamp(12px, 2.5vmin, 28px); 
+    max-width: 90%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vinyl-center-hole {
+    position: absolute; width: 12%; height: 12%; background: #111; border-radius: 50%;
+    box-shadow: inset 1px 1px 3px rgba(255,255,255,0.3);
+    z-index: 2;
+}
+
+/* ========== 按钮内图标精致化 ========== */
+.btn-icon { width: 52%; height: 52%; display: flex; justify-content: center; align-items: center; }
+.btn-icon svg { width: 100%; height: 100%; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15)); }
+
+.icon-theme { color: rgba(80, 80, 80, 0.85); }
+.icon-play { color: rgba(204, 51, 51, 0.9); }
+.icon-next { color: rgba(80, 80, 80, 0.85); }
+
+body.dark-mode .icon-theme, body.dark-mode .icon-next { color: rgba(200, 200, 200, 0.85); }
+body.dark-mode .icon-play { color: rgba(255, 68, 68, 0.9); }
+
+/* 悬停时图标轻微增强亮度 */
+.ctrl-btn:hover .btn-icon { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); transform: scale(1.02); transition: all 0.2s ease; }
+.ctrl-btn:active .btn-icon { transform: scale(0.96); }
+
+/* 暂停图标默认隐藏 */
+.icon-pause { display: none; color: rgba(204, 51, 51, 0.9); }
+body.dark-mode .icon-pause { color: rgba(255, 68, 68, 0.9); }
+
+.playing .icon-play { display: none; }
+.playing .icon-pause { display: block; }
+</style>
+</head>
+<body class="light-mode">
+
+<div class="glass-base"></div>
+
+<div class="main-container">
+    <!-- 左列/上行：唱片区域 -->
+    <div class="vinyl-section">
+        <div class="vinyl-wrapper" id="progressRing">
+            <div class="vinyl-disc" id="vinylDisc">
+                <div class="vinyl-label">
+                    <!-- 动态歌曲信息 -->
+                    <div class="label-text" id="labelSongName">HellYell</div>
+                    <div class="label-text" id="labelArtistName">Radio</div>
+                    <div class="vinyl-center-hole"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右列/下行：控制按钮区域 - 透明精致风格，横屏各占1/3高度，竖屏各占1/3宽度 -->
+    <div class="controls-section">
+        <!-- 切换深浅模式 -->
+        <button class="ctrl-btn" id="themeBtn">
+            <div class="btn-icon icon-theme" id="themeIconContainer">
+                <!-- 月亮 SVG -->
+                <svg viewBox="0 0 100 100" fill="currentColor"><path d="M50,10 A40,40 0 1,0 85,75 A35,35 0 0,1 50,10 Z"/></svg>
+            </div>
+        </button>
+        
+        <!-- 播放/暂停 -->
+        <button class="ctrl-btn" id="playBtn">
+            <div class="btn-icon icon-play" id="playIcon">
+                <svg viewBox="0 0 100 100" fill="currentColor"><polygon points="30,20 80,50 30,80"/></svg>
+            </div>
+            <div class="btn-icon icon-pause" id="pauseIcon">
+                <svg viewBox="0 0 100 100" fill="currentColor"><rect x="25" y="20" width="18" height="60" rx="4"/><rect x="57" y="20" width="18" height="60" rx="4"/></svg>
+            </div>
+        </button>
+        
+        <!-- 下一首 -->
+        <button class="ctrl-btn" id="nextBtn">
+            <div class="btn-icon icon-next">
+                <svg viewBox="0 0 100 100" fill="currentColor"><polygon points="20,20 55,50 20,80"/><rect x="65" y="20" width="15" height="60" rx="3"/></svg>
+            </div>
+        </button>
+    </div>
+</div>
+
+<script>
+// ========== 音频核心逻辑 ==========
+const audio = new Audio();
+audio.preload = "auto";
+let allSongs = [];
+let currentSong = null;
+let isPlaying = false;
+let normalCount = 0;
+let hasStarted = false;
+let isSwitching = false;
+let loadTimer = null;
+let volume = 1.0;
+const promoSong = { name: "HellYell Radio - 欢迎收听", url: "https://radio.hellyell.com/hy.mp3" };
+const BUFFER_TIMEOUT = 30000;
+
+// ========== UI 元素引用 ==========
+const vinylDisc = document.getElementById('vinylDisc');
+const progressRing = document.getElementById('progressRing');
+const playBtn = document.getElementById('playBtn');
+const themeBtn = document.getElementById('themeBtn');
+const nextBtn = document.getElementById('nextBtn');
+const themeIconContainer = document.getElementById('themeIconContainer');
+const labelSongNameEl = document.getElementById('labelSongName');
+const labelArtistNameEl = document.getElementById('labelArtistName');
+
+// ========== 拟物化特效逻辑 ==========
+function playStartSound() {
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(50, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.05, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(); osc.stop(ctx.currentTime + 0.3);
+    } catch(e) {}
+}
+
+let rotationAngle = 0, lastTime = 0, speed = 0, animationFrameId;
+function startSpinLoop() {
+    function step(ts) {
+        if (!lastTime) lastTime = ts;
+        const delta = ts - lastTime; lastTime = ts;
+        if (isPlaying) { if (speed < 0.25) speed += 0.003; }
+        else { if (speed > 0) speed -= 0.003; else { speed = 0; cancelAnimationFrame(animationFrameId); return; } }
+        rotationAngle += speed * delta;
+        vinylDisc.style.transform = `rotate(${rotationAngle % 360}deg)`;
+        animationFrameId = requestAnimationFrame(step);
+    }
+    cancelAnimationFrame(animationFrameId); lastTime = 0; animationFrameId = requestAnimationFrame(step);
+}
+
+function updateProgressRing() {
+    if (audio.duration && !isNaN(audio.duration)) {
+        const percent = (audio.currentTime / audio.duration) * 100;
+        progressRing.style.background = `conic-gradient(var(--progress-red) ${percent}%, transparent ${percent}%)`;
+    }
+}
+
+// ========== 业务逻辑 ==========
+function setTheme(theme) {
+    if (theme === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.body.classList.remove('light-mode');
+        // 太阳 SVG
+        themeIconContainer.innerHTML = `<svg viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="22"/><line x1="50" y1="8" x2="50" y2="20" stroke="currentColor" stroke-width="6" stroke-linecap="round"/><line x1="50" y1="80" x2="50" y2="92" stroke="currentColor" stroke-width="6" stroke-linecap="round"/><line x1="8" y1="50" x2="20" y2="50" stroke="currentColor" stroke-width="6" stroke-linecap="round"/><line x1="80" y1="50" x2="92" y2="50" stroke="currentColor" stroke-width="6" stroke-linecap="round"/><line x1="20" y1="20" x2="28" y2="28" stroke="currentColor" stroke-width="6" stroke-linecap="round"/><line x1="72" y1="72" x2="80" y2="80" stroke="currentColor" stroke-width="6" stroke-linecap="round"/><line x1="20" y1="80" x2="28" y2="72" stroke="currentColor" stroke-width="6" stroke-linecap="round"/><line x1="72" y1="28" x2="80" y2="20" stroke="currentColor" stroke-width="6" stroke-linecap="round"/></svg>`;
+        localStorage.setItem('radioTheme', 'dark');
+    } else {
+        document.body.classList.remove('dark-mode');
+        document.body.classList.add('light-mode');
+        // 月亮 SVG
+        themeIconContainer.innerHTML = `<svg viewBox="0 0 100 100" fill="currentColor"><path d="M50,10 A40,40 0 1,0 85,75 A35,35 0 0,1 50,10 Z"/></svg>`;
+        localStorage.setItem('radioTheme', 'light');
+    }
+}
+function toggleTheme() { setTheme(document.body.classList.contains('dark-mode') ? 'light' : 'dark'); }
+
+function updateUINew(song) {
+    const parts = song.name.split(' - ');
+    const singer = parts[0] || '';
+    const music = parts.slice(1).join(' - ') || song.name;
+    
+    document.title = `${music} - ${singer}`;
+    
+    // 更新唱片中心文字
+    if (labelSongNameEl) labelSongNameEl.innerText = music;
+    if (labelArtistNameEl) labelArtistNameEl.innerText = singer;
+}
+
+function playSong(song, autoPlay = true) {
+    if (isSwitching) return;
+    isSwitching = true;
+    clearLoadTimer();
+    currentSong = song;
+    updateUINew(song);
+    audio.pause();
+    audio.src = song.url;
+    audio.volume = volume;
+    
+    if (autoPlay && isPlaying) {
+        loadTimer = setTimeout(() => { if (isPlaying && !isSwitching) nextSong(); }, BUFFER_TIMEOUT);
+        audio.play().then(() => {
+            clearLoadTimer(); isSwitching = false;
+            startSpinLoop();
+            playBtn.classList.add('playing');
+        }).catch(() => { clearLoadTimer(); isSwitching = false; setTimeout(nextSong, 500); });
+    } else {
+        isSwitching = false;
+        if (isPlaying) { startSpinLoop(); playBtn.classList.add('playing'); }
+    }
+}
+
+function nextSong() {
+    if (isSwitching) return;
+    clearLoadTimer();
+    const next = getNextSong();
+    if (next !== promoSong) normalCount++;
+    playSong(next, isPlaying);
+}
+function getNextSong() {
+    if (normalCount === 7) { normalCount = 0; return promoSong; }
+    if (allSongs.length === 0) return promoSong;
+    return allSongs[Math.floor(Math.random() * allSongs.length)];
+}
+
+function togglePlay() {
+    if (isPlaying) {
+        audio.pause(); clearLoadTimer(); isPlaying = false;
+        playBtn.classList.remove('playing');
+    } else {
+        isPlaying = true; playBtn.classList.add('playing');
+        if (!hasStarted) {
+            hasStarted = true; normalCount = 0; playStartSound(); playSong(promoSong, true);
+        } else if (currentSong) {
+            clearLoadTimer();
+            loadTimer = setTimeout(() => { if (isPlaying && !isSwitching) nextSong(); }, BUFFER_TIMEOUT);
+            audio.play().catch(() => { clearLoadTimer(); nextSong(); });
+            startSpinLoop();
+        } else { playStartSound(); playSong(promoSong, true); }
+    }
+}
+function clearLoadTimer() { if (loadTimer) { clearTimeout(loadTimer); loadTimer = null; } }
+
+// ========== 事件绑定与初始化 ==========
+playBtn.onclick = () => togglePlay();
+nextBtn.onclick = () => { if (!isSwitching) nextSong(); };
+themeBtn.onclick = () => toggleTheme();
+
+audio.addEventListener('ended', () => { if (!isSwitching && isPlaying) nextSong(); });
+audio.addEventListener('error', () => { if (!isSwitching && isPlaying) { clearLoadTimer(); nextSong(); } });
+audio.addEventListener('timeupdate', () => { if (isPlaying) updateProgressRing(); });
+
+async function init() {
+    const savedTheme = localStorage.getItem('radioTheme');
+    if (savedTheme === 'dark') setTheme('dark'); else setTheme('light');
+    
+    try {
+        const [hj, qc] = await Promise.all([
+            fetch('https://radio.hellyell.com/huaijiu-musiclist.json').then(r => r.json()),
+            fetch('https://radio.hellyell.com/qiche-musiclist.json').then(r => r.json())
+        ]);
+        const all = [...hj, ...qc];
+        allSongs = all.filter(item => {
+            const singer = item.name.split(' - ')[0];
+            return singer !== 'HellYell 怀旧电台' && singer !== 'HellYell 汽车电台' &&
+                   singer !== 'HellYell怀旧电台' && singer !== 'HellYell汽车电台' &&
+                   item.url && item.url.startsWith('http');
+        });
+    } catch(e) { allSongs = []; }
+    
+    updateUINew(promoSong);
+    hasStarted = false; isPlaying = false; currentSong = null; normalCount = 0; audio.volume = volume;
+    playBtn.classList.remove('playing');
+}
+window.onload = init;
+</script>
+</body>
+</html>
