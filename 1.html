@@ -105,15 +105,6 @@
                 padding: 20px;
             }
             
-            .song-name {
-                font-size: clamp(24px, 8vw, 56px);
-                margin-bottom: 12px;
-            }
-            
-            .artist-name {
-                font-size: clamp(16px, 4vw, 32px);
-            }
-            
             /* 右侧按钮区域 - 占20%宽度，100%高度，三个按钮垂直等分 */
             .buttons-area {
                 position: fixed;
@@ -137,13 +128,13 @@
                 border: none;
                 cursor: pointer;
                 outline: none;
-                padding: 20px 0;
+                padding: 0;
             }
             
-            /* 三个按钮的图标容器尺寸完全一致 */
+            /* 横屏时：按钮大小为屏幕高度的20% */
             .btn-icon-wrapper {
-                width: 70px;
-                height: 70px;
+                width: 20vh;
+                height: 20vh;
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -177,15 +168,6 @@
                 width: 90%;
             }
             
-            .song-name {
-                font-size: clamp(20px, 7vw, 42px);
-                margin-bottom: 10px;
-            }
-            
-            .artist-name {
-                font-size: clamp(14px, 3.5vw, 24px);
-            }
-            
             /* 底部按钮区域 - 占100%宽度，20%高度，三个按钮水平等分 */
             .buttons-area {
                 position: fixed;
@@ -209,14 +191,14 @@
                 border: none;
                 cursor: pointer;
                 outline: none;
-                padding: 0 10px;
+                padding: 0;
                 flex: 1;
             }
             
-            /* 三个按钮的图标容器尺寸完全一致 */
+            /* 竖屏时：按钮大小为屏幕宽度的20% */
             .btn-icon-wrapper {
-                width: 60px;
-                height: 60px;
+                width: 20vw;
+                height: 20vw;
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -224,19 +206,21 @@
             }
         }
 
-        /* 图标统一样式 - 所有图标在容器内居中，大小一致 */
+        /* 图标统一样式 - 所有图标在容器内完全填充，尺寸一致 */
         .ctrl-icon {
             display: flex;
             justify-content: center;
             align-items: center;
             transition: transform 0.2s ease;
+            width: 100%;
+            height: 100%;
         }
         
         .ctrl-btn:active .ctrl-icon {
             transform: scale(0.92);
         }
         
-        /* 太阳/月亮 SVG 图标 - 占满容器 */
+        /* 太阳/月亮 SVG 图标 - 完全占满容器 */
         .sun-icon, .moon-icon {
             width: 100%;
             height: 100%;
@@ -247,63 +231,37 @@
             display: block;
         }
         
-        /* 播放三角形 - 在容器内居中 */
+        /* 播放三角形 - 相对于容器大小自适应，保持视觉居中 */
         .play-icon {
             width: 0;
             height: 0;
             border-style: solid;
-            border-width: 18px 0 18px 32px;
-            margin-left: 6px;
+            border-width: 30% 0 30% 52%;
+            margin-left: 10%;
         }
         
-        /* 暂停双竖线 - 在容器内居中 */
+        /* 暂停双竖线 - 相对于容器大小自适应 */
         .pause-icon {
             display: flex;
-            gap: 10px;
+            gap: 12%;
             align-items: center;
             justify-content: center;
+            width: 100%;
+            height: 100%;
         }
         .pause-icon .bar {
-            width: 6px;
-            height: 36px;
+            width: 10%;
+            height: 60%;
             border-radius: 3px;
         }
         
-        /* 下一首图标 - 字体图标，在容器内居中 */
+        /* 下一首图标 - 字体图标，相对于容器大小自适应 */
         .next-icon {
-            font-size: 48px;
+            font-size: 58%;
             line-height: 1;
             font-weight: normal;
-        }
-        
-        /* 横屏时稍大的图标尺寸保持比例一致 */
-        @media (min-aspect-ratio: 1/1) and (max-width: 800px) {
-            .btn-icon-wrapper { width: 60px; height: 60px; }
-            .play-icon { border-width: 15px 0 15px 28px; }
-            .pause-icon .bar { width: 5px; height: 32px; }
-            .next-icon { font-size: 42px; }
-        }
-        
-        @media (min-aspect-ratio: 1/1) and (min-width: 1200px) {
-            .btn-icon-wrapper { width: 85px; height: 85px; }
-            .play-icon { border-width: 22px 0 22px 40px; }
-            .pause-icon .bar { width: 7px; height: 44px; gap: 12px; }
-            .next-icon { font-size: 58px; }
-        }
-        
-        /* 竖屏时图标尺寸保持一致 */
-        @media (max-aspect-ratio: 1/1) and (max-width: 500px) {
-            .btn-icon-wrapper { width: 50px; height: 50px; }
-            .play-icon { border-width: 13px 0 13px 24px; }
-            .pause-icon .bar { width: 5px; height: 28px; gap: 8px; }
-            .next-icon { font-size: 38px; }
-        }
-        
-        @media (max-aspect-ratio: 1/1) and (min-width: 800px) {
-            .btn-icon-wrapper { width: 75px; height: 75px; }
-            .play-icon { border-width: 20px 0 20px 36px; }
-            .pause-icon .bar { width: 7px; height: 42px; gap: 12px; }
-            .next-icon { font-size: 54px; }
+            width: auto;
+            height: auto;
         }
 
         /* ========== 波纹特效 ========== */
@@ -455,7 +413,7 @@
     const promoSong = { name: "HellYell Radio - 欢迎收听", url: "https://radio.hellyell.com/hy.mp3" };
     const BUFFER_TIMEOUT = 30000;
 
-    // 字体自适应
+    // 字体自适应：严格按照规则
     function adjustFontSize() {
         const isLandscape = window.innerWidth >= window.innerHeight;
         const songNameEl = document.getElementById('songName');
@@ -463,13 +421,21 @@
         
         if (!songNameEl || !artistNameEl) return;
         
+        let songFontSize;
         if (isLandscape) {
-            songNameEl.style.fontSize = 'clamp(24px, 8vw, 56px)';
-            artistNameEl.style.fontSize = 'clamp(16px, 4vw, 32px)';
+            // 横屏：歌曲名 = 屏幕宽度的10%
+            songFontSize = window.innerWidth * 0.1;
         } else {
-            songNameEl.style.fontSize = 'clamp(20px, 7vw, 42px)';
-            artistNameEl.style.fontSize = 'clamp(14px, 3.5vw, 24px)';
+            // 竖屏：歌曲名 = 屏幕高度的20%
+            songFontSize = window.innerHeight * 0.2;
         }
+        // 限制最小最大字号
+        songFontSize = Math.min(Math.max(songFontSize, 18), 80);
+        let artistFontSize = songFontSize - 6;
+        artistFontSize = Math.max(artistFontSize, 12);
+        
+        songNameEl.style.fontSize = songFontSize + 'px';
+        artistNameEl.style.fontSize = artistFontSize + 'px';
     }
 
     // 主题切换
