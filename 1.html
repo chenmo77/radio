@@ -119,13 +119,15 @@
                 font-size: 20vh;
                 margin-bottom: 5px;
                 line-height: 1.2;
-                white-space: nowrap;
+                white-space: normal;
+                word-break: break-word;
             }
             /* 歌手名字号是歌曲名的一半 */
             .artist-name {
                 font-size: 10vh;
                 line-height: 1.2;
-                white-space: nowrap;
+                white-space: normal;
+                word-break: break-word;
             }
             
             .buttons-area {
@@ -191,16 +193,18 @@
             
             /* 竖屏：歌曲名字号为屏幕宽度的10% */
             .song-name {
-                font-size: 10vw;
+                font-size: 20vw;
                 margin-bottom: 5px;
                 line-height: 1.2;
-                white-space: nowrap;
+                white-space: normal;
+                word-break: break-word;
             }
             /* 歌手名字号是歌曲名的一半 */
             .artist-name {
-                font-size: 5vw;
+                font-size: 10vw;
                 line-height: 1.2;
-                white-space: nowrap;
+                white-space: normal;
+                word-break: break-word;
             }
             
             .buttons-area {
@@ -274,10 +278,10 @@
         /* 限制竖屏时歌曲名和歌手名的最大最小字号 */
         @media (max-aspect-ratio: 1/1) {
             .song-name {
-                font-size: max(16px, min(10vw, 50px));
+                font-size: max(16px, min(20vw, 80px));
             }
             .artist-name {
-                font-size: max(8px, min(5vw, 25px));
+                font-size: max(8px, min(10vw, 40px));
             }
         }
 
