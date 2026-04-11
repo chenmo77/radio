@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>HellYell 音乐电台</title>
+    <!-- 汇文明朝体字体 -->
+    <link href="https://fontsapi.zeoseven.com/256/main/result.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        body {
+            background: #f5f5f0;
+            font-family: "Huiwen-mincho", 'Arial', 'MiSans', 'Microsoft YaHei', serif;
+            font-weight: normal;
+            transition: background 0.3s ease;
+            position: relative;
+        }
+
+        /* ========== 浅色模式样式 ========== */
+        body.light-mode {
+            background: #f5f5f0;
+        }
+        body.light-mode .song-name {
+            color: #cc3333;
+            text-shadow: 0 0 4px rgba(204,51,51,0.2);
+        }
+        body.light-mode .artist-name {
+            color: #000000;
+        }
+        body.light-mode .ctrl-icon {
+            color: #555555;
+        }
+        body.light-mode .play-icon {
+            border-color: transparent transparent transparent #cc3333;
+        }
+        body.light-mode .pause-icon .bar {
+            background: #cc3333;
+        }
+        body.light-mode .progress-bar-container {
+            background: rgba(0,0,0,0.15);
+        }
+        body.light-mode .progress-fill {
+            background: #cc3333;
+        }
+        body.light-mode .moon-icon {
+            color: #555555;
+        }
+
+        /* ========== 深色模式样式 ========== */
+        body.dark-mode {
+            background: #1a1a1a;
+        }
+        body.dark-mode .song-name {
+            color: #ff4444;
+            text-shadow: 0 0 8px rgba(255,68,68,0.3);
+        }
+        body.dark-mode .artist-name {
+            color: #ffffff;
+        }
+        body.dark-mode .ctrl-icon {
+            color: #cccccc;
+        }
+        body.dark-mode .play-icon {
+            border-color: transparent transparent transparent #ff4444;
+        }
+        body.dark-mode .pause-icon .bar {
+            background: #ff4444;
+        }
+        body.dark-mode .progress-bar-container {
+            background: rgba(255,255,255,0.2);
+        }
+        body.dark-mode .progress-fill {
+            background: #ff4444;
+        }
+        body.dark-mode .sun-icon {
+            color: #cccccc;
+        }
+
+        /* ========== 歌曲信息容器 - 始终存在 ========== */
+        .song-info-container {
+            position: fixed;
+            z-index: 1;
+        }
+
+        .top-section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: transparent;
+        }
+        
+        .fade-text {
+            transition: opacity 0.35s ease-in-out;
+            opacity: 1;
+            width: 100%;
+            text-align: center;
+        }
+        .fade-text.fade-out {
+            opacity: 0;
+        }
+        
+        .song-name {
+            font-weight: normal;
+            text-align: center;
+            word-break: break-word;
+            width: 100%;
+            line-height: 1.3;
+            font-family: "Huiwen-mincho", serif;
+        }
+        .artist-name {
+            font-weight: normal;
+            text-align: center;
+            word-break: break-word;
+            width: 100%;
+            opacity: 0.9;
+            line-height: 1.3;
+            font-family: "Huiwen-mincho", serif;
+        }
+
+        /* ========== 横屏布局 (宽 >= 高) ========== */
+        @media (min-aspect-ratio: 1/1) {
+            /* 歌曲信息：左侧，占80%宽度，100%高度，垂直水平居中 */
+            .song-info-container {
+                left: 0;
+                top: 0;
+                width: 80%;
+                height: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            
+            .top-section {
+                width: 80%;
+                gap: 12px;
+            }
+            
+            /* 按钮容器：右侧，占20%宽度，100%高度，垂直等分分布 */
+            .side-buttons {
+                position: fixed;
+                right: 0;
+                top: 0;
+                width: 20%;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                align-items: center;
+                background: transparent;
+                z-index: 10;
+                padding: 20px 0;
+            }
+            
+            /* 三个按钮高度相等，宽度一致，无背景无边框 */
+            .ctrl-btn {
+                flex: 1;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                outline: none;
+                padding: 0;
+                width: 100%;
+            }
+            
+            .btn-icon-wrapper {
+                width: 64px;
+                height: 64px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                position: relative;
+            }
+        }
+
+        /* ========== 竖屏布局 (宽 < 高) ========== */
+        @media (max-aspect-ratio: 1/1) {
+            /* 歌曲信息：上部，占100%宽度，80%高度，水平垂直居中 */
+            .song-info-container {
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 80%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            
+            .top-section {
+                width: 80%;
+                gap: 10px;
+            }
+            
+            /* 按钮容器：底部，占100%宽度，20%高度，水平等分分布 */
+            .bottom-buttons {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 20%;
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                background: transparent;
+                z-index: 10;
+                padding: 0 20px;
+            }
+            
+            /* 三个按钮宽度相等，高度一致，无背景无边框 */
+            .ctrl-btn {
+                flex: 1;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                outline: none;
+                padding: 0;
+                height: 100%;
+            }
+            
+            .btn-icon-wrapper {
+                width: 56px;
+                height: 56px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                position: relative;
+            }
+        }
+
+        /* 图标尺寸统一 */
+        .ctrl-icon {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+        
+        .sun-icon svg, .moon-icon svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* 播放三角形图标 */
+        .play-icon {
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 18px 0 18px 32px;
+            margin-left: 6px;
+        }
+        
+        /* 暂停双竖线图标 */
+        .pause-icon {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+        .pause-icon .bar {
+            width: 6px;
+            height: 36px;
+            border-radius: 3px;
+        }
+        
+        /* 下一首图标 */
+        .next-icon {
+            font-size: 48px;
+            line-height: 1;
+            font-weight: normal;
+        }
+        
+        /* 太阳/月亮图标尺寸 */
+        .sun-icon, .moon-icon {
+            width: 48px;
+            height: 48px;
+        }
+        
+        /* 大屏幕稍微放大图标保持比例 */
+        @media (min-aspect-ratio: 1/1) and (min-width: 1200px) {
+            .btn-icon-wrapper { width: 80px; height: 80px; }
+            .play-icon { border-width: 22px 0 22px 40px; }
+            .pause-icon .bar { width: 8px; height: 44px; }
+            .next-icon { font-size: 58px; }
+            .sun-icon, .moon-icon { width: 60px; height: 60px; }
+        }
+        
+        @media (min-aspect-ratio: 1/1) and (max-width: 768px) {
+            .btn-icon-wrapper { width: 52px; height: 52px; }
+            .play-icon { border-width: 14px 0 14px 26px; }
+            .pause-icon .bar { width: 5px; height: 28px; }
+            .next-icon { font-size: 40px; }
+            .sun-icon, .moon-icon { width: 40px; height: 40px; }
+        }
+        
+        @media (max-aspect-ratio: 1/1) and (max-width: 560px) {
+            .btn-icon-wrapper { width: 48px; height: 48px; }
+            .play-icon { border-width: 13px 0 13px 24px; }
+            .pause-icon .bar { width: 5px; height: 26px; }
+            .next-icon { font-size: 36px; }
+            .sun-icon, .moon-icon { width: 36px; height: 36px; }
+        }
+
+        /* ========== 波纹特效 ========== */
+        .wave-ripple-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .wave-ripple {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid rgba(204, 51, 51, 0.6);
+            opacity: 0;
+            animation: waveExpand 2.2s ease-out infinite;
+            pointer-events: none;
+            display: none;
+            box-sizing: border-box;
+        }
+        
+        .playing-ripple .wave-ripple {
+            display: block;
+        }
+        
+        .wave-ripple:nth-child(1) { animation-delay: 0s; }
+        .wave-ripple:nth-child(2) { animation-delay: 0.7s; }
+        .wave-ripple:nth-child(3) { animation-delay: 1.4s; }
+        
+        @keyframes waveExpand {
+            0% {
+                transform: scale(1);
+                opacity: 0.7;
+                border-width: 2px;
+            }
+            100% {
+                transform: scale(2.2);
+                opacity: 0;
+                border-width: 1px;
+            }
+        }
+        
+        body.dark-mode .wave-ripple {
+            border-color: rgba(255, 68, 68, 0.7);
+        }
+        
+        /* ========== 底部进度条 ========== */
+        .progress-bar-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            cursor: pointer;
+            z-index: 100;
+        }
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            border-radius: 0 5px 5px 0;
+            transition: width 0.05s linear;
+        }
+
+        .tip-bubble {
+            position: fixed;
+            background: rgba(30,25,20,0.95);
+            color: #f0e8d8;
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            font-family: monospace;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        .tip-bubble.show { opacity: 1; }
+    </style>
+</head>
+<body>
+
+<!-- 歌曲信息容器 -->
+<div class="song-info-container">
+    <div class="top-section">
+        <div class="fade-text" id="songNameWrapper">
+            <div class="song-name" id="songName">欢迎收听</div>
+        </div>
+        <div class="fade-text" id="artistNameWrapper">
+            <div class="artist-name" id="artistName">HellYell Radio</div>
+        </div>
+    </div>
+</div>
+
+<!-- 横屏右侧按钮容器（仅横屏显示） -->
+<div class="side-buttons" id="sideButtons">
+    <button class="ctrl-btn" id="themeBtnSide">
+        <div class="btn-icon-wrapper">
+            <div class="ctrl-icon moon-icon" id="themeIconSide">
+                <svg viewBox="0 0 100 100" fill="currentColor">
+                    <path d="M50,10 A40,40 0 1,0 85,75 A35,35 0 0,1 50,10 Z"/>
+                </svg>
+            </div>
+        </div>
+    </button>
+    <button class="ctrl-btn" id="playBtnSide">
+        <div class="btn-icon-wrapper" id="playIconWrapperSide">
+            <div class="wave-ripple-container">
+                <div class="wave-ripple"></div>
+                <div class="wave-ripple"></div>
+                <div class="wave-ripple"></div>
+            </div>
+            <span id="playIconSide" class="ctrl-icon play-icon"></span>
+            <span id="pauseIconSide" class="ctrl-icon pause-icon" style="display:none;">
+                <span class="bar"></span><span class="bar"></span>
+            </span>
+        </div>
+    </button>
+    <button class="ctrl-btn" id="nextBtnSide">
+        <div class="btn-icon-wrapper">
+            <span class="ctrl-icon next-icon">⏭</span>
+        </div>
+    </button>
+</div>
+
+<!-- 竖屏底部按钮容器（仅竖屏显示） -->
+<div class="bottom-buttons" id="bottomButtons">
+    <button class="ctrl-btn" id="themeBtnBottom">
+        <div class="btn-icon-wrapper">
+            <div class="ctrl-icon moon-icon" id="themeIconBottom">
+                <svg viewBox="0 0 100 100" fill="currentColor">
+                    <path d="M50,10 A40,40 0 1,0 85,75 A35,35 0 0,1 50,10 Z"/>
+                </svg>
+            </div>
+        </div>
+    </button>
+    <button class="ctrl-btn" id="playBtnBottom">
+        <div class="btn-icon-wrapper" id="playIconWrapperBottom">
+            <div class="wave-ripple-container">
+                <div class="wave-ripple"></div>
+                <div class="wave-ripple"></div>
+                <div class="wave-ripple"></div>
+            </div>
+            <span id="playIconBottom" class="ctrl-icon play-icon"></span>
+            <span id="pauseIconBottom" class="ctrl-icon pause-icon" style="display:none;">
+                <span class="bar"></span><span class="bar"></span>
+            </span>
+        </div>
+    </button>
+    <button class="ctrl-btn" id="nextBtnBottom">
+        <div class="btn-icon-wrapper">
+            <span class="ctrl-icon next-icon">⏭</span>
+        </div>
+    </button>
+</div>
+
+<!-- 底部进度条 -->
+<div class="progress-bar-container" id="progressBarContainer">
+    <div class="progress-fill" id="progressFill"></div>
+</div>
+
+<div class="tip-bubble" id="tipBubble"></div>
+
+<script>
+    // ========== 音频核心逻辑 ==========
+    const audio = new Audio();
+    audio.preload = "auto";
+    let allSongs = [];
+    let currentSong = null;
+    let isPlaying = false;
+    let normalCount = 0;
+    let hasStarted = false;
+    let isSwitching = false;
+    let loadTimer = null;
+    let volume = 1.0;
+    const promoSong = { name: "HellYell Radio - 欢迎收听", url: "https://radio.hellyell.com/hy.mp3" };
+    const BUFFER_TIMEOUT = 30000;
+
+    // ========== 字体大小自适应 ==========
+    function adjustFontSize() {
+        const songNameEl = document.getElementById('songName');
+        const artistNameEl = document.getElementById('artistName');
+        const container = document.querySelector('.song-info-container');
+        
+        if (!songNameEl || !artistNameEl || !container) return;
+        
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
+        const isLandscape = window.innerWidth >= window.innerHeight;
+        
+        let songFontSize;
+        if (isLandscape) {
+            songFontSize = Math.min(containerWidth * 0.08, 56);
+        } else {
+            songFontSize = Math.min(containerWidth * 0.08, 48);
+        }
+        songFontSize = Math.max(songFontSize, 20);
+        let artistFontSize = Math.max(songFontSize - 12, 14);
+        
+        songNameEl.style.fontSize = songFontSize + 'px';
+        artistNameEl.style.fontSize = artistFontSize + 'px';
+    }
+
+    // 主题切换
+    function setTheme(theme) {
+        const themeIcons = [
+            document.getElementById('themeIconSide'),
+            document.getElementById('themeIconBottom')
+        ];
+        
+        if (theme === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.body.classList.remove('light-mode');
+            const sunSvg = `<svg viewBox="0 0 100 100" fill="currentColor">
+                <circle cx="50" cy="50" r="22" />
+                <line x1="50" y1="8" x2="50" y2="20" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+                <line x1="50" y1="80" x2="50" y2="92" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+                <line x1="8" y1="50" x2="20" y2="50" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+                <line x1="80" y1="50" x2="92" y2="50" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+                <line x1="20" y1="20" x2="28" y2="28" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+                <line x1="72" y1="72" x2="80" y2="80" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+                <line x1="20" y1="80" x2="28" y2="72" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+                <line x1="72" y1="28" x2="80" y2="20" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+            </svg>`;
+            themeIcons.forEach(icon => {
+                if (icon) {
+                    icon.className = 'ctrl-icon sun-icon';
+                    icon.innerHTML = sunSvg;
+                }
+            });
+            localStorage.setItem('radioTheme', 'dark');
+        } else {
+            document.body.classList.remove('dark-mode');
+            document.body.classList.add('light-mode');
+            const moonSvg = `<svg viewBox="0 0 100 100" fill="currentColor">
+                <path d="M50,10 A40,40 0 1,0 85,75 A35,35 0 0,1 50,10 Z"/>
+            </svg>`;
+            themeIcons.forEach(icon => {
+                if (icon) {
+                    icon.className = 'ctrl-icon moon-icon';
+                    icon.innerHTML = moonSvg;
+                }
+            });
+            localStorage.setItem('radioTheme', 'light');
+        }
+    }
+    
+    function toggleTheme() {
+        const isDark = document.body.classList.contains('dark-mode');
+        setTheme(isDark ? 'light' : 'dark');
+    }
+    
+    const savedTheme = localStorage.getItem('radioTheme');
+    setTheme(savedTheme === 'dark' ? 'dark' : 'light');
+
+    function playStartSound() {}
+
+    // ========== 歌曲信息渐显渐隐动画 ==========
+    let isUpdatingText = false;
+    let pendingUpdate = null;
+    
+    function updateUINewWithFade(song) {
+        const parts = song.name.split(' - ');
+        const singer = parts[0] || '';
+        const music = parts.slice(1).join(' - ') || song.name;
+        
+        const songNameEl = document.getElementById('songName');
+        const artistNameEl = document.getElementById('artistName');
+        const songWrapper = document.getElementById('songNameWrapper');
+        const artistWrapper = document.getElementById('artistNameWrapper');
+        
+        if (!songNameEl || !artistNameEl) return;
+        
+        if (isUpdatingText) {
+            pendingUpdate = { music, singer };
+            return;
+        }
+        
+        isUpdatingText = true;
+        
+        if (songWrapper) songWrapper.classList.add('fade-out');
+        if (artistWrapper) artistWrapper.classList.add('fade-out');
+        
+        setTimeout(() => {
+            songNameEl.innerText = music;
+            artistNameEl.innerText = singer;
+            document.title = `${music} - ${singer}`;
+            
+            if (songWrapper) songWrapper.classList.remove('fade-out');
+            if (artistWrapper) artistWrapper.classList.remove('fade-out');
+            
+            setTimeout(() => {
+                isUpdatingText = false;
+                adjustFontSize();
+                if (pendingUpdate) {
+                    const next = pendingUpdate;
+                    pendingUpdate = null;
+                    const fakeSong = { name: `${next.singer} - ${next.music}` };
+                    updateUINewWithFade(fakeSong);
+                }
+            }, 50);
+        }, 200);
+    }
+    
+    function updateUINew(song) {
+        updateUINewWithFade(song);
+    }
+
+    function updateProgress() {
+        const progressFill = document.getElementById('progressFill');
+        if (audio.duration && !isNaN(audio.duration) && isPlaying) {
+            const percent = (audio.currentTime / audio.duration) * 100;
+            progressFill.style.width = percent + '%';
+        }
+    }
+    
+    function resetProgress() {
+        document.getElementById('progressFill').style.width = '0%';
+    }
+
+    function clearLoadTimer() {
+        if (loadTimer) { clearTimeout(loadTimer); loadTimer = null; }
+    }
+
+    // 波纹特效控制
+    function updateWaveRipple(playing) {
+        const playWrappers = [
+            document.getElementById('playIconWrapperSide'),
+            document.getElementById('playIconWrapperBottom')
+        ];
+        playWrappers.forEach(wrapper => {
+            if (wrapper) {
+                if (playing) wrapper.classList.add('playing-ripple');
+                else wrapper.classList.remove('playing-ripple');
+            }
+        });
+    }
+
+    // 更新播放/暂停图标显示
+    function updatePlayPauseIcons(playing) {
+        const playIcons = [
+            { play: document.getElementById('playIconSide'), pause: document.getElementById('pauseIconSide') },
+            { play: document.getElementById('playIconBottom'), pause: document.getElementById('pauseIconBottom') }
+        ];
+        playIcons.forEach(icons => {
+            if (icons.play && icons.pause) {
+                if (playing) {
+                    icons.play.style.display = 'none';
+                    icons.pause.style.display = 'flex';
+                } else {
+                    icons.play.style.display = 'flex';
+                    icons.pause.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    function playSong(song, autoPlay = true) {
+        if (isSwitching) return;
+        isSwitching = true;
+        clearLoadTimer();
+        currentSong = song;
+        updateUINew(song);
+        audio.pause();
+        audio.src = song.url;
+        audio.volume = volume;
+        
+        if (autoPlay && isPlaying) {
+            loadTimer = setTimeout(() => {
+                if (isPlaying && !isSwitching) nextSong();
+            }, BUFFER_TIMEOUT);
+            
+            audio.play().then(() => {
+                clearLoadTimer();
+                isSwitching = false;
+                resetProgress();
+                updateWaveRipple(true);
+            }).catch(() => {
+                clearLoadTimer();
+                isSwitching = false;
+                setTimeout(() => nextSong(), 500);
+            });
+        } else {
+            isSwitching = false;
+            if (!autoPlay) resetProgress();
+        }
+    }
+
+    function nextSong() {
+        if (isSwitching) return;
+        clearLoadTimer();
+        const next = getNextSong();
+        if (next !== promoSong) normalCount++;
+        playSong(next, isPlaying);
+    }
+
+    function getNextSong() {
+        if (normalCount === 7) { normalCount = 0; return promoSong; }
+        if (allSongs.length === 0) return promoSong;
+        return allSongs[Math.floor(Math.random() * allSongs.length)];
+    }
+
+    function togglePlay() {
+        if (isPlaying) {
+            audio.pause();
+            clearLoadTimer();
+            isPlaying = false;
+            updateWaveRipple(false);
+            updatePlayPauseIcons(false);
+        } else {
+            isPlaying = true;
+            updateWaveRipple(true);
+            updatePlayPauseIcons(true);
+            
+            if (!hasStarted) {
+                hasStarted = true;
+                normalCount = 0;
+                playStartSound();
+                playSong(promoSong, true);
+            } else if (currentSong) {
+                clearLoadTimer();
+                loadTimer = setTimeout(() => {
+                    if (isPlaying && !isSwitching) nextSong();
+                }, BUFFER_TIMEOUT);
+                audio.play().catch(() => { clearLoadTimer(); nextSong(); });
+            } else {
+                playStartSound();
+                playSong(promoSong, true);
+            }
+        }
+    }
+
+    function initProgressBar() {
+        const progressContainer = document.getElementById('progressBarContainer');
+        progressContainer.addEventListener('click', (e) => {
+            if (audio.duration && !isNaN(audio.duration)) {
+                const rect = progressContainer.getBoundingClientRect();
+                const percent = (e.clientX - rect.left) / rect.width;
+                audio.currentTime = percent * audio.duration;
+                updateProgress();
+            }
+        });
+    }
+
+    function bindButtons() {
+        const playBtnSide = document.getElementById('playBtnSide');
+        const nextBtnSide = document.getElementById('nextBtnSide');
+        const themeBtnSide = document.getElementById('themeBtnSide');
+        if (playBtnSide) playBtnSide.onclick = (e) => { e.stopPropagation(); togglePlay(); };
+        if (nextBtnSide) nextBtnSide.onclick = () => { if (!isSwitching) nextSong(); };
+        if (themeBtnSide) themeBtnSide.onclick = () => toggleTheme();
+        
+        const playBtnBottom = document.getElementById('playBtnBottom');
+        const nextBtnBottom = document.getElementById('nextBtnBottom');
+        const themeBtnBottom = document.getElementById('themeBtnBottom');
+        if (playBtnBottom) playBtnBottom.onclick = (e) => { e.stopPropagation(); togglePlay(); };
+        if (nextBtnBottom) nextBtnBottom.onclick = () => { if (!isSwitching) nextSong(); };
+        if (themeBtnBottom) themeBtnBottom.onclick = () => toggleTheme();
+    }
+
+    audio.addEventListener('ended', () => { if (!isSwitching && isPlaying) nextSong(); });
+    audio.addEventListener('error', () => { if (!isSwitching && isPlaying) { clearLoadTimer(); nextSong(); } });
+    audio.addEventListener('timeupdate', () => { if (isPlaying) updateProgress(); });
+    audio.addEventListener('play', () => { setTimeout(() => updateProgress(), 50); });
+    audio.addEventListener('play', () => { if (isPlaying) updateWaveRipple(true); });
+    audio.addEventListener('pause', () => { if (!isPlaying) updateWaveRipple(false); });
+
+    window.addEventListener('resize', () => { setTimeout(adjustFontSize, 50); });
+    
+    const resizeObserver = new ResizeObserver(() => { adjustFontSize(); });
+    const songContainer = document.querySelector('.song-info-container');
+    if (songContainer) resizeObserver.observe(songContainer);
+
+    async function init() {
+        try {
+            const [hj, qc] = await Promise.all([
+                fetch('https://radio.hellyell.com/huaijiu-musiclist.json').then(r => r.json()),
+                fetch('https://radio.hellyell.com/qiche-musiclist.json').then(r => r.json())
+            ]);
+            const all = [...hj, ...qc];
+            allSongs = all.filter(item => {
+                const singer = item.name.split(' - ')[0];
+                return singer !== 'HellYell 怀旧电台' && singer !== 'HellYell 汽车电台' &&
+                       singer !== 'HellYell怀旧电台' && singer !== 'HellYell汽车电台' &&
+                       item.url && item.url.startsWith('http');
+            });
+        } catch(e) { allSongs = []; }
+        
+        updateUINew(promoSong);
+        hasStarted = false;
+        isPlaying = false;
+        currentSong = null;
+        normalCount = 0;
+        audio.volume = volume;
+        bindButtons();
+        initProgressBar();
+        adjustFontSize();
+        updateWaveRipple(false);
+        updatePlayPauseIcons(false);
+    }
+    
+    window.onload = init;
+</script>
+</body>
+</html>
