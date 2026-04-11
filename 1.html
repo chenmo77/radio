@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>HellYell 音乐电台</title>
-    <!-- 汇文明朝体字体 -->
     <link href="https://fontsapi.zeoseven.com/256/main/result.css" rel="stylesheet">
     <style>
         * {
@@ -25,20 +24,16 @@
         }
 
         body {
-            background: #f5f5f0;
             font-family: "Huiwen-mincho", 'Arial', 'MiSans', 'Microsoft YaHei', serif;
-            font-weight: normal;
             transition: background 0.3s ease;
-            position: relative;
         }
 
-        /* ========== 浅色模式样式 ========== */
+        /* 浅色模式 */
         body.light-mode {
             background: #f5f5f0;
         }
         body.light-mode .song-name {
             color: #cc3333;
-            text-shadow: 0 0 4px rgba(204,51,51,0.2);
         }
         body.light-mode .artist-name {
             color: #000000;
@@ -58,17 +53,13 @@
         body.light-mode .progress-fill {
             background: #cc3333;
         }
-        body.light-mode .moon-icon {
-            color: #555555;
-        }
 
-        /* ========== 深色模式样式 ========== */
+        /* 深色模式 */
         body.dark-mode {
             background: #1a1a1a;
         }
         body.dark-mode .song-name {
             color: #ff4444;
-            text-shadow: 0 0 8px rgba(255,68,68,0.3);
         }
         body.dark-mode .artist-name {
             color: #ffffff;
@@ -88,56 +79,17 @@
         body.dark-mode .progress-fill {
             background: #ff4444;
         }
-        body.dark-mode .sun-icon {
-            color: #cccccc;
-        }
-
-        /* ========== 歌曲信息容器 - 始终存在 ========== */
-        .song-info-container {
-            position: fixed;
-            z-index: 1;
-        }
-
-        .top-section {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: transparent;
-        }
-        
-        .fade-text {
-            transition: opacity 0.35s ease-in-out;
-            opacity: 1;
-            width: 100%;
-            text-align: center;
-        }
-        .fade-text.fade-out {
-            opacity: 0;
-        }
-        
-        .song-name {
-            font-weight: normal;
-            text-align: center;
-            word-break: break-word;
-            width: 100%;
-            line-height: 1.3;
-            font-family: "Huiwen-mincho", serif;
-        }
-        .artist-name {
-            font-weight: normal;
-            text-align: center;
-            word-break: break-word;
-            width: 100%;
-            opacity: 0.9;
-            line-height: 1.3;
-            font-family: "Huiwen-mincho", serif;
-        }
 
         /* ========== 横屏布局 (宽 >= 高) ========== */
         @media (min-aspect-ratio: 1/1) {
-            /* 歌曲信息：左侧，占80%宽度，100%高度，垂直水平居中 */
-            .song-info-container {
+            body {
+                display: flex;
+                flex-direction: row;
+            }
+            
+            /* 左侧歌曲信息区域 - 占80%宽度，100%高度，内容居中 */
+            .song-area {
+                position: fixed;
                 left: 0;
                 top: 0;
                 width: 80%;
@@ -145,15 +97,25 @@
                 display: flex;
                 justify-content: center;
                 align-items: center;
+                z-index: 1;
             }
             
-            .top-section {
-                width: 80%;
-                gap: 12px;
+            .song-text {
+                text-align: center;
+                padding: 20px;
             }
             
-            /* 按钮容器：右侧，占20%宽度，100%高度，垂直等分分布 */
-            .side-buttons {
+            .song-name {
+                font-size: clamp(24px, 8vw, 56px);
+                margin-bottom: 12px;
+            }
+            
+            .artist-name {
+                font-size: clamp(16px, 4vw, 32px);
+            }
+            
+            /* 右侧按钮区域 - 占20%宽度，100%高度，三个按钮垂直等分 */
+            .buttons-area {
                 position: fixed;
                 right: 0;
                 top: 0;
@@ -161,16 +123,13 @@
                 height: 100%;
                 display: flex;
                 flex-direction: column;
-                justify-content: space-between;
+                justify-content: space-evenly;
                 align-items: center;
-                background: transparent;
                 z-index: 10;
-                padding: 20px 0;
             }
             
-            /* 三个按钮高度相等，宽度一致，无背景无边框 */
             .ctrl-btn {
-                flex: 1;
+                width: 100%;
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -178,13 +137,13 @@
                 border: none;
                 cursor: pointer;
                 outline: none;
-                padding: 0;
-                width: 100%;
+                padding: 20px 0;
             }
             
+            /* 三个按钮的图标容器尺寸完全一致 */
             .btn-icon-wrapper {
-                width: 64px;
-                height: 64px;
+                width: 70px;
+                height: 70px;
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -194,8 +153,14 @@
 
         /* ========== 竖屏布局 (宽 < 高) ========== */
         @media (max-aspect-ratio: 1/1) {
-            /* 歌曲信息：上部，占100%宽度，80%高度，水平垂直居中 */
-            .song-info-container {
+            body {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            /* 上部歌曲信息区域 - 占100%宽度，80%高度，内容居中 */
+            .song-area {
+                position: fixed;
                 left: 0;
                 top: 0;
                 width: 100%;
@@ -203,15 +168,26 @@
                 display: flex;
                 justify-content: center;
                 align-items: center;
+                z-index: 1;
             }
             
-            .top-section {
-                width: 80%;
-                gap: 10px;
+            .song-text {
+                text-align: center;
+                padding: 20px;
+                width: 90%;
             }
             
-            /* 按钮容器：底部，占100%宽度，20%高度，水平等分分布 */
-            .bottom-buttons {
+            .song-name {
+                font-size: clamp(20px, 7vw, 42px);
+                margin-bottom: 10px;
+            }
+            
+            .artist-name {
+                font-size: clamp(14px, 3.5vw, 24px);
+            }
+            
+            /* 底部按钮区域 - 占100%宽度，20%高度，三个按钮水平等分 */
+            .buttons-area {
                 position: fixed;
                 bottom: 0;
                 left: 0;
@@ -219,16 +195,13 @@
                 height: 20%;
                 display: flex;
                 flex-direction: row;
-                justify-content: space-between;
+                justify-content: space-evenly;
                 align-items: center;
-                background: transparent;
                 z-index: 10;
-                padding: 0 20px;
             }
             
-            /* 三个按钮宽度相等，高度一致，无背景无边框 */
             .ctrl-btn {
-                flex: 1;
+                height: 100%;
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -236,13 +209,14 @@
                 border: none;
                 cursor: pointer;
                 outline: none;
-                padding: 0;
-                height: 100%;
+                padding: 0 10px;
+                flex: 1;
             }
             
+            /* 三个按钮的图标容器尺寸完全一致 */
             .btn-icon-wrapper {
-                width: 56px;
-                height: 56px;
+                width: 60px;
+                height: 60px;
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -250,21 +224,30 @@
             }
         }
 
-        /* 图标尺寸统一 */
+        /* 图标统一样式 - 所有图标在容器内居中，大小一致 */
         .ctrl-icon {
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease;
         }
         
+        .ctrl-btn:active .ctrl-icon {
+            transform: scale(0.92);
+        }
+        
+        /* 太阳/月亮 SVG 图标 - 占满容器 */
+        .sun-icon, .moon-icon {
+            width: 100%;
+            height: 100%;
+        }
         .sun-icon svg, .moon-icon svg {
             width: 100%;
             height: 100%;
             display: block;
         }
-
-        /* 播放三角形图标 */
+        
+        /* 播放三角形 - 在容器内居中 */
         .play-icon {
             width: 0;
             height: 0;
@@ -273,7 +256,7 @@
             margin-left: 6px;
         }
         
-        /* 暂停双竖线图标 */
+        /* 暂停双竖线 - 在容器内居中 */
         .pause-icon {
             display: flex;
             gap: 10px;
@@ -286,42 +269,41 @@
             border-radius: 3px;
         }
         
-        /* 下一首图标 */
+        /* 下一首图标 - 字体图标，在容器内居中 */
         .next-icon {
             font-size: 48px;
             line-height: 1;
             font-weight: normal;
         }
         
-        /* 太阳/月亮图标尺寸 */
-        .sun-icon, .moon-icon {
-            width: 48px;
-            height: 48px;
+        /* 横屏时稍大的图标尺寸保持比例一致 */
+        @media (min-aspect-ratio: 1/1) and (max-width: 800px) {
+            .btn-icon-wrapper { width: 60px; height: 60px; }
+            .play-icon { border-width: 15px 0 15px 28px; }
+            .pause-icon .bar { width: 5px; height: 32px; }
+            .next-icon { font-size: 42px; }
         }
         
-        /* 大屏幕稍微放大图标保持比例 */
         @media (min-aspect-ratio: 1/1) and (min-width: 1200px) {
-            .btn-icon-wrapper { width: 80px; height: 80px; }
+            .btn-icon-wrapper { width: 85px; height: 85px; }
             .play-icon { border-width: 22px 0 22px 40px; }
-            .pause-icon .bar { width: 8px; height: 44px; }
+            .pause-icon .bar { width: 7px; height: 44px; gap: 12px; }
             .next-icon { font-size: 58px; }
-            .sun-icon, .moon-icon { width: 60px; height: 60px; }
         }
         
-        @media (min-aspect-ratio: 1/1) and (max-width: 768px) {
-            .btn-icon-wrapper { width: 52px; height: 52px; }
-            .play-icon { border-width: 14px 0 14px 26px; }
-            .pause-icon .bar { width: 5px; height: 28px; }
-            .next-icon { font-size: 40px; }
-            .sun-icon, .moon-icon { width: 40px; height: 40px; }
-        }
-        
-        @media (max-aspect-ratio: 1/1) and (max-width: 560px) {
-            .btn-icon-wrapper { width: 48px; height: 48px; }
+        /* 竖屏时图标尺寸保持一致 */
+        @media (max-aspect-ratio: 1/1) and (max-width: 500px) {
+            .btn-icon-wrapper { width: 50px; height: 50px; }
             .play-icon { border-width: 13px 0 13px 24px; }
-            .pause-icon .bar { width: 5px; height: 26px; }
-            .next-icon { font-size: 36px; }
-            .sun-icon, .moon-icon { width: 36px; height: 36px; }
+            .pause-icon .bar { width: 5px; height: 28px; gap: 8px; }
+            .next-icon { font-size: 38px; }
+        }
+        
+        @media (max-aspect-ratio: 1/1) and (min-width: 800px) {
+            .btn-icon-wrapper { width: 75px; height: 75px; }
+            .play-icon { border-width: 20px 0 20px 36px; }
+            .pause-icon .bar { width: 7px; height: 42px; gap: 12px; }
+            .next-icon { font-size: 54px; }
         }
 
         /* ========== 波纹特效 ========== */
@@ -383,41 +365,31 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 10px;
+            height: 8px;
             cursor: pointer;
             z-index: 100;
         }
         .progress-fill {
             width: 0%;
             height: 100%;
-            border-radius: 0 5px 5px 0;
             transition: width 0.05s linear;
         }
 
-        .tip-bubble {
-            position: fixed;
-            background: rgba(30,25,20,0.95);
-            color: #f0e8d8;
-            padding: 6px 12px;
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: bold;
-            font-family: monospace;
-            pointer-events: none;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-            white-space: nowrap;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        /* 渐隐渐显动画 */
+        .fade-text {
+            transition: opacity 0.35s ease-in-out;
+            opacity: 1;
         }
-        .tip-bubble.show { opacity: 1; }
+        .fade-text.fade-out {
+            opacity: 0;
+        }
     </style>
 </head>
 <body>
 
-<!-- 歌曲信息容器 -->
-<div class="song-info-container">
-    <div class="top-section">
+<!-- 歌曲信息区域 - 只有纯文字 -->
+<div class="song-area">
+    <div class="song-text">
         <div class="fade-text" id="songNameWrapper">
             <div class="song-name" id="songName">欢迎收听</div>
         </div>
@@ -427,62 +399,36 @@
     </div>
 </div>
 
-<!-- 横屏右侧按钮容器（仅横屏显示） -->
-<div class="side-buttons" id="sideButtons">
-    <button class="ctrl-btn" id="themeBtnSide">
+<!-- 按钮区域 - 三个图标按钮尺寸完全一致 -->
+<div class="buttons-area" id="buttonsArea">
+    <!-- 主题切换按钮 -->
+    <button class="ctrl-btn" id="themeBtn">
         <div class="btn-icon-wrapper">
-            <div class="ctrl-icon moon-icon" id="themeIconSide">
+            <div class="ctrl-icon moon-icon" id="themeIcon">
                 <svg viewBox="0 0 100 100" fill="currentColor">
                     <path d="M50,10 A40,40 0 1,0 85,75 A35,35 0 0,1 50,10 Z"/>
                 </svg>
             </div>
         </div>
     </button>
-    <button class="ctrl-btn" id="playBtnSide">
-        <div class="btn-icon-wrapper" id="playIconWrapperSide">
+    
+    <!-- 播放/暂停按钮 -->
+    <button class="ctrl-btn" id="playBtn">
+        <div class="btn-icon-wrapper" id="playIconWrapper">
             <div class="wave-ripple-container">
                 <div class="wave-ripple"></div>
                 <div class="wave-ripple"></div>
                 <div class="wave-ripple"></div>
             </div>
-            <span id="playIconSide" class="ctrl-icon play-icon"></span>
-            <span id="pauseIconSide" class="ctrl-icon pause-icon" style="display:none;">
+            <span id="playIcon" class="ctrl-icon play-icon"></span>
+            <span id="pauseIcon" class="ctrl-icon pause-icon" style="display:none;">
                 <span class="bar"></span><span class="bar"></span>
             </span>
         </div>
     </button>
-    <button class="ctrl-btn" id="nextBtnSide">
-        <div class="btn-icon-wrapper">
-            <span class="ctrl-icon next-icon">⏭</span>
-        </div>
-    </button>
-</div>
-
-<!-- 竖屏底部按钮容器（仅竖屏显示） -->
-<div class="bottom-buttons" id="bottomButtons">
-    <button class="ctrl-btn" id="themeBtnBottom">
-        <div class="btn-icon-wrapper">
-            <div class="ctrl-icon moon-icon" id="themeIconBottom">
-                <svg viewBox="0 0 100 100" fill="currentColor">
-                    <path d="M50,10 A40,40 0 1,0 85,75 A35,35 0 0,1 50,10 Z"/>
-                </svg>
-            </div>
-        </div>
-    </button>
-    <button class="ctrl-btn" id="playBtnBottom">
-        <div class="btn-icon-wrapper" id="playIconWrapperBottom">
-            <div class="wave-ripple-container">
-                <div class="wave-ripple"></div>
-                <div class="wave-ripple"></div>
-                <div class="wave-ripple"></div>
-            </div>
-            <span id="playIconBottom" class="ctrl-icon play-icon"></span>
-            <span id="pauseIconBottom" class="ctrl-icon pause-icon" style="display:none;">
-                <span class="bar"></span><span class="bar"></span>
-            </span>
-        </div>
-    </button>
-    <button class="ctrl-btn" id="nextBtnBottom">
+    
+    <!-- 下一首按钮 -->
+    <button class="ctrl-btn" id="nextBtn">
         <div class="btn-icon-wrapper">
             <span class="ctrl-icon next-icon">⏭</span>
         </div>
@@ -493,8 +439,6 @@
 <div class="progress-bar-container" id="progressBarContainer">
     <div class="progress-fill" id="progressFill"></div>
 </div>
-
-<div class="tip-bubble" id="tipBubble"></div>
 
 <script>
     // ========== 音频核心逻辑 ==========
@@ -511,42 +455,31 @@
     const promoSong = { name: "HellYell Radio - 欢迎收听", url: "https://radio.hellyell.com/hy.mp3" };
     const BUFFER_TIMEOUT = 30000;
 
-    // ========== 字体大小自适应 ==========
+    // 字体自适应
     function adjustFontSize() {
+        const isLandscape = window.innerWidth >= window.innerHeight;
         const songNameEl = document.getElementById('songName');
         const artistNameEl = document.getElementById('artistName');
-        const container = document.querySelector('.song-info-container');
         
-        if (!songNameEl || !artistNameEl || !container) return;
+        if (!songNameEl || !artistNameEl) return;
         
-        const containerWidth = container.clientWidth;
-        const containerHeight = container.clientHeight;
-        const isLandscape = window.innerWidth >= window.innerHeight;
-        
-        let songFontSize;
         if (isLandscape) {
-            songFontSize = Math.min(containerWidth * 0.08, 56);
+            songNameEl.style.fontSize = 'clamp(24px, 8vw, 56px)';
+            artistNameEl.style.fontSize = 'clamp(16px, 4vw, 32px)';
         } else {
-            songFontSize = Math.min(containerWidth * 0.08, 48);
+            songNameEl.style.fontSize = 'clamp(20px, 7vw, 42px)';
+            artistNameEl.style.fontSize = 'clamp(14px, 3.5vw, 24px)';
         }
-        songFontSize = Math.max(songFontSize, 20);
-        let artistFontSize = Math.max(songFontSize - 12, 14);
-        
-        songNameEl.style.fontSize = songFontSize + 'px';
-        artistNameEl.style.fontSize = artistFontSize + 'px';
     }
 
     // 主题切换
     function setTheme(theme) {
-        const themeIcons = [
-            document.getElementById('themeIconSide'),
-            document.getElementById('themeIconBottom')
-        ];
-        
+        const themeIcon = document.getElementById('themeIcon');
         if (theme === 'dark') {
             document.body.classList.add('dark-mode');
             document.body.classList.remove('light-mode');
-            const sunSvg = `<svg viewBox="0 0 100 100" fill="currentColor">
+            themeIcon.className = 'ctrl-icon sun-icon';
+            themeIcon.innerHTML = `<svg viewBox="0 0 100 100" fill="currentColor">
                 <circle cx="50" cy="50" r="22" />
                 <line x1="50" y1="8" x2="50" y2="20" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
                 <line x1="50" y1="80" x2="50" y2="92" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
@@ -557,25 +490,14 @@
                 <line x1="20" y1="80" x2="28" y2="72" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
                 <line x1="72" y1="28" x2="80" y2="20" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
             </svg>`;
-            themeIcons.forEach(icon => {
-                if (icon) {
-                    icon.className = 'ctrl-icon sun-icon';
-                    icon.innerHTML = sunSvg;
-                }
-            });
             localStorage.setItem('radioTheme', 'dark');
         } else {
             document.body.classList.remove('dark-mode');
             document.body.classList.add('light-mode');
-            const moonSvg = `<svg viewBox="0 0 100 100" fill="currentColor">
+            themeIcon.className = 'ctrl-icon moon-icon';
+            themeIcon.innerHTML = `<svg viewBox="0 0 100 100" fill="currentColor">
                 <path d="M50,10 A40,40 0 1,0 85,75 A35,35 0 0,1 50,10 Z"/>
             </svg>`;
-            themeIcons.forEach(icon => {
-                if (icon) {
-                    icon.className = 'ctrl-icon moon-icon';
-                    icon.innerHTML = moonSvg;
-                }
-            });
             localStorage.setItem('radioTheme', 'light');
         }
     }
@@ -588,9 +510,7 @@
     const savedTheme = localStorage.getItem('radioTheme');
     setTheme(savedTheme === 'dark' ? 'dark' : 'light');
 
-    function playStartSound() {}
-
-    // ========== 歌曲信息渐显渐隐动画 ==========
+    // 歌曲信息渐隐渐显
     let isUpdatingText = false;
     let pendingUpdate = null;
     
@@ -641,6 +561,7 @@
         updateUINewWithFade(song);
     }
 
+    // 进度条
     function updateProgress() {
         const progressFill = document.getElementById('progressFill');
         if (audio.duration && !isNaN(audio.duration) && isPlaying) {
@@ -657,37 +578,28 @@
         if (loadTimer) { clearTimeout(loadTimer); loadTimer = null; }
     }
 
-    // 波纹特效控制
+    // 波纹特效
     function updateWaveRipple(playing) {
-        const playWrappers = [
-            document.getElementById('playIconWrapperSide'),
-            document.getElementById('playIconWrapperBottom')
-        ];
-        playWrappers.forEach(wrapper => {
-            if (wrapper) {
-                if (playing) wrapper.classList.add('playing-ripple');
-                else wrapper.classList.remove('playing-ripple');
-            }
-        });
+        const wrapper = document.getElementById('playIconWrapper');
+        if (wrapper) {
+            if (playing) wrapper.classList.add('playing-ripple');
+            else wrapper.classList.remove('playing-ripple');
+        }
     }
 
-    // 更新播放/暂停图标显示
+    // 播放/暂停图标切换
     function updatePlayPauseIcons(playing) {
-        const playIcons = [
-            { play: document.getElementById('playIconSide'), pause: document.getElementById('pauseIconSide') },
-            { play: document.getElementById('playIconBottom'), pause: document.getElementById('pauseIconBottom') }
-        ];
-        playIcons.forEach(icons => {
-            if (icons.play && icons.pause) {
-                if (playing) {
-                    icons.play.style.display = 'none';
-                    icons.pause.style.display = 'flex';
-                } else {
-                    icons.play.style.display = 'flex';
-                    icons.pause.style.display = 'none';
-                }
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        if (playIcon && pauseIcon) {
+            if (playing) {
+                playIcon.style.display = 'none';
+                pauseIcon.style.display = 'flex';
+            } else {
+                playIcon.style.display = 'flex';
+                pauseIcon.style.display = 'none';
             }
-        });
+        }
     }
 
     function playSong(song, autoPlay = true) {
@@ -750,7 +662,6 @@
             if (!hasStarted) {
                 hasStarted = true;
                 normalCount = 0;
-                playStartSound();
                 playSong(promoSong, true);
             } else if (currentSong) {
                 clearLoadTimer();
@@ -759,7 +670,6 @@
                 }, BUFFER_TIMEOUT);
                 audio.play().catch(() => { clearLoadTimer(); nextSong(); });
             } else {
-                playStartSound();
                 playSong(promoSong, true);
             }
         }
@@ -777,34 +687,20 @@
         });
     }
 
+    // 绑定按钮事件
     function bindButtons() {
-        const playBtnSide = document.getElementById('playBtnSide');
-        const nextBtnSide = document.getElementById('nextBtnSide');
-        const themeBtnSide = document.getElementById('themeBtnSide');
-        if (playBtnSide) playBtnSide.onclick = (e) => { e.stopPropagation(); togglePlay(); };
-        if (nextBtnSide) nextBtnSide.onclick = () => { if (!isSwitching) nextSong(); };
-        if (themeBtnSide) themeBtnSide.onclick = () => toggleTheme();
-        
-        const playBtnBottom = document.getElementById('playBtnBottom');
-        const nextBtnBottom = document.getElementById('nextBtnBottom');
-        const themeBtnBottom = document.getElementById('themeBtnBottom');
-        if (playBtnBottom) playBtnBottom.onclick = (e) => { e.stopPropagation(); togglePlay(); };
-        if (nextBtnBottom) nextBtnBottom.onclick = () => { if (!isSwitching) nextSong(); };
-        if (themeBtnBottom) themeBtnBottom.onclick = () => toggleTheme();
+        document.getElementById('playBtn').onclick = (e) => { e.stopPropagation(); togglePlay(); };
+        document.getElementById('nextBtn').onclick = () => { if (!isSwitching) nextSong(); };
+        document.getElementById('themeBtn').onclick = () => toggleTheme();
     }
 
     audio.addEventListener('ended', () => { if (!isSwitching && isPlaying) nextSong(); });
     audio.addEventListener('error', () => { if (!isSwitching && isPlaying) { clearLoadTimer(); nextSong(); } });
     audio.addEventListener('timeupdate', () => { if (isPlaying) updateProgress(); });
     audio.addEventListener('play', () => { setTimeout(() => updateProgress(), 50); });
-    audio.addEventListener('play', () => { if (isPlaying) updateWaveRipple(true); });
-    audio.addEventListener('pause', () => { if (!isPlaying) updateWaveRipple(false); });
 
     window.addEventListener('resize', () => { setTimeout(adjustFontSize, 50); });
-    
-    const resizeObserver = new ResizeObserver(() => { adjustFontSize(); });
-    const songContainer = document.querySelector('.song-info-container');
-    if (songContainer) resizeObserver.observe(songContainer);
+    adjustFontSize();
 
     async function init() {
         try {
@@ -829,7 +725,6 @@
         audio.volume = volume;
         bindButtons();
         initProgressBar();
-        adjustFontSize();
         updateWaveRipple(false);
         updatePlayPauseIcons(false);
     }
