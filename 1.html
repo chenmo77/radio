@@ -189,16 +189,16 @@
                 width: 90%;
             }
             
-            /* 竖屏：歌曲名字号为屏幕宽度的4% */
+            /* 竖屏：歌曲名字号为屏幕宽度的10% */
             .song-name {
-                font-size: 4vw;
+                font-size: 10vw;
                 margin-bottom: 5px;
                 line-height: 1.2;
                 white-space: nowrap;
             }
             /* 歌手名字号是歌曲名的一半 */
             .artist-name {
-                font-size: 2vw;
+                font-size: 5vw;
                 line-height: 1.2;
                 white-space: nowrap;
             }
@@ -274,10 +274,10 @@
         /* 限制竖屏时歌曲名和歌手名的最大最小字号 */
         @media (max-aspect-ratio: 1/1) {
             .song-name {
-                font-size: max(14px, min(4vw, 40px));
+                font-size: max(16px, min(10vw, 50px));
             }
             .artist-name {
-                font-size: max(7px, min(2vw, 20px));
+                font-size: max(8px, min(5vw, 25px));
             }
         }
 
