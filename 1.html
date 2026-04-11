@@ -41,11 +41,13 @@
         body.light-mode .ctrl-icon {
             color: #555555;
         }
-        body.light-mode .play-icon {
-            border-color: transparent transparent transparent #cc3333;
-        }
-        body.light-mode .pause-icon .bar {
-            background: #cc3333;
+        body.light-mode .play-icon svg,
+        body.light-mode .pause-icon svg,
+        body.light-mode .next-icon svg,
+        body.light-mode .moon-icon svg,
+        body.light-mode .sun-icon svg {
+            stroke: #555555;
+            fill: #555555;
         }
         body.light-mode .progress-bar-container {
             background: rgba(0,0,0,0.15);
@@ -67,11 +69,13 @@
         body.dark-mode .ctrl-icon {
             color: #cccccc;
         }
-        body.dark-mode .play-icon {
-            border-color: transparent transparent transparent #ff4444;
-        }
-        body.dark-mode .pause-icon .bar {
-            background: #ff4444;
+        body.dark-mode .play-icon svg,
+        body.dark-mode .pause-icon svg,
+        body.dark-mode .next-icon svg,
+        body.dark-mode .moon-icon svg,
+        body.dark-mode .sun-icon svg {
+            stroke: #cccccc;
+            fill: #cccccc;
         }
         body.dark-mode .progress-bar-container {
             background: rgba(255,255,255,0.2);
@@ -104,6 +108,16 @@
                 padding: 20px;
             }
             
+            /* 横屏：歌曲名字号为屏幕宽度的7% */
+            .song-name {
+                font-size: 7vw;
+                margin-bottom: 10px;
+            }
+            /* 歌手名比歌曲名小10px */
+            .artist-name {
+                font-size: calc(7vw - 10px);
+            }
+            
             .buttons-area {
                 position: fixed;
                 right: 0;
@@ -129,10 +143,10 @@
                 padding: 0;
             }
             
-            /* 横屏：按钮图标容器大小为屏幕高度的20% */
+            /* 横屏：图标宽度为屏幕宽度的20% */
             .btn-icon-wrapper {
-                width: 20vh;
-                height: 20vh;
+                width: 20vw;
+                height: 20vw;
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -165,6 +179,16 @@
                 width: 90%;
             }
             
+            /* 竖屏：歌曲名字号为屏幕高度的20% */
+            .song-name {
+                font-size: 20vh;
+                margin-bottom: 10px;
+            }
+            /* 歌手名比歌曲名小10px */
+            .artist-name {
+                font-size: calc(20vh - 10px);
+            }
+            
             .buttons-area {
                 position: fixed;
                 bottom: 0;
@@ -191,10 +215,10 @@
                 flex: 1;
             }
             
-            /* 竖屏：按钮图标容器大小为屏幕宽度的20% */
+            /* 竖屏：图标高度为屏幕高度的20% */
             .btn-icon-wrapper {
-                width: 20vw;
-                height: 20vw;
+                width: 20vh;
+                height: 20vh;
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -202,7 +226,7 @@
             }
         }
 
-        /* 所有图标容器内的内容完全填充，尺寸一致 */
+        /* 所有图标容器内的内容完全填充，尺寸一致，1:1 */
         .ctrl-icon {
             display: flex;
             justify-content: center;
@@ -216,100 +240,36 @@
             transform: scale(0.92);
         }
         
-        /* 太阳/月亮 SVG 图标 - 完全占满容器 */
-        .sun-icon, .moon-icon {
-            width: 100%;
-            height: 100%;
-        }
-        .sun-icon svg, .moon-icon svg {
+        /* 所有 SVG 图标完全占满容器 */
+        .ctrl-icon svg {
             width: 100%;
             height: 100%;
             display: block;
         }
         
-        /* 播放三角形 - 相对于容器大小自适应，保持视觉居中，所有三个按钮尺寸一致 */
-        .play-icon {
-            width: 0;
-            height: 0;
-            border-style: solid;
-            /* 使用百分比相对于容器，但border不支持百分比，改用vw/vh单位确保一致性 */
-            border-width: 0;
-            /* 使用相对于视口的单位，但为了在所有设备上保持一致，使用相对于容器大小的方式 */
+        /* 月亮图标 SVG */
+        .moon-icon svg {
+            viewBox: "0 0 100 100";
         }
         
-        /* 重新定义：所有图标都使用相对于按钮容器大小的固定比例 */
-        .btn-icon-wrapper .play-icon {
-            width: 0;
-            height: 0;
-            border-style: solid;
-            border-width: 0;
+        /* 太阳图标 SVG */
+        .sun-icon svg {
+            viewBox: "0 0 100 100";
         }
         
-        /* 横屏时播放图标大小基于屏幕高度 */
-        @media (min-aspect-ratio: 1/1) {
-            .play-icon {
-                border-width: 6vh 0 6vh 11vh;
-                margin-left: 2vh;
-            }
-            .pause-icon .bar {
-                width: 1.2vh;
-                height: 10vh;
-                border-radius: 0.5vh;
-            }
-            .pause-icon {
-                gap: 2vh;
-            }
-            .next-icon {
-                font-size: 12vh;
-            }
-            .sun-icon, .moon-icon {
-                font-size: 12vh;
-            }
+        /* 播放图标 SVG - 三角形 */
+        .play-icon svg {
+            viewBox: "0 0 100 100";
         }
         
-        /* 竖屏时播放图标大小基于屏幕宽度 */
-        @media (max-aspect-ratio: 1/1) {
-            .play-icon {
-                border-width: 6vw 0 6vw 11vw;
-                margin-left: 2vw;
-            }
-            .pause-icon .bar {
-                width: 1.2vw;
-                height: 10vw;
-                border-radius: 0.5vw;
-            }
-            .pause-icon {
-                gap: 2vw;
-            }
-            .next-icon {
-                font-size: 12vw;
-            }
-            .sun-icon, .moon-icon {
-                font-size: 12vw;
-            }
+        /* 暂停图标 SVG - 双竖线 */
+        .pause-icon svg {
+            viewBox: "0 0 100 100";
         }
         
-        /* 暂停图标样式 */
-        .pause-icon {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        /* 下一首图标 - 字体图标 */
-        .next-icon {
-            line-height: 1;
-            font-weight: normal;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        /* 太阳/月亮图标内容居中 */
-        .sun-icon, .moon-icon {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* 下一首图标 SVG - 双箭头+竖线 */
+        .next-icon svg {
+            viewBox: "0 0 100 100";
         }
 
         /* ========== 波纹特效 ========== */
@@ -389,6 +349,25 @@
         .fade-text.fade-out {
             opacity: 0;
         }
+        
+        /* 限制最大最小字号 */
+        @media (min-aspect-ratio: 1/1) {
+            .song-name {
+                font-size: max(16px, min(7vw, 80px));
+            }
+            .artist-name {
+                font-size: max(12px, min(calc(7vw - 10px), 70px));
+            }
+        }
+        
+        @media (max-aspect-ratio: 1/1) {
+            .song-name {
+                font-size: max(20px, min(20vh, 100px));
+            }
+            .artist-name {
+                font-size: max(14px, min(calc(20vh - 10px), 90px));
+            }
+        }
     </style>
 </head>
 <body>
@@ -410,7 +389,7 @@
     <button class="ctrl-btn" id="themeBtn">
         <div class="btn-icon-wrapper">
             <div class="ctrl-icon moon-icon" id="themeIcon">
-                <svg viewBox="0 0 100 100" fill="currentColor">
+                <svg viewBox="0 0 100 100" fill="currentColor" stroke="currentColor" stroke-width="2">
                     <path d="M50,10 A40,40 0 1,0 85,75 A35,35 0 0,1 50,10 Z"/>
                 </svg>
             </div>
@@ -424,16 +403,28 @@
                 <div class="wave-ripple"></div>
                 <div class="wave-ripple"></div>
             </div>
-            <span id="playIcon" class="ctrl-icon play-icon"></span>
+            <span id="playIcon" class="ctrl-icon play-icon">
+                <svg viewBox="0 0 100 100" fill="currentColor">
+                    <polygon points="30,20 80,50 30,80" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/>
+                </svg>
+            </span>
             <span id="pauseIcon" class="ctrl-icon pause-icon" style="display:none;">
-                <span class="bar"></span><span class="bar"></span>
+                <svg viewBox="0 0 100 100" fill="currentColor">
+                    <rect x="25" y="20" width="18" height="60" rx="4" />
+                    <rect x="57" y="20" width="18" height="60" rx="4" />
+                </svg>
             </span>
         </div>
     </button>
     
     <button class="ctrl-btn" id="nextBtn">
         <div class="btn-icon-wrapper">
-            <span class="ctrl-icon next-icon">⏭</span>
+            <span class="ctrl-icon next-icon">
+                <svg viewBox="0 0 100 100" fill="currentColor">
+                    <polygon points="20,25 55,50 20,75" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/>
+                    <rect x="65" y="25" width="15" height="50" rx="3" />
+                </svg>
+            </span>
         </div>
     </button>
 </div>
@@ -458,36 +449,13 @@
     const promoSong = { name: "HellYell Radio - 欢迎收听", url: "https://radio.hellyell.com/hy.mp3" };
     const BUFFER_TIMEOUT = 30000;
 
-    // 字体自适应
-    function adjustFontSize() {
-        const isLandscape = window.innerWidth >= window.innerHeight;
-        const songNameEl = document.getElementById('songName');
-        const artistNameEl = document.getElementById('artistName');
-        
-        if (!songNameEl || !artistNameEl) return;
-        
-        let songFontSize;
-        if (isLandscape) {
-            songFontSize = window.innerWidth * 0.1;
-        } else {
-            songFontSize = window.innerHeight * 0.2;
-        }
-        songFontSize = Math.min(Math.max(songFontSize, 18), 80);
-        let artistFontSize = songFontSize - 6;
-        artistFontSize = Math.max(artistFontSize, 12);
-        
-        songNameEl.style.fontSize = songFontSize + 'px';
-        artistNameEl.style.fontSize = artistFontSize + 'px';
-    }
-
     // 主题切换
     function setTheme(theme) {
         const themeIcon = document.getElementById('themeIcon');
         if (theme === 'dark') {
             document.body.classList.add('dark-mode');
             document.body.classList.remove('light-mode');
-            themeIcon.className = 'ctrl-icon sun-icon';
-            themeIcon.innerHTML = `<svg viewBox="0 0 100 100" fill="currentColor">
+            themeIcon.innerHTML = `<svg viewBox="0 0 100 100" fill="currentColor" stroke="currentColor" stroke-width="2">
                 <circle cx="50" cy="50" r="22" />
                 <line x1="50" y1="8" x2="50" y2="20" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
                 <line x1="50" y1="80" x2="50" y2="92" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
@@ -502,8 +470,7 @@
         } else {
             document.body.classList.remove('dark-mode');
             document.body.classList.add('light-mode');
-            themeIcon.className = 'ctrl-icon moon-icon';
-            themeIcon.innerHTML = `<svg viewBox="0 0 100 100" fill="currentColor">
+            themeIcon.innerHTML = `<svg viewBox="0 0 100 100" fill="currentColor" stroke="currentColor" stroke-width="2">
                 <path d="M50,10 A40,40 0 1,0 85,75 A35,35 0 0,1 50,10 Z"/>
             </svg>`;
             localStorage.setItem('radioTheme', 'light');
@@ -554,7 +521,6 @@
             
             setTimeout(() => {
                 isUpdatingText = false;
-                adjustFontSize();
                 if (pendingUpdate) {
                     const next = pendingUpdate;
                     pendingUpdate = null;
@@ -702,9 +668,6 @@
     audio.addEventListener('error', () => { if (!isSwitching && isPlaying) { clearLoadTimer(); nextSong(); } });
     audio.addEventListener('timeupdate', () => { if (isPlaying) updateProgress(); });
     audio.addEventListener('play', () => { setTimeout(() => updateProgress(), 50); });
-
-    window.addEventListener('resize', () => { setTimeout(adjustFontSize, 50); });
-    adjustFontSize();
 
     async function init() {
         try {
